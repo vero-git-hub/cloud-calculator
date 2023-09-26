@@ -1,0 +1,51 @@
+### Compiled class files and artifacts
+/target/
+/out/
+/build/
+/bin/
+/classes/
+/artifacts/
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/*
+mvnw
+mvnw.cmd
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### Log files
+*.log
+
+### Backup files
+*~
+
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.iws
+*.ipr
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
