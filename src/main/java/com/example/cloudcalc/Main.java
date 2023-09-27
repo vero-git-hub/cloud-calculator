@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -153,15 +154,7 @@ public class Main extends Application {
             }
         }
 
-        JSONObject profileJson = new JSONObject();
-        profileJson.put("name", profile.getName());
-        profileJson.put("startDate", profile.getStartDate());
-        profileJson.put("profileLink", profile.getProfileLink());
-        profileJson.put("pdfFilePath", profile.getPdfFilePath());
-        JSONArray linksArray = new JSONArray(profile.getExtractedLinks());
-        profileJson.put("extractedLinks", linksArray);
-
-        profilesArray.put(profileJson);
+        updateProfileFile(profile, profilesArray);
 
         try (FileWriter fileWriter = new FileWriter(fileName)) {
             fileWriter.write(profilesArray.toString());
@@ -233,9 +226,20 @@ public class Main extends Application {
 
         List<Profile> profiles = loadProfilesFromFile("profiles.json");
         for (Profile profile : profiles) {
+            HBox profileContainer = new HBox(10);
+
             Button profileButton = new Button(profile.getName());
             profileButton.setOnAction(e -> showProfileDetails(primaryStage, profile));
-            layout.getChildren().add(profileButton);
+
+            Button deleteButton = new Button("Delete");
+            deleteButton.setOnAction(e -> {
+                profiles.remove(profile);
+                saveProfilesToFile(profiles, "profiles.json");
+                showMainScreen(primaryStage);
+            });
+            profileContainer.getChildren().addAll(profileButton, deleteButton);
+
+            layout.getChildren().add(profileContainer);
         }
 
         Button createProfileButton = new Button("Create Profile");
@@ -243,8 +247,34 @@ public class Main extends Application {
 
         layout.getChildren().add(createProfileButton);
 
-        Scene mainScene = new Scene(layout, 300, 200);
+        Scene mainScene = new Scene(layout, 400, 300);
         primaryStage.setScene(mainScene);
+    }
+
+    private void saveProfilesToFile(List<Profile> profilesList, String fileName) {
+        JSONArray profilesArray = new JSONArray();
+
+        for (Profile profile : profilesList) {
+            updateProfileFile(profile, profilesArray);
+        }
+
+        try (FileWriter fileWriter = new FileWriter(fileName)) {
+            fileWriter.write(profilesArray.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateProfileFile(Profile profile, JSONArray profilesArray) {
+        JSONObject profileJson = new JSONObject();
+        profileJson.put("name", profile.getName());
+        profileJson.put("startDate", profile.getStartDate());
+        profileJson.put("profileLink", profile.getProfileLink());
+        profileJson.put("pdfFilePath", profile.getPdfFilePath());
+        JSONArray linksArray = new JSONArray(profile.getExtractedLinks());
+        profileJson.put("extractedLinks", linksArray);
+
+        profilesArray.put(profileJson);
     }
 
 }
