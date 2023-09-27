@@ -14,6 +14,9 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -72,8 +75,10 @@ public class Main extends Application {
             profile.setStartDate(dateField.getText());
             profile.setProfileLink(linkField.getText());
 
-            List<String> extractedLinks = extractLinkTitlesFromPdf(profile.getPdfFilePath());
-            profile.setExtractedLinks(extractedLinks);
+            List<String> extractedLinks = extractHiddenLinksFromPdf(profile.getPdfFilePath());
+            System.out.println(extractedLinks);
+            List<String> h1Contents = extractH1FromLinks(extractedLinks);
+            profile.setExtractedLinks(h1Contents);
 
             saveProfileToFile(profile, "profiles.json");
 
@@ -84,6 +89,25 @@ public class Main extends Application {
 
         Scene createProfileScene = new Scene(layout, 300, 200);
         primaryStage.setScene(createProfileScene);
+    }
+
+    public List<String> extractH1FromLinks(List<String> extractedLinks) {
+        List<String> h1Contents = new ArrayList<>();
+
+        for (String link : extractedLinks) {
+            try {
+                Document doc = Jsoup.connect(link).timeout(10 * 1000).get();
+                Elements h1Elements = doc.select("h1[class=\"ql-headline-1\"]");
+                for (int i = 0; i < h1Elements.size(); i++) {
+                    String str = h1Elements.get(i).text();
+                    h1Contents.add(str);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return h1Contents;
     }
 
     private void saveProfileToFile(Profile profile, String fileName) {
@@ -104,8 +128,8 @@ public class Main extends Application {
         }
     }
 
-    public List<String> extractLinkTitlesFromPdf(String pdfFilePath) {
-        List<String> linkTitles = new ArrayList<>();
+    public List<String> extractHiddenLinksFromPdf(String pdfFilePath) {
+        List<String> links = new ArrayList<>();
 
         try (PDDocument document = PDDocument.load(new File(pdfFilePath))) {
             for (PDPage page : document.getPages()) {
@@ -114,12 +138,9 @@ public class Main extends Application {
                         PDAnnotationLink link = (PDAnnotationLink) annotation;
                         if (link.getAction() instanceof PDActionURI) {
                             PDActionURI uri = (PDActionURI) link.getAction();
-                            String linkUri = uri.getURI();
-                            if (linkUri.startsWith("https://www.cloudskillsboost.google/")) {
-                                String linkTitle = link.getContents();
-                                if (linkTitle != null && !linkTitle.isEmpty()) {
-                                    linkTitles.add(linkTitle);
-                                }
+                            String linkUrl = uri.getURI();
+                            if (linkUrl.startsWith("https://www.cloudskillsboost.google/")) {
+                                links.add(linkUrl);
                             }
                         }
                     }
@@ -129,7 +150,7 @@ public class Main extends Application {
             e.printStackTrace();
         }
 
-        return linkTitles;
+        return links;
     }
 
 }
