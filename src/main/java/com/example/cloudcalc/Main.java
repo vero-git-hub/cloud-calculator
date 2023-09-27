@@ -21,6 +21,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,9 +52,11 @@ public class Main extends Application {
         VBox linksVBox = new VBox(5);
         Label linksTitle = new Label("Extracted Links:");
         linksVBox.getChildren().add(linksTitle);
-        for (String link : profile.getExtractedLinks()) {
-            Label linkLabel = new Label(link);
-            linksVBox.getChildren().add(linkLabel);
+        if(profile.getExtractedLinks() != null){
+            for (String link : profile.getExtractedLinks()) {
+                Label linkLabel = new Label(link);
+                linksVBox.getChildren().add(linkLabel);
+            }
         }
 
         Button backButton = new Button("Back");
@@ -93,18 +98,21 @@ public class Main extends Application {
         Button saveButton = new Button("Save");
         saveButton.setOnAction(e -> {
             if(nameField.getText() != null && dateField.getText() != null
-                    && linkField.getText() != null && profile.getPdfFilePath() != null) {
+                    && linkField.getText() != null) {
                 profile.setName(nameField.getText());
                 profile.setStartDate(dateField.getText());
                 profile.setProfileLink(linkField.getText());
 
-                List<String> extractedLinks = extractHiddenLinksFromPdf(profile.getPdfFilePath());
-                List<String> h1Contents = extractH1FromLinks(extractedLinks);
-                profile.setExtractedLinks(h1Contents);
+                if(profile.getPdfFilePath() != null) {
+                    List<String> extractedLinks = extractHiddenLinksFromPdf(profile.getPdfFilePath());
+                    List<String> h1Contents = extractH1FromLinks(extractedLinks);
+                    profile.setExtractedLinks(h1Contents);
+                }
 
                 saveProfileToFile(profile, "profiles.json");
+                showMainScreen(primaryStage);
             }
-            primaryStage.setScene(new Scene(new VBox(20, createProfileButton), 300, 200));
+
         });
 
         layout.getChildren().addAll(nameField, dateField, linkField, uploadPdfButton, saveButton);
@@ -133,18 +141,30 @@ public class Main extends Application {
     }
 
     private void saveProfileToFile(Profile profile, String fileName) {
+        JSONArray profilesArray = new JSONArray();
+        File file = new File(fileName);
+
+        if (file.exists()) {
+            try {
+                String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                profilesArray = new JSONArray(content);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         JSONObject profileJson = new JSONObject();
         profileJson.put("name", profile.getName());
         profileJson.put("startDate", profile.getStartDate());
         profileJson.put("profileLink", profile.getProfileLink());
         profileJson.put("pdfFilePath", profile.getPdfFilePath());
-
         JSONArray linksArray = new JSONArray(profile.getExtractedLinks());
         profileJson.put("extractedLinks", linksArray);
 
-        try (FileWriter file = new FileWriter(fileName, true)) {
-            file.write(profileJson.toString());
-            file.write("\n");
+        profilesArray.put(profileJson);
+
+        try (FileWriter fileWriter = new FileWriter(fileName)) {
+            fileWriter.write(profilesArray.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -178,29 +198,35 @@ public class Main extends Application {
     private List<Profile> loadProfilesFromFile(String fileName) {
         List<Profile> profiles = new ArrayList<>();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(fileName));
-            String line;
-            while ((line = br.readLine()) != null) {
-                JSONObject json = new JSONObject(line);
+            String content = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
+            JSONArray jsonArray = new JSONArray(content);
+
+            for (int j = 0; j < jsonArray.length(); j++) {
+                JSONObject json = jsonArray.getJSONObject(j);
                 Profile profile = new Profile();
                 profile.setName(json.getString("name"));
                 profile.setStartDate(json.getString("startDate"));
                 profile.setProfileLink(json.getString("profileLink"));
-                profile.setPdfFilePath(json.getString("pdfFilePath"));
-                JSONArray linksArray = json.getJSONArray("extractedLinks");
-                List<String> links = new ArrayList<>();
-                for (int i = 0; i < linksArray.length(); i++) {
-                    links.add(linksArray.getString(i));
+                if (json.has("pdfFilePath")) {
+                    profile.setPdfFilePath(json.getString("pdfFilePath"));
                 }
-                profile.setExtractedLinks(links);
+                if (json.has("extractedLinks")) {
+                    JSONArray linksArray = json.getJSONArray("extractedLinks");
+                    List<String> links = new ArrayList<>();
+                    for (int i = 0; i < linksArray.length(); i++) {
+                        links.add(linksArray.getString(i));
+                    }
+                    profile.setExtractedLinks(links);
+                }
+
                 profiles.add(profile);
             }
-            br.close();
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
         return profiles;
     }
+
 
     private void showMainScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
