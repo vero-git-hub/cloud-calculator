@@ -25,8 +25,11 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main extends Application {
 
@@ -239,6 +242,12 @@ public class Main extends Application {
             });
             profileContainer.getChildren().addAll(profileButton, deleteButton);
 
+            Button scanButton = new Button("Scan");
+            scanButton.setOnAction(e -> {
+                performScan(profile);
+            });
+            profileContainer.getChildren().add(scanButton);
+
             layout.getChildren().add(profileContainer);
         }
 
@@ -249,6 +258,70 @@ public class Main extends Application {
 
         Scene mainScene = new Scene(layout, 400, 300);
         primaryStage.setScene(mainScene);
+    }
+
+    private Map<String, String> scanProfileLink(Profile profile) {
+        Map<String, String> resultMap = new HashMap<>();
+
+        try {
+            Document doc = Jsoup.connect(profile.getProfileLink()).timeout(10 * 1000).get();
+
+            Elements subheadElements = doc.select(".ql-subhead-1.l-mts");
+            Elements bodyElements = doc.select(".ql-body-2.l-mbs");
+
+            LocalDate profileDate = convertProfileStartDate(profile.getStartDate());
+
+            if(subheadElements.size() == bodyElements.size()) {
+                for(int i = 0; i < subheadElements.size(); i++) {
+                    String key = subheadElements.get(i).text();
+                    String valueStr = bodyElements.get(i).text();
+
+                    LocalDate valueDate = extractDateFromValue(valueStr);
+
+                    if(!valueDate.isBefore(profileDate)) {
+                        resultMap.put(key, valueStr);
+                    }
+                }
+            } else {
+                System.out.println("Number of subhead and body elements do not match!");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return resultMap;
+    }
+
+
+
+    private void performScan(Profile profile) {
+        String profileLink = profile.getProfileLink();
+        String startDate = profile.getStartDate();
+
+        System.out.println("Profile: " + profile.getName() + " with link: " + profileLink + ", date: " + startDate);
+
+        Map<String, String> extractedData = scanProfileLink(profile);
+
+        for(Map.Entry<String, String> entry : extractedData.entrySet()) {
+            System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+        }
+    }
+
+    private LocalDate extractDateFromValue(String value) {
+        Pattern pattern = Pattern.compile("(\\w+\\s\\d+,\\s\\d+)");
+        Matcher matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            String cleanedStr = matcher.group(1);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
+            return LocalDate.parse(cleanedStr, formatter);
+        }
+        throw new IllegalArgumentException("Invalid date format in string: " + value);
+    }
+
+    private LocalDate convertProfileStartDate(String startDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        return LocalDate.parse(startDate, formatter);
     }
 
     private void saveProfilesToFile(List<Profile> profilesList, String fileName) {
