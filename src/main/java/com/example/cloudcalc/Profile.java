@@ -7,7 +7,7 @@ public class Profile {
     private String startDate;
     private String profileLink;
     private String pdfFilePath;
-    private List<String> extractedLinks;
+    private List<String> pdfLinks;
 
     public String getName() {
         return name;
@@ -41,11 +41,11 @@ public class Profile {
         this.pdfFilePath = pdfFilePath;
     }
 
-    public List<String> getExtractedLinks() {
-        return extractedLinks;
+    public List<String> getPdfLinks() {
+        return pdfLinks;
     }
 
-    public void setExtractedLinks(List<String> extractedLinks) {
-        this.extractedLinks = extractedLinks;
+    public void setPdfLinks(List<String> pdfLinks) {
+        this.pdfLinks = pdfLinks;
     }
 }

@@ -11,10 +11,12 @@ import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
 
 public class DataExtractor {
+
+    private final DateUtils dateUtils = new DateUtils();
 
     public List<String> extractHiddenLinksFromPdf(String pdfFilePath) {
         List<String> links = new ArrayList<>();
@@ -58,6 +60,44 @@ public class DataExtractor {
         }
 
         return h1Contents;
+    }
+
+    public ArrayList<String> performScan(Profile profile) {
+        Map<String, String> extractedData = scanProfileLink(profile);
+        return new ArrayList<>(extractedData.keySet());
+    }
+
+    public Map<String, String> scanProfileLink(Profile profile) {
+        Map<String, String> resultMap = new LinkedHashMap<>();
+
+        try {
+            Document doc = Jsoup.connect(profile.getProfileLink()).timeout(10 * 1000).get();
+
+            Elements subheadElements = doc.select(".ql-subhead-1.l-mts");
+            Elements bodyElements = doc.select(".ql-body-2.l-mbs");
+
+            LocalDate profileDate = dateUtils.convertProfileStartDate(profile.getStartDate());
+
+            if(subheadElements.size() == bodyElements.size()) {
+                for(int i = 0; i < subheadElements.size(); i++) {
+                    String key = subheadElements.get(i).text();
+                    String valueStr = bodyElements.get(i).text();
+
+                    LocalDate valueDate = dateUtils.extractDateFromValue(valueStr);
+
+                    if(!valueDate.isBefore(profileDate)) {
+                        resultMap.put(key, valueStr);
+                    }
+                }
+            } else {
+                System.out.println("Number of subhead and body elements do not match!");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return resultMap;
     }
 
 }

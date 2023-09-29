@@ -10,8 +10,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MainUI {
 
@@ -29,8 +29,8 @@ public class MainUI {
         VBox linksVBox = new VBox(5);
         Label linksTitle = new Label("PDF Links:");
         linksVBox.getChildren().add(linksTitle);
-        if(profile.getExtractedLinks() != null){
-            for (String link : profile.getExtractedLinks()) {
+        if(profile.getPdfLinks() != null){
+            for (String link : profile.getPdfLinks()) {
                 Label linkLabel = new Label(link);
                 linksVBox.getChildren().add(linkLabel);
             }
@@ -65,7 +65,8 @@ public class MainUI {
 
             Button scanButton = new Button("Scan");
             scanButton.setOnAction(e -> {
-                performScan(profile);
+                ArrayList<String> extractedData = dataExtractor.performScan(profile);
+                showCountScreen(primaryStage, profile, extractedData);
             });
             profileContainer.getChildren().add(scanButton);
 
@@ -81,17 +82,33 @@ public class MainUI {
         primaryStage.setScene(mainScene);
     }
 
-    private void performScan(Profile profile) {
-        String profileLink = profile.getProfileLink();
-        String startDate = profile.getStartDate();
+    private void showCountScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
+        VBox layout = new VBox(10);
 
-        System.out.println("Profile: " + profile.getName() + " with link: " + profileLink + ", date: " + startDate);
+        Label titleLabel = new Label("Scan Results for " + profile.getName());
+        List<String> pdfLinksList = profile.getPdfLinks();
 
-        Map<String, String> extractedData = profileDataManager.scanProfileLink(profile);
-
-        for(Map.Entry<String, String> entry : extractedData.entrySet()) {
-            System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+        int pdfBadges = 0;
+        int totalBadges = siteLinks.size();
+        for (String data : siteLinks) {
+            if (pdfLinksList.contains(data)) {
+                pdfBadges++;
+                pdfLinksList.remove(data);
+            }
         }
+        int otherBadges = totalBadges - pdfBadges;
+
+        Label totalLabel = new Label("Total: " + totalBadges);
+        Label pdfLabel = new Label("PDF badges: " + pdfBadges);
+        Label otherLabel = new Label("Other badges: " + otherBadges);
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> showMainScreen(primaryStage));
+
+        layout.getChildren().addAll(titleLabel, totalLabel, pdfLabel, otherLabel, backButton);
+
+        Scene countScene = new Scene(layout, 400, 300);
+        primaryStage.setScene(countScene);
     }
 
     public void showCreateProfileScreen(Stage primaryStage) {
@@ -103,7 +120,7 @@ public class MainUI {
         nameField.setPromptText("Name");
 
         TextField dateField = new TextField();
-        dateField.setPromptText("Start Date (e.g., Sep 26, 2023)");
+        dateField.setPromptText("Start Date (e.g., 26.09.2023)");
 
         TextField linkField = new TextField();
         linkField.setPromptText("Profile Link");
@@ -128,7 +145,7 @@ public class MainUI {
                 if(profile.getPdfFilePath() != null) {
                     List<String> extractedLinks = dataExtractor.extractHiddenLinksFromPdf(profile.getPdfFilePath());
                     List<String> h1Contents = dataExtractor.extractH1FromLinks(extractedLinks);
-                    profile.setExtractedLinks(h1Contents);
+                    profile.setPdfLinks(h1Contents);
                 }
 
                 profileDataManager.saveProfileToFile(profile, "profiles.json");
