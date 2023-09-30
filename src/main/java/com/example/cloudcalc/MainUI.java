@@ -8,8 +8,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +73,7 @@ public class MainUI {
             Button scanButton = new Button("Scan");
             scanButton.setOnAction(e -> {
                 ArrayList<String> extractedData = dataExtractor.performScan(profile);
-                showCountScreen(primaryStage, profile, extractedData);
+                showScanScreen(primaryStage, profile, extractedData);
             });
             profileContainer.getChildren().add(scanButton);
 
@@ -75,14 +82,115 @@ public class MainUI {
 
         Button createProfileButton = new Button("Create Profile");
         createProfileButton.setOnAction(e -> showCreateProfileScreen(primaryStage));
-
         layout.getChildren().add(createProfileButton);
+
+        Button ignoreButton = new Button("Ignore Badges");
+        ignoreButton.setOnAction(e -> showIgnoreScreen(primaryStage));
+        layout.getChildren().add(ignoreButton);
 
         Scene mainScene = new Scene(layout, 400, 300);
         primaryStage.setScene(mainScene);
     }
 
-    private void showCountScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
+    private void showIgnoreScreen(Stage primaryStage) {
+        VBox layout = new VBox(10);
+        Label label = new Label("Ignore Screen");
+
+        Button addButton = new Button("Add Ignore Badge");
+        addButton.setOnAction(e -> showAddIgnoreBadgeScreen(primaryStage));
+
+        List<String> ignoredBadges = loadIgnoredBadgesFromFile("ignored_badges.json");
+        for (String badge : ignoredBadges) {
+            HBox badgeRow = new HBox(10);
+
+            Label badgeLabel = new Label(badge);
+            Button deleteButton = new Button("Delete");
+            deleteButton.setOnAction(e -> {
+                ignoredBadges.remove(badge);
+                saveIgnoredBadgesToFile(ignoredBadges, "ignored_badges.json");
+                showIgnoreScreen(primaryStage);
+            });
+
+            badgeRow.getChildren().addAll(badgeLabel, deleteButton);
+            layout.getChildren().add(badgeRow);
+        }
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> showMainScreen(primaryStage));
+
+        layout.getChildren().addAll(label, addButton, backButton);
+        Scene countScene = new Scene(layout, 400, 300);
+        primaryStage.setScene(countScene);
+    }
+
+    private void saveIgnoredBadgesToFile(List<String> ignoredBadges, String fileName) {
+        JSONArray jsonArray = new JSONArray(ignoredBadges);
+
+        try (FileWriter fileWriter = new FileWriter(fileName)) {
+            fileWriter.write(jsonArray.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<String> loadIgnoredBadgesFromFile(String fileName) {
+        List<String> ignoredBadges = new ArrayList<>();
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
+            JSONArray jsonArray = new JSONArray(content);
+
+            for (int j = 0; j < jsonArray.length(); j++) {
+                ignoredBadges.add(jsonArray.getString(j));
+            }
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+        return ignoredBadges;
+    }
+
+    private void showAddIgnoreBadgeScreen(Stage primaryStage) {
+        VBox layout = new VBox(10);
+        Label label = new Label("Add Ignore Badge Screen");
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> showMainScreen(primaryStage));
+
+        TextField nameField = new TextField();
+        nameField.setPromptText("Lab name");
+
+        Button saveButton = new Button("Save Ignore Badge");
+        saveButton.setOnAction(e -> {
+            saveIgnoreBadgeToFile(nameField.getText(), "ignored_badges.json");
+            showIgnoreScreen(primaryStage);
+        });
+
+        layout.getChildren().addAll(label, nameField, saveButton, backButton);
+        Scene countScene = new Scene(layout, 400, 300);
+        primaryStage.setScene(countScene);
+    }
+
+    private void saveIgnoreBadgeToFile(String badgeName, String fileName) {
+        JSONArray badgesArray = new JSONArray();
+        File file = new File(fileName);
+
+        if (file.exists()) {
+            try {
+                String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                badgesArray = new JSONArray(content);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        badgesArray.put(badgeName);
+
+        try (FileWriter fileWriter = new FileWriter(fileName)) {
+            fileWriter.write(badgesArray.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showScanScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
         VBox layout = new VBox(10);
 
         Label titleLabel = new Label("Scan Results for " + profile.getName());
@@ -96,16 +204,20 @@ public class MainUI {
                 pdfLinksList.remove(data);
             }
         }
-        int otherBadges = totalBadges - pdfBadges;
+        List<String> ignoredBadges = loadIgnoredBadgesFromFile("ignored_badges.json");
+        int ignoreBadges = ignoredBadges.size();
+
+        int skillBadges = totalBadges - pdfBadges - ignoreBadges;
 
         Label totalLabel = new Label("Total: " + totalBadges);
         Label pdfLabel = new Label("PDF badges: " + pdfBadges);
-        Label otherLabel = new Label("Other badges: " + otherBadges);
+        Label skillLabel = new Label("Skill badges: " + skillBadges);
+        Label ignoreLabel = new Label("Ignore badges: " + ignoreBadges);
 
         Button backButton = new Button("Back");
         backButton.setOnAction(e -> showMainScreen(primaryStage));
 
-        layout.getChildren().addAll(titleLabel, totalLabel, pdfLabel, otherLabel, backButton);
+        layout.getChildren().addAll(titleLabel, totalLabel, pdfLabel, skillLabel, ignoreLabel, backButton);
 
         Scene countScene = new Scene(layout, 400, 300);
         primaryStage.setScene(countScene);
