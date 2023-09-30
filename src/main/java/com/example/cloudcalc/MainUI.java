@@ -1,5 +1,6 @@
 package com.example.cloudcalc;
 
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -8,88 +9,120 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class MainUI {
 
     private final ProfileDataManager profileDataManager = new ProfileDataManager();
 
     private final DataExtractor dataExtractor = new DataExtractor();
-
-    public  void showProfileDetails(Stage primaryStage, Profile profile) {
-        VBox layout = new VBox(10);
-
-        Label nameLabel = new Label("Name: " + profile.getName());
-        Label startDateLabel = new Label("Start Date: " + profile.getStartDate());
-        Label profileLinkLabel = new Label("Profile Link: " + profile.getProfileLink());
-
-        VBox linksVBox = new VBox(5);
-        Label linksTitle = new Label("PDF Links:");
-        linksVBox.getChildren().add(linksTitle);
-        if(profile.getPdfLinks() != null){
-            for (String link : profile.getPdfLinks()) {
-                Label linkLabel = new Label(link);
-                linksVBox.getChildren().add(linkLabel);
-            }
-        }
-
-        Button backButton = new Button("Back");
-        backButton.setOnAction(e -> showMainScreen(primaryStage));
-
-        layout.getChildren().addAll(nameLabel, startDateLabel, profileLinkLabel, linksVBox, backButton);
-
-        Scene detailsScene = new Scene(layout, 400, 300);
-        primaryStage.setScene(detailsScene);
-    }
+    private final IgnoredBadgeManager ignoredBadgeManager = new IgnoredBadgeManager();
 
     public void showMainScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
 
         List<Profile> profiles = profileDataManager.loadProfilesFromFile("profiles.json");
         for (Profile profile : profiles) {
-            HBox profileContainer = new HBox(10);
-
-            Button profileButton = new Button(profile.getName());
-            profileButton.setOnAction(e -> showProfileDetails(primaryStage, profile));
-
-            Button deleteButton = new Button("Delete");
-            deleteButton.setOnAction(e -> {
-                profiles.remove(profile);
-                profileDataManager.saveProfilesToFile(profiles, "profiles.json");
-                showMainScreen(primaryStage);
-            });
-            profileContainer.getChildren().addAll(profileButton, deleteButton);
-
-            Button scanButton = new Button("Scan");
-            scanButton.setOnAction(e -> {
-                ArrayList<String> extractedData = dataExtractor.performScan(profile);
-                showScanScreen(primaryStage, profile, extractedData);
-            });
-            profileContainer.getChildren().add(scanButton);
-
-            layout.getChildren().add(profileContainer);
+            layout.getChildren().add(createProfileRow(primaryStage, profile));
         }
 
-        Button createProfileButton = new Button("Create Profile");
-        createProfileButton.setOnAction(e -> showCreateProfileScreen(primaryStage));
-        layout.getChildren().add(createProfileButton);
-
-        Button ignoreButton = new Button("Ignore Badges");
-        ignoreButton.setOnAction(e -> showIgnoreScreen(primaryStage));
-        layout.getChildren().add(ignoreButton);
+        layout.getChildren().addAll(createCreateProfileButton(primaryStage), createIgnoreBadgesButton(primaryStage));
 
         Scene mainScene = new Scene(layout, 400, 300);
         primaryStage.setScene(mainScene);
+    }
+
+    public void showProfileScreen(Stage primaryStage, Profile profile) {
+        VBox layout = new VBox(10);
+
+        layout.getChildren().addAll(
+                createProfileInfo(profile),
+                createPdfLinksSection(profile),
+                createBackButton(primaryStage)
+        );
+
+        Scene detailsScene = new Scene(layout, 400, 300);
+        primaryStage.setScene(detailsScene);
+    }
+
+    private void showScanScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
+        VBox layout = new VBox(10);
+
+        layout.getChildren().addAll(
+                new Label("Scan Results for " + profile.getName()),
+                createBadgeLabels(profile, siteLinks),
+                createBackButton(primaryStage)
+        );
+
+        Scene countScene = new Scene(layout, 400, 300);
+        primaryStage.setScene(countScene);
+    }
+
+    public void showCreateProfileScreen(Stage primaryStage) {
+        VBox layout = new VBox(10);
+        Profile profile = new Profile();
+
+        TextField nameField = createTextField("Name");
+        TextField dateField = createTextField("Start Date (e.g., 26.09.2023)");
+        TextField linkField = createTextField("Profile Link");
+
+        layout.getChildren().addAll(
+                nameField,
+                dateField,
+                linkField,
+                createUploadPdfButton(primaryStage, profile),
+                createSaveButton(primaryStage, profile, nameField, dateField, linkField),
+                createBackButton(primaryStage)
+        );
+
+        Scene createProfileScene = new Scene(layout, 300, 200);
+        primaryStage.setScene(createProfileScene);
+    }
+
+    private Button createSaveButton(Stage primaryStage, Profile profile, TextField nameField, TextField dateField, TextField linkField) {
+        Button saveButton = new Button("Save");
+        saveButton.setOnAction(e -> handleProfileSave(primaryStage, profile, nameField.getText(), dateField.getText(), linkField.getText()));
+        return saveButton;
+    }
+
+    private void handleProfileSave(Stage primaryStage, Profile profile, String name, String startDate, String profileLink) {
+        if(name != null && !name.isEmpty() &&
+                startDate != null && !startDate.isEmpty() &&
+                profileLink != null && !profileLink.isEmpty()) {
+
+            profile.setName(name);
+            profile.setStartDate(startDate);
+            profile.setProfileLink(profileLink);
+
+            if(profile.getPdfFilePath() != null) {
+                List<String> extractedLinks = dataExtractor.extractHiddenLinksFromPdf(profile.getPdfFilePath());
+                List<String> h1Contents = dataExtractor.extractH1FromLinks(extractedLinks);
+                profile.setPdfLinks(h1Contents);
+            }
+            profileDataManager.saveProfileToFile(profile, "profiles.json");
+            showMainScreen(primaryStage);
+        }
+    }
+
+
+    private TextField createTextField(String promptText) {
+        TextField textField = new TextField();
+        textField.setPromptText(promptText);
+        return textField;
+    }
+
+    private Button createUploadPdfButton(Stage primaryStage, Profile profile) {
+        FileChooser fileChooser = new FileChooser();
+        Button uploadPdfButton = new Button("Upload PDF");
+        uploadPdfButton.setOnAction(e -> {
+            File selectedFile = fileChooser.showOpenDialog(primaryStage);
+            if (selectedFile != null) {
+                profile.setPdfFilePath(selectedFile.getAbsolutePath());
+            }
+        });
+        return uploadPdfButton;
     }
 
     private void showIgnoreScreen(Stage primaryStage) {
@@ -99,7 +132,7 @@ public class MainUI {
         Button addButton = new Button("Add Ignore Badge");
         addButton.setOnAction(e -> showAddIgnoreBadgeScreen(primaryStage));
 
-        List<String> ignoredBadges = loadIgnoredBadgesFromFile("ignored_badges.json");
+        List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
         for (String badge : ignoredBadges) {
             HBox badgeRow = new HBox(10);
 
@@ -107,7 +140,7 @@ public class MainUI {
             Button deleteButton = new Button("Delete");
             deleteButton.setOnAction(e -> {
                 ignoredBadges.remove(badge);
-                saveIgnoredBadgesToFile(ignoredBadges, "ignored_badges.json");
+                ignoredBadgeManager.saveIgnoredBadgesToFile(ignoredBadges, "ignored_badges.json");
                 showIgnoreScreen(primaryStage);
             });
 
@@ -123,31 +156,6 @@ public class MainUI {
         primaryStage.setScene(countScene);
     }
 
-    private void saveIgnoredBadgesToFile(List<String> ignoredBadges, String fileName) {
-        JSONArray jsonArray = new JSONArray(ignoredBadges);
-
-        try (FileWriter fileWriter = new FileWriter(fileName)) {
-            fileWriter.write(jsonArray.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private List<String> loadIgnoredBadgesFromFile(String fileName) {
-        List<String> ignoredBadges = new ArrayList<>();
-        try {
-            String content = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
-            JSONArray jsonArray = new JSONArray(content);
-
-            for (int j = 0; j < jsonArray.length(); j++) {
-                ignoredBadges.add(jsonArray.getString(j));
-            }
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
-        return ignoredBadges;
-    }
-
     private void showAddIgnoreBadgeScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
         Label label = new Label("Add Ignore Badge Screen");
@@ -159,7 +167,7 @@ public class MainUI {
 
         Button saveButton = new Button("Save Ignore Badge");
         saveButton.setOnAction(e -> {
-            saveIgnoreBadgeToFile(nameField.getText(), "ignored_badges.json");
+            ignoredBadgeManager.saveIgnoredBadgesToFile(Collections.singletonList(nameField.getText()), "ignored_badges.json");
             showIgnoreScreen(primaryStage);
         });
 
@@ -168,108 +176,140 @@ public class MainUI {
         primaryStage.setScene(countScene);
     }
 
-    private void saveIgnoreBadgeToFile(String badgeName, String fileName) {
-        JSONArray badgesArray = new JSONArray();
-        File file = new File(fileName);
 
-        if (file.exists()) {
-            try {
-                String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
-                badgesArray = new JSONArray(content);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
-        badgesArray.put(badgeName);
 
-        try (FileWriter fileWriter = new FileWriter(fileName)) {
-            fileWriter.write(badgesArray.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+
+
+    private VBox createBadgeLabels(Profile profile, ArrayList<String> siteLinks) {
+        VBox labelsBox = new VBox(5);
+        Map<String, Integer> badgeCounts = calculateBadgeCounts(profile, siteLinks);
+
+        labelsBox.getChildren().addAll(
+                new Label("Total: " + badgeCounts.get("Total")),
+                new Label("PDF badges: " + badgeCounts.get("PDF")),
+                new Label("Skill badges: " + badgeCounts.get("Skill")),
+                new Label("Ignore badges: " + badgeCounts.get("Ignore"))
+        );
+        return labelsBox;
     }
 
-    private void showScanScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
-        VBox layout = new VBox(10);
+    private Map<String, Integer> calculateBadgeCounts(Profile profile, ArrayList<String> siteLinks) {
+        Map<String, Integer> badgeCounts = new HashMap<>();
 
-        Label titleLabel = new Label("Scan Results for " + profile.getName());
-        List<String> pdfLinksList = profile.getPdfLinks();
-
+        List<String> pdfLinksList = new ArrayList<>(profile.getPdfLinks());
         int pdfBadges = 0;
-        int totalBadges = siteLinks.size();
         for (String data : siteLinks) {
             if (pdfLinksList.contains(data)) {
                 pdfBadges++;
                 pdfLinksList.remove(data);
             }
         }
-        List<String> ignoredBadges = loadIgnoredBadgesFromFile("ignored_badges.json");
-        int ignoreBadges = ignoredBadges.size();
 
+        List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
+        int totalBadges = siteLinks.size();
+        int ignoreBadges = ignoredBadges.size();
         int skillBadges = totalBadges - pdfBadges - ignoreBadges;
 
-        Label totalLabel = new Label("Total: " + totalBadges);
-        Label pdfLabel = new Label("PDF badges: " + pdfBadges);
-        Label skillLabel = new Label("Skill badges: " + skillBadges);
-        Label ignoreLabel = new Label("Ignore badges: " + ignoreBadges);
+        badgeCounts.put("Total", totalBadges);
+        badgeCounts.put("PDF", pdfBadges);
+        badgeCounts.put("Skill", skillBadges);
+        badgeCounts.put("Ignore", ignoreBadges);
 
+        return badgeCounts;
+    }
+
+
+
+    private Button createBackButton(Stage primaryStage) {
         Button backButton = new Button("Back");
         backButton.setOnAction(e -> showMainScreen(primaryStage));
-
-        layout.getChildren().addAll(titleLabel, totalLabel, pdfLabel, skillLabel, ignoreLabel, backButton);
-
-        Scene countScene = new Scene(layout, 400, 300);
-        primaryStage.setScene(countScene);
+        return backButton;
     }
 
-    public void showCreateProfileScreen(Stage primaryStage) {
-        VBox layout = new VBox(10);
+    private VBox createPdfLinksSection(Profile profile) {
+        VBox linksVBox = new VBox(5);
 
-        Profile profile = new Profile();
+        Label linksTitle = new Label("PDF Links:");
+        linksVBox.getChildren().add(linksTitle);
 
-        TextField nameField = new TextField();
-        nameField.setPromptText("Name");
-
-        TextField dateField = new TextField();
-        dateField.setPromptText("Start Date (e.g., 26.09.2023)");
-
-        TextField linkField = new TextField();
-        linkField.setPromptText("Profile Link");
-
-        FileChooser fileChooser = new FileChooser();
-        Button uploadPdfButton = new Button("Upload PDF");
-        uploadPdfButton.setOnAction(e -> {
-            File selectedFile = fileChooser.showOpenDialog(primaryStage);
-            if (selectedFile != null) {
-                profile.setPdfFilePath(selectedFile.getAbsolutePath());
+        if (profile.getPdfLinks() != null) {
+            for (String link : profile.getPdfLinks()) {
+                Label linkLabel = new Label(link);
+                linksVBox.getChildren().add(linkLabel);
             }
-        });
+        }
 
-        Button saveButton = new Button("Save");
-        saveButton.setOnAction(e -> {
-            if(nameField.getText() != null && dateField.getText() != null
-                    && linkField.getText() != null) {
-                profile.setName(nameField.getText());
-                profile.setStartDate(dateField.getText());
-                profile.setProfileLink(linkField.getText());
-
-                if(profile.getPdfFilePath() != null) {
-                    List<String> extractedLinks = dataExtractor.extractHiddenLinksFromPdf(profile.getPdfFilePath());
-                    List<String> h1Contents = dataExtractor.extractH1FromLinks(extractedLinks);
-                    profile.setPdfLinks(h1Contents);
-                }
-
-                profileDataManager.saveProfileToFile(profile, "profiles.json");
-                showMainScreen(primaryStage);
-            }
-
-        });
-
-        layout.getChildren().addAll(nameField, dateField, linkField, uploadPdfButton, saveButton);
-
-        Scene createProfileScene = new Scene(layout, 300, 200);
-        primaryStage.setScene(createProfileScene);
+        return linksVBox;
     }
+
+    private VBox createProfileInfo(Profile profile) {
+        VBox profileInfoBox = new VBox(10);
+
+        Label nameLabel = new Label("Name: " + profile.getName());
+        Label startDateLabel = new Label("Start Date: " + profile.getStartDate());
+        Label profileLinkLabel = new Label("Profile Link: " + profile.getProfileLink());
+
+        profileInfoBox.getChildren().addAll(nameLabel, startDateLabel, profileLinkLabel);
+
+        return profileInfoBox;
+    }
+
+
+
+    private Button createIgnoreBadgesButton(Stage primaryStage) {
+        Button ignoreButton = new Button("Ignore Badges");
+        ignoreButton.setOnAction(e -> showIgnoreScreen(primaryStage));
+        return ignoreButton;
+    }
+
+    private Button createCreateProfileButton(Stage primaryStage) {
+        Button createProfileButton = new Button("Create Profile");
+        createProfileButton.setOnAction(e -> showCreateProfileScreen(primaryStage));
+        return createProfileButton;
+    }
+
+    private HBox createProfileRow(Stage primaryStage, Profile profile) {
+        HBox profileContainer = new HBox(10);
+
+        Button profileButton = new Button(profile.getName());
+        profileButton.setOnAction(e -> showProfileScreen(primaryStage, profile));
+
+        Button deleteButton = createDeleteButton(primaryStage, profile);
+        Button scanButton = createScanButton(primaryStage, profile);
+
+        profileContainer.getChildren().addAll(profileButton, deleteButton, scanButton);
+        return profileContainer;
+    }
+
+    private Button createDeleteButton(Stage primaryStage, Profile profile) {
+        Button deleteButton = new Button("Delete");
+        deleteButton.setOnAction(e -> {
+            handleDeleteAction(primaryStage, profile);
+        });
+        return deleteButton;
+    }
+
+    private void handleDeleteAction(Stage primaryStage, Profile profile) {
+        List<Profile> profiles = profileDataManager.loadProfilesFromFile("profiles.json");
+        profiles.remove(profile);
+        profileDataManager.saveProfilesToFile(profiles, "profiles.json");
+        showMainScreen(primaryStage);
+    }
+
+    private Button createScanButton(Stage primaryStage, Profile profile) {
+        Button scanButton = new Button("Scan");
+        scanButton.setOnAction(e -> {
+            ArrayList<String> extractedData = dataExtractor.performScan(profile);
+            showScanScreen(primaryStage, profile, extractedData);
+        });
+        return scanButton;
+    }
+
+
+
+
+
 
 }

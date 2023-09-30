@@ -1,6 +1,7 @@
 package com.example.cloudcalc;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Profile {
     private String name;
@@ -48,4 +49,22 @@ public class Profile {
     public void setPdfLinks(List<String> pdfLinks) {
         this.pdfLinks = pdfLinks;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Profile profile = (Profile) o;
+        return Objects.equals(name, profile.name) &&
+                Objects.equals(startDate, profile.startDate) &&
+                Objects.equals(profileLink, profile.profileLink) &&
+                Objects.equals(pdfFilePath, profile.pdfFilePath) &&
+                Objects.equals(pdfLinks, profile.pdfLinks);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, startDate, profileLink, pdfFilePath, pdfLinks);
+    }
+
 }

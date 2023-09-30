@@ -11,6 +11,8 @@ import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -47,19 +49,32 @@ public class DataExtractor {
         List<String> h1Contents = new ArrayList<>();
 
         for (String link : extractedLinks) {
-            try {
-                Document doc = Jsoup.connect(link).timeout(10 * 1000).get();
-                Elements h1Elements = doc.select("h1[class=\"ql-headline-1\"]");
-                for (int i = 0; i < h1Elements.size(); i++) {
-                    String str = h1Elements.get(i).text();
-                    h1Contents.add(str);
+            if (isURLAccessible(link)) {
+                try {
+                    Document doc = Jsoup.connect(link).timeout(30 * 1000).get();
+                    Elements h1Elements = doc.select("h1[class=\"ql-headline-1\"]");
+                    for (int i = 0; i < h1Elements.size(); i++) {
+                        String str = h1Elements.get(i).text();
+                        h1Contents.add(str);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
 
         return h1Contents;
+    }
+
+    public boolean isURLAccessible(String url) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("HEAD");
+            int responseCode = connection.getResponseCode();
+            return (200 <= responseCode && responseCode <= 399);
+        } catch (IOException exception) {
+            return false;
+        }
     }
 
     public ArrayList<String> performScan(Profile profile) {
