@@ -1,5 +1,6 @@
 package com.example.cloudcalc;
 
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -129,55 +130,82 @@ public class MainUI {
 
     private void showIgnoreScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
-        Label label = new Label("Ignore Screen");
 
-        Button addButton = new Button("Add Ignore Badge");
-        addButton.setOnAction(e -> showAddIgnoreBadgeScreen(primaryStage));
+        layout.getChildren().addAll(
+                createLabel("Ignore Screen"),
+                createAddIgnoreBadgeButton(primaryStage),
+                createIgnoredBadgesList(primaryStage),
+                createBackButton(primaryStage)
+        );
 
-        List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
-        for (String badge : ignoredBadges) {
-            HBox badgeRow = new HBox(10);
-
-            Label badgeLabel = new Label(badge);
-            Button deleteButton = new Button("Delete");
-            deleteButton.setOnAction(e -> {
-                ignoredBadges.remove(badge);
-                ignoredBadgeManager.saveIgnoredBadgesToFile(ignoredBadges, "ignored_badges.json");
-                showIgnoreScreen(primaryStage);
-            });
-
-            badgeRow.getChildren().addAll(badgeLabel, deleteButton);
-            layout.getChildren().add(badgeRow);
-        }
-
-        Button backButton = new Button("Back");
-        backButton.setOnAction(e -> showMainScreen(primaryStage));
-
-        layout.getChildren().addAll(label, addButton, backButton);
         Scene countScene = new Scene(layout, 400, 300);
         primaryStage.setScene(countScene);
     }
 
-    private void showAddIgnoreBadgeScreen(Stage primaryStage) {
-        VBox layout = new VBox(10);
-        Label label = new Label("Add Ignore Badge Screen");
-        Button backButton = new Button("Back");
-        backButton.setOnAction(e -> showMainScreen(primaryStage));
+    private Label createLabel(String text) {
+        return new Label(text);
+    }
 
-        TextField nameField = new TextField();
-        nameField.setPromptText("Lab name");
+    private Button createAddIgnoreBadgeButton(Stage primaryStage) {
+        Button addButton = new Button("Add Ignore Badge");
+        addButton.setOnAction(e -> showAddIgnoreBadgeScreen(primaryStage));
+        return addButton;
+    }
 
-        Button saveButton = new Button("Save Ignore Badge");
-        saveButton.setOnAction(e -> {
-            List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
-            ignoredBadges.add(nameField.getText());
+    private VBox createIgnoredBadgesList(Stage primaryStage) {
+        VBox badgesList = new VBox(10);
+        List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
+        for (String badge : ignoredBadges) {
+            badgesList.getChildren().add(createBadgeRow(primaryStage, badge, ignoredBadges));
+        }
+        return badgesList;
+    }
+
+    private HBox createBadgeRow(Stage primaryStage, String badge, List<String> ignoredBadges) {
+        HBox badgeRow = new HBox(10);
+        Label badgeLabel = new Label(badge);
+        Button deleteButton = new Button("Delete");
+        deleteButton.setOnAction(e -> {
+            ignoredBadges.remove(badge);
             ignoredBadgeManager.saveIgnoredBadgesToFile(ignoredBadges, "ignored_badges.json");
             showIgnoreScreen(primaryStage);
         });
 
-        layout.getChildren().addAll(label, nameField, saveButton, backButton);
+        badgeRow.getChildren().addAll(badgeLabel, deleteButton);
+        return badgeRow;
+    }
+
+    private void showAddIgnoreBadgeScreen(Stage primaryStage) {
+        VBox layout = new VBox(10);
+
+        layout.getChildren().addAll(
+                createLabel("Add Ignore Badge Screen"),
+                createNameTextField(),
+                createSaveIgnoreBadgeButton(primaryStage),
+                createBackButton(primaryStage)
+        );
+
         Scene countScene = new Scene(layout, 400, 300);
         primaryStage.setScene(countScene);
+    }
+
+    private Button createSaveIgnoreBadgeButton(Stage primaryStage) {
+        Button saveButton = new Button("Save Ignore Badge");
+        saveButton.setOnAction(e -> {
+            List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
+            TextField nameField = (TextField) ((Node) e.getSource()).getScene().lookup("#nameField");
+            ignoredBadges.add(nameField.getText());
+            ignoredBadgeManager.saveIgnoredBadgesToFile(ignoredBadges, "ignored_badges.json");
+            showIgnoreScreen(primaryStage);
+        });
+        return saveButton;
+    }
+
+    private TextField createNameTextField() {
+        TextField nameField = new TextField();
+        nameField.setId("nameField");
+        nameField.setPromptText("Lab name");
+        return nameField;
     }
 
     private VBox createBadgeLabels(Profile profile, ArrayList<String> siteLinks) {
