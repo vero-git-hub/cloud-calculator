@@ -1,12 +1,16 @@
 package com.example.cloudcalc;
 
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -25,29 +29,48 @@ public class MainUI {
 
     public void showMainScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
-
+        layout.getChildren().add(createLabel("Profiles:"));
         List<Profile> profiles = profileDataManager.loadProfilesFromFile("profiles.json");
-        for (Profile profile : profiles) {
-            layout.getChildren().add(createProfileRow(primaryStage, profile));
+
+        if (profiles.isEmpty()) {
+            layout.getChildren().add(createLabel("No profiles"));
+        } else {
+            for (Profile profile : profiles) {
+                layout.getChildren().add(createProfileRow(primaryStage, profile));
+            }
         }
 
-        layout.getChildren().addAll(createCreateProfileButton(primaryStage), createIgnoreBadgesButton(primaryStage));
+        layout.getChildren().add(createLabel("Actions:"));
+        layout.getChildren().addAll(createCreateProfileButton(primaryStage), createIgnoreBadgesButton(primaryStage) , createSettingPrizesButton(primaryStage));
 
-        Scene mainScene = new Scene(layout, 400, 300);
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(layout);
+
+        createScene(scrollPane, primaryStage);
+    }
+
+    private void createScene(Parent layout, Stage primaryStage) {
+        layout.setStyle("-fx-font-size: 18;-fx-padding: 10px;");
+
+        Scene mainScene = new Scene(layout, 600, 400);
         primaryStage.setScene(mainScene);
     }
+
 
     public void showProfileScreen(Stage primaryStage, Profile profile) {
         VBox layout = new VBox(10);
 
         layout.getChildren().addAll(
+                createBackButton(primaryStage),
                 createProfileInfo(profile),
-                createPdfLinksSection(profile),
-                createBackButton(primaryStage)
+                createPdfLinksSection(profile)
+
         );
 
-        Scene detailsScene = new Scene(layout, 400, 300);
-        primaryStage.setScene(detailsScene);
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(layout);
+
+        createScene(scrollPane, primaryStage);
     }
 
     private void showScanScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
@@ -59,8 +82,7 @@ public class MainUI {
                 createBackButton(primaryStage)
         );
 
-        Scene countScene = new Scene(layout, 400, 300);
-        primaryStage.setScene(countScene);
+        createScene(layout, primaryStage);
     }
 
     public void showCreateProfileScreen(Stage primaryStage) {
@@ -72,6 +94,7 @@ public class MainUI {
         TextField linkField = createTextField("Profile Link");
 
         layout.getChildren().addAll(
+                createLabel("Create Profile Screen"),
                 nameField,
                 dateField,
                 linkField,
@@ -80,8 +103,7 @@ public class MainUI {
                 createBackButton(primaryStage)
         );
 
-        Scene createProfileScene = new Scene(layout, 300, 200);
-        primaryStage.setScene(createProfileScene);
+        createScene(layout, primaryStage);
     }
 
     private Button createSaveButton(Stage primaryStage, Profile profile, TextField nameField, TextField dateField, TextField linkField) {
@@ -134,12 +156,14 @@ public class MainUI {
         layout.getChildren().addAll(
                 createLabel("Ignore Screen"),
                 createAddIgnoreBadgeButton(primaryStage),
-                createIgnoredBadgesList(primaryStage),
-                createBackButton(primaryStage)
+                createBackButton(primaryStage),
+                createIgnoredBadgesList(primaryStage)
         );
 
-        Scene countScene = new Scene(layout, 400, 300);
-        primaryStage.setScene(countScene);
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(layout);
+
+        createScene(scrollPane, primaryStage);
     }
 
     private Label createLabel(String text) {
@@ -155,9 +179,15 @@ public class MainUI {
     private VBox createIgnoredBadgesList(Stage primaryStage) {
         VBox badgesList = new VBox(10);
         List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
-        for (String badge : ignoredBadges) {
-            badgesList.getChildren().add(createBadgeRow(primaryStage, badge, ignoredBadges));
+
+        if (ignoredBadges.isEmpty()) {
+            badgesList.getChildren().add(createLabel("No ignored badges"));
+        } else {
+            for (String badge : ignoredBadges) {
+                badgesList.getChildren().add(createBadgeRow(primaryStage, badge, ignoredBadges));
+            }
         }
+
         return badgesList;
     }
 
@@ -185,8 +215,7 @@ public class MainUI {
                 createBackButton(primaryStage)
         );
 
-        Scene countScene = new Scene(layout, 400, 300);
-        primaryStage.setScene(countScene);
+        createScene(layout, primaryStage);
     }
 
     private Button createSaveIgnoreBadgeButton(Stage primaryStage) {
@@ -213,10 +242,10 @@ public class MainUI {
         Map<String, Integer> badgeCounts = calculateBadgeCounts(profile, siteLinks);
 
         labelsBox.getChildren().addAll(
-                new Label("Total: " + badgeCounts.get("Total")),
-                new Label("PDF badges: " + badgeCounts.get("PDF")),
-                new Label("Skill badges: " + badgeCounts.get("Skill")),
-                new Label("Ignore badges: " + badgeCounts.get("Ignore"))
+                createTextFlow("Total: ", String.valueOf(badgeCounts.get("Total"))),
+                createTextFlow("PDF badges: ", String.valueOf(badgeCounts.get("PDF"))),
+                createTextFlow("Skill badges: ", String.valueOf(badgeCounts.get("Skill"))),
+                createTextFlow("Ignore badges: ", String.valueOf(badgeCounts.get("Ignore")))
         );
         return labelsBox;
     }
@@ -257,6 +286,7 @@ public class MainUI {
         VBox linksVBox = new VBox(5);
 
         Label linksTitle = new Label("PDF Links:");
+        linksTitle.setStyle("-fx-font-weight: bold;");
         linksVBox.getChildren().add(linksTitle);
 
         if (profile.getPdfLinks() != null) {
@@ -272,13 +302,40 @@ public class MainUI {
     private VBox createProfileInfo(Profile profile) {
         VBox profileInfoBox = new VBox(10);
 
-        Label nameLabel = new Label("Name: " + profile.getName());
-        Label startDateLabel = new Label("Start Date: " + profile.getStartDate());
-        Label profileLinkLabel = new Label("Profile Link: " + profile.getProfileLink());
+        TextFlow nameFlow = createTextFlow("Name: ", profile.getName());
+        TextFlow startDateFlow = createTextFlow("Start Date: ", profile.getStartDate());
+        TextFlow profileLinkFlow = createTextFlow("Profile Link: ", profile.getProfileLink());
 
-        profileInfoBox.getChildren().addAll(nameLabel, startDateLabel, profileLinkLabel);
+        profileInfoBox.getChildren().addAll(nameFlow, startDateFlow, profileLinkFlow);
 
         return profileInfoBox;
+    }
+
+    private TextFlow createTextFlow(String boldText, String normalText) {
+        Text bold = new Text(boldText);
+        bold.setStyle("-fx-font-weight: bold;");
+
+        Text normal = new Text(normalText);
+
+        TextFlow textFlow = new TextFlow(bold, normal);
+        return textFlow;
+    }
+
+    private Button createSettingPrizesButton(Stage primaryStage) {
+        Button settingsPrizesButton = new Button("Settings prizes");
+        settingsPrizesButton.setOnAction(e -> showSettingsPrizesScreen(primaryStage));
+        return settingsPrizesButton;
+    }
+
+    private void showSettingsPrizesScreen(Stage primaryStage) {
+        VBox layout = new VBox(10);
+
+        layout.getChildren().addAll(
+                createLabel("Settings Prizes Screen"),
+                createBackButton(primaryStage)
+        );
+
+        createScene(layout, primaryStage);
     }
 
     private Button createIgnoreBadgesButton(Stage primaryStage) {
