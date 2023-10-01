@@ -1,6 +1,5 @@
 package com.example.cloudcalc;
 
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -11,7 +10,10 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainUI {
 
@@ -167,7 +169,9 @@ public class MainUI {
 
         Button saveButton = new Button("Save Ignore Badge");
         saveButton.setOnAction(e -> {
-            ignoredBadgeManager.saveIgnoredBadgesToFile(Collections.singletonList(nameField.getText()), "ignored_badges.json");
+            List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
+            ignoredBadges.add(nameField.getText());
+            ignoredBadgeManager.saveIgnoredBadgesToFile(ignoredBadges, "ignored_badges.json");
             showIgnoreScreen(primaryStage);
         });
 
@@ -175,12 +179,6 @@ public class MainUI {
         Scene countScene = new Scene(layout, 400, 300);
         primaryStage.setScene(countScene);
     }
-
-
-
-
-
-
 
     private VBox createBadgeLabels(Profile profile, ArrayList<String> siteLinks) {
         VBox labelsBox = new VBox(5);
@@ -195,32 +193,31 @@ public class MainUI {
         return labelsBox;
     }
 
-    private Map<String, Integer> calculateBadgeCounts(Profile profile, ArrayList<String> siteLinks) {
+    private Map<String, Integer> calculateBadgeCounts(Profile profile, ArrayList<String> siteBadges) {
         Map<String, Integer> badgeCounts = new HashMap<>();
 
-        List<String> pdfLinksList = new ArrayList<>(profile.getPdfLinks());
-        int pdfBadges = 0;
-        for (String data : siteLinks) {
-            if (pdfLinksList.contains(data)) {
-                pdfBadges++;
-                pdfLinksList.remove(data);
-            }
-        }
+        List<String> pdfBadges = new ArrayList<>(profile.getPdfLinks());
+        List<String> ignoreBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
 
-        List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
-        int totalBadges = siteLinks.size();
-        int ignoreBadges = ignoredBadges.size();
-        int skillBadges = totalBadges - pdfBadges - ignoreBadges;
+        int countAll = siteBadges.size();
+        int countPdf;
+        int countIgnore;
+        int countSkill;
 
-        badgeCounts.put("Total", totalBadges);
-        badgeCounts.put("PDF", pdfBadges);
-        badgeCounts.put("Skill", skillBadges);
-        badgeCounts.put("Ignore", ignoreBadges);
+        siteBadges.removeAll(pdfBadges);
+        countPdf = countAll - siteBadges.size();
+
+        siteBadges.removeAll(ignoreBadges);
+        countSkill = siteBadges.size();
+        countIgnore = countAll - (countPdf + countSkill);
+
+        badgeCounts.put("Total", countAll);
+        badgeCounts.put("PDF", countPdf);
+        badgeCounts.put("Skill", countSkill);
+        badgeCounts.put("Ignore", countIgnore);
 
         return badgeCounts;
     }
-
-
 
     private Button createBackButton(Stage primaryStage) {
         Button backButton = new Button("Back");
@@ -255,8 +252,6 @@ public class MainUI {
 
         return profileInfoBox;
     }
-
-
 
     private Button createIgnoreBadgesButton(Stage primaryStage) {
         Button ignoreButton = new Button("Ignore Badges");
@@ -306,10 +301,5 @@ public class MainUI {
         });
         return scanButton;
     }
-
-
-
-
-
 
 }
