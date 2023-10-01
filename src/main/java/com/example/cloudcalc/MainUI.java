@@ -17,11 +17,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,11 +33,17 @@ public class MainUI {
 
     private final DataExtractor dataExtractor = new DataExtractor();
     private final IgnoredBadgeManager ignoredBadgeManager = new IgnoredBadgeManager();
+    private List<String> receivedPrizes = new ArrayList<>();
+
+    private static final String PRIZES_FILE = "prizes.json";
+    private static final String PROFILES_FILE = "profiles.json";
+    private static final String IGNORE_FILE = "ignore.json";
+
 
     public void showMainScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
         layout.getChildren().add(createLabel("Profiles:"));
-        List<Profile> profiles = profileDataManager.loadProfilesFromFile("profiles.json");
+        List<Profile> profiles = profileDataManager.loadProfilesFromFile(PROFILES_FILE);
 
         if (profiles.isEmpty()) {
             layout.getChildren().add(createLabel("No profiles"));
@@ -49,7 +54,7 @@ public class MainUI {
         }
 
         layout.getChildren().add(createLabel("Actions:"));
-        layout.getChildren().addAll(createCreateProfileButton(primaryStage), createIgnoreBadgesButton(primaryStage) , createSettingPrizesButton(primaryStage));
+        layout.getChildren().addAll(createCreateProfileButton(primaryStage), createIgnoreBadgesButton(primaryStage) , createPrizesButton(primaryStage));
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(layout);
@@ -133,7 +138,7 @@ public class MainUI {
                 List<String> h1Contents = dataExtractor.extractH1FromLinks(extractedLinks);
                 profile.setPdfLinks(h1Contents);
             }
-            profileDataManager.saveProfileToFile(profile, "profiles.json");
+            profileDataManager.saveProfileToFile(profile, PROFILES_FILE);
             showMainScreen(primaryStage);
         }
     }
@@ -184,7 +189,7 @@ public class MainUI {
 
     private VBox createIgnoredBadgesList(Stage primaryStage) {
         VBox badgesList = new VBox(10);
-        List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
+        List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile(IGNORE_FILE);
 
         if (ignoredBadges.isEmpty()) {
             badgesList.getChildren().add(createLabel("No ignored badges"));
@@ -203,7 +208,7 @@ public class MainUI {
         Button deleteButton = new Button("Delete");
         deleteButton.setOnAction(e -> {
             ignoredBadges.remove(badge);
-            ignoredBadgeManager.saveIgnoredBadgesToFile(ignoredBadges, "ignored_badges.json");
+            ignoredBadgeManager.saveIgnoredBadgesToFile(ignoredBadges, IGNORE_FILE);
             showIgnoreScreen(primaryStage);
         });
 
@@ -227,10 +232,10 @@ public class MainUI {
     private Button createSaveIgnoreBadgeButton(Stage primaryStage) {
         Button saveButton = new Button("Save Ignore Badge");
         saveButton.setOnAction(e -> {
-            List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
+            List<String> ignoredBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile(IGNORE_FILE);
             TextField nameField = (TextField) ((Node) e.getSource()).getScene().lookup("#nameField");
             ignoredBadges.add(nameField.getText());
-            ignoredBadgeManager.saveIgnoredBadgesToFile(ignoredBadges, "ignored_badges.json");
+            ignoredBadgeManager.saveIgnoredBadgesToFile(ignoredBadges, IGNORE_FILE);
             showIgnoreScreen(primaryStage);
         });
         return saveButton;
@@ -247,11 +252,14 @@ public class MainUI {
         VBox labelsBox = new VBox(5);
         Map<String, Integer> badgeCounts = calculateBadgeCounts(profile, siteLinks);
 
+        String prizesStr = String.join(", ", receivedPrizes);
+
         labelsBox.getChildren().addAll(
                 createTextFlow("Total: ", String.valueOf(badgeCounts.get("Total"))),
                 createTextFlow("PDF badges: ", String.valueOf(badgeCounts.get("PDF"))),
                 createTextFlow("Skill badges: ", String.valueOf(badgeCounts.get("Skill"))),
-                createTextFlow("Ignore badges: ", String.valueOf(badgeCounts.get("Ignore")))
+                createTextFlow("Ignore badges: ", String.valueOf(badgeCounts.get("Ignore"))),
+                createTextFlow("Prize received: ", prizesStr.isEmpty() ? "None" : prizesStr)
         );
         return labelsBox;
     }
@@ -260,7 +268,7 @@ public class MainUI {
         Map<String, Integer> badgeCounts = new HashMap<>();
 
         List<String> pdfBadges = new ArrayList<>(profile.getPdfLinks());
-        List<String> ignoreBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile("ignored_badges.json");
+        List<String> ignoreBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile(IGNORE_FILE);
 
         int countAll = siteBadges.size();
         int countPdf;
@@ -270,9 +278,44 @@ public class MainUI {
         siteBadges.removeAll(pdfBadges);
         countPdf = countAll - siteBadges.size();
 
-        siteBadges.removeAll(ignoreBadges);
+        if(!ignoreBadges.isEmpty()) {
+            siteBadges.removeAll(ignoreBadges);
+        }
+
         countSkill = siteBadges.size();
         countIgnore = countAll - (countPdf + countSkill);
+
+        receivedPrizes.clear();
+        List<Prize> prizes = loadPrizesFromFile(PRIZES_FILE);
+        boolean isPdfPrizeAdded = false;
+        Prize bestSkillPrize = null;
+
+        int totalSkillCount = isPdfPrizeAdded ? countSkill : countSkill + countPdf;
+
+        for (Prize prize : prizes) {
+            if ("pdf".equals(prize.getType()) && countPdf >= prize.getCount() && !isPdfPrizeAdded) {
+                receivedPrizes.add(prize.getName());
+                isPdfPrizeAdded = true;
+            }
+        }
+
+        if (!isPdfPrizeAdded) {
+            totalSkillCount = countSkill + countPdf;
+        } else {
+            totalSkillCount = countSkill;
+        }
+
+        for (Prize prize : prizes) {
+            if ("skill".equals(prize.getType()) && totalSkillCount >= prize.getCount()) {
+                if (bestSkillPrize == null || prize.getCount() > bestSkillPrize.getCount()) {
+                    bestSkillPrize = prize;
+                }
+            }
+        }
+
+        if (bestSkillPrize != null) {
+            receivedPrizes.add(bestSkillPrize.getName());
+        }
 
         badgeCounts.put("Total", countAll);
         badgeCounts.put("PDF", countPdf);
@@ -327,16 +370,16 @@ public class MainUI {
         return textFlow;
     }
 
-    private Button createSettingPrizesButton(Stage primaryStage) {
+    private Button createPrizesButton(Stage primaryStage) {
         Button settingsPrizesButton = new Button("Settings Prizes");
-        settingsPrizesButton.setOnAction(e -> showSettingsPrizesScreen(primaryStage));
+        settingsPrizesButton.setOnAction(e -> showPrizesScreen(primaryStage));
         return settingsPrizesButton;
     }
 
-    private void showSettingsPrizesScreen(Stage primaryStage) {
+    private void showPrizesScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
 
-        List<Prize> prizes = loadPrizesFromFile("settings_prizes.json");
+        List<Prize> prizes = loadPrizesFromFile(PRIZES_FILE);
 
         TableView<Prize> table = new TableView<>();
 
@@ -360,7 +403,7 @@ public class MainUI {
                         btn.setOnAction((ActionEvent event) -> {
                             Prize prize = getTableView().getItems().get(getIndex());
                             deletePrize(prize);
-                            showSettingsPrizesScreen(primaryStage);
+                            showPrizesScreen(primaryStage);
                         });
                     }
 
@@ -410,15 +453,15 @@ public class MainUI {
     }
 
     private void deletePrize(Prize prize) {
-        List<Prize> prizes = loadPrizesFromFile("settings_prizes.json");
+        List<Prize> prizes = loadPrizesFromFile(PRIZES_FILE);
         prizes.remove(prize);
-        savePrizesToFile(prizes, "settings_prizes.json");
+        savePrizesToFile(prizes, PRIZES_FILE);
     }
 
     private void savePrizesToFile(List<Prize> prizes, String fileName) {
         JSONArray jsonArray = convertPrizesToJSONArray(prizes);
-        try (FileWriter file = new FileWriter(fileName)) {
-            file.write(jsonArray.toString());
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(fileName), StandardCharsets.UTF_8)) {
+            writer.write(jsonArray.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -426,8 +469,14 @@ public class MainUI {
 
     private List<Prize> loadPrizesFromFile(String fileName) {
         List<Prize> prizes = new ArrayList<>();
+
+        Path filePath = Paths.get(fileName);
+        if (!Files.exists(filePath)) {
+            return prizes;
+        }
+
         try {
-            String content = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
+            String content = new String(Files.readAllBytes(filePath), StandardCharsets.UTF_8);
             JSONArray jsonArray = new JSONArray(content);
 
             for (int j = 0; j < jsonArray.length(); j++) {
@@ -460,7 +509,7 @@ public class MainUI {
         Button saveButton = new Button("Save");
         saveButton.setOnAction(e -> {
             savePrize(namePrizeField.getText(), badgeCountField.getText(), badgeTypeComboBox.getValue());
-            showSettingsPrizesScreen(primaryStage);
+            showPrizesScreen(primaryStage);
         });
 
         layout.getChildren().addAll(
@@ -488,13 +537,13 @@ public class MainUI {
                 return;
             }
 
-            List<Prize> existingPrizes = loadPrizesFromFile("settings_prizes.json");
+            List<Prize> existingPrizes = loadPrizesFromFile(PRIZES_FILE);
             existingPrizes.add(newPrize);
 
             JSONArray jsonArray = convertPrizesToJSONArray(existingPrizes);
 
-            try (FileWriter file = new FileWriter("settings_prizes.json")) {
-                file.write(jsonArray.toString());
+            try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(PRIZES_FILE), StandardCharsets.UTF_8)) {
+                writer.write(jsonArray.toString());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -547,9 +596,9 @@ public class MainUI {
     }
 
     private void handleDeleteAction(Stage primaryStage, Profile profile) {
-        List<Profile> profiles = profileDataManager.loadProfilesFromFile("profiles.json");
+        List<Profile> profiles = profileDataManager.loadProfilesFromFile(PROFILES_FILE);
         profiles.remove(profile);
-        profileDataManager.saveProfilesToFile(profiles, "profiles.json");
+        profileDataManager.saveProfilesToFile(profiles, PROFILES_FILE);
         showMainScreen(primaryStage);
     }
 
