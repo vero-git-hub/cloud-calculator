@@ -1,20 +1,28 @@
 package com.example.cloudcalc;
 
+import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +63,6 @@ public class MainUI {
         Scene mainScene = new Scene(layout, 600, 400);
         primaryStage.setScene(mainScene);
     }
-
 
     public void showProfileScreen(Stage primaryStage, Profile profile) {
         VBox layout = new VBox(10);
@@ -130,7 +137,6 @@ public class MainUI {
             showMainScreen(primaryStage);
         }
     }
-
 
     private TextField createTextField(String promptText) {
         TextField textField = new TextField();
@@ -322,7 +328,7 @@ public class MainUI {
     }
 
     private Button createSettingPrizesButton(Stage primaryStage) {
-        Button settingsPrizesButton = new Button("Settings prizes");
+        Button settingsPrizesButton = new Button("Settings Prizes");
         settingsPrizesButton.setOnAction(e -> showSettingsPrizesScreen(primaryStage));
         return settingsPrizesButton;
     }
@@ -330,12 +336,181 @@ public class MainUI {
     private void showSettingsPrizesScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
 
+        List<Prize> prizes = loadPrizesFromFile("settings_prizes.json");
+
+        TableView<Prize> table = new TableView<>();
+
+        TableColumn<Prize, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<Prize, String> typeColumn = new TableColumn<>("Type");
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+
+        TableColumn<Prize, Integer> countColumn = new TableColumn<>("Count");
+        countColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
+
+        TableColumn<Prize, Void> deleteColumn = new TableColumn<>("Actions");
+        Callback<TableColumn<Prize, Void>, TableCell<Prize, Void>> cellFactory = new Callback<>() {
+            @Override
+            public TableCell<Prize, Void> call(final TableColumn<Prize, Void> param) {
+                final TableCell<Prize, Void> cell = new TableCell<>() {
+                    private final Button btn = new Button("Delete");
+
+                    {
+                        btn.setOnAction((ActionEvent event) -> {
+                            Prize prize = getTableView().getItems().get(getIndex());
+                            deletePrize(prize);
+                            showSettingsPrizesScreen(primaryStage);
+                        });
+                    }
+
+                    @Override
+                    public void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            setGraphic(btn);
+                        }
+                    }
+                };
+                return cell;
+            }
+        };
+        deleteColumn.setCellFactory(cellFactory);
+
+        nameColumn.setResizable(false);
+        typeColumn.setResizable(false);
+        countColumn.setResizable(false);
+        deleteColumn.setResizable(false);
+
+        double width = 0.25;
+        nameColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
+        typeColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
+        countColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
+        deleteColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
+
+        table.getColumns().add(nameColumn);
+        table.getColumns().add(typeColumn);
+        table.getColumns().add(countColumn);
+        table.getColumns().add(deleteColumn);
+        table.getItems().addAll(prizes);
+
+        Button addPrizeButton = new Button("Add Prize");
+        addPrizeButton.setOnAction(e -> showAddPrizesScreen(primaryStage));
+
         layout.getChildren().addAll(
                 createLabel("Settings Prizes Screen"),
+                table,
+                addPrizeButton,
                 createBackButton(primaryStage)
         );
 
         createScene(layout, primaryStage);
+    }
+
+    private void deletePrize(Prize prize) {
+        List<Prize> prizes = loadPrizesFromFile("settings_prizes.json");
+        prizes.remove(prize);
+        savePrizesToFile(prizes, "settings_prizes.json");
+    }
+
+    private void savePrizesToFile(List<Prize> prizes, String fileName) {
+        JSONArray jsonArray = convertPrizesToJSONArray(prizes);
+        try (FileWriter file = new FileWriter(fileName)) {
+            file.write(jsonArray.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<Prize> loadPrizesFromFile(String fileName) {
+        List<Prize> prizes = new ArrayList<>();
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
+            JSONArray jsonArray = new JSONArray(content);
+
+            for (int j = 0; j < jsonArray.length(); j++) {
+                JSONObject prizeObject = jsonArray.getJSONObject(j);
+                Prize prize = new Prize();
+                prize.setName(prizeObject.getString("name"));
+                prize.setType(prizeObject.getString("type"));
+                prize.setCount(prizeObject.getInt("count"));
+                prizes.add(prize);
+            }
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+        return prizes;
+    }
+
+    private void showAddPrizesScreen(Stage primaryStage) {
+        VBox layout = new VBox(10);
+
+        TextField namePrizeField = new TextField();
+        namePrizeField.setPromptText("Enter name prize");
+
+        TextField badgeCountField = new TextField();
+        badgeCountField.setPromptText("Enter badge count");
+
+        ComboBox<String> badgeTypeComboBox = new ComboBox<>();
+        badgeTypeComboBox.getItems().addAll("pdf", "skill");
+        badgeTypeComboBox.setPromptText("Select badge type");
+
+        Button saveButton = new Button("Save");
+        saveButton.setOnAction(e -> {
+            savePrize(namePrizeField.getText(), badgeCountField.getText(), badgeTypeComboBox.getValue());
+            showSettingsPrizesScreen(primaryStage);
+        });
+
+        layout.getChildren().addAll(
+                createLabel("Add Prizes Screen"),
+                namePrizeField,
+                badgeCountField,
+                badgeTypeComboBox,
+                saveButton,
+                createBackButton(primaryStage)
+        );
+
+        createScene(layout, primaryStage);
+    }
+
+    private void savePrize(String namePrize, String badgeCount, String badgeType) {
+        if (namePrize != null && badgeCount != null && !badgeCount.isEmpty() && badgeType != null) {
+            Prize newPrize = new Prize();
+            newPrize.setName(namePrize);
+            newPrize.setType(badgeType);
+
+            try {
+                newPrize.setCount(Integer.parseInt(badgeCount));
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Badge count must be a valid number.");
+                return;
+            }
+
+            List<Prize> existingPrizes = loadPrizesFromFile("settings_prizes.json");
+            existingPrizes.add(newPrize);
+
+            JSONArray jsonArray = convertPrizesToJSONArray(existingPrizes);
+
+            try (FileWriter file = new FileWriter("settings_prizes.json")) {
+                file.write(jsonArray.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private JSONArray convertPrizesToJSONArray(List<Prize> prizes) {
+        JSONArray jsonArray = new JSONArray();
+        for (Prize prize : prizes) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("name", prize.getName());
+            jsonObject.put("type", prize.getType());
+            jsonObject.put("count", prize.getCount());
+            jsonArray.put(jsonObject);
+        }
+        return jsonArray;
     }
 
     private Button createIgnoreBadgesButton(Stage primaryStage) {
