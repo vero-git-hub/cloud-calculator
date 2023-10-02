@@ -1,11 +1,14 @@
 package com.example.cloudcalc;
 
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -22,10 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MainUI {
 
@@ -38,6 +38,7 @@ public class MainUI {
     private static final String PRIZES_FILE = "prizes.json";
     private static final String PROFILES_FILE = "profiles.json";
     private static final String IGNORE_FILE = "ignore.json";
+    private static final String DELETE_ICON = "/delete_icon48.png";
 
 
     public void showMainScreen(Stage primaryStage) {
@@ -205,12 +206,17 @@ public class MainUI {
     private HBox createBadgeRow(Stage primaryStage, String badge, List<String> ignoredBadges) {
         HBox badgeRow = new HBox(10);
         Label badgeLabel = new Label(badge);
-        Button deleteButton = new Button("Delete");
-        deleteButton.setOnAction(e -> {
-            ignoredBadges.remove(badge);
-            ignoredBadgeManager.saveIgnoredBadgesToFile(ignoredBadges, IGNORE_FILE);
-            showIgnoreScreen(primaryStage);
-        });
+
+        Image deleteImage = new Image(getClass().getResourceAsStream(DELETE_ICON));
+        EventHandler<ActionEvent> deleteAction = e -> {
+            if (showConfirmationAlert("Confirmation Dialog", "Delete Badge", "Are you sure you want to delete this badge?")) {
+                ignoredBadges.remove(badge);
+                ignoredBadgeManager.saveIgnoredBadgesToFile(ignoredBadges, IGNORE_FILE);
+                showIgnoreScreen(primaryStage);
+            }
+
+        };
+        Button deleteButton = createIconButton(deleteImage, deleteAction);
 
         badgeRow.getChildren().addAll(badgeLabel, deleteButton);
         return badgeRow;
@@ -397,15 +403,25 @@ public class MainUI {
             @Override
             public TableCell<Prize, Void> call(final TableColumn<Prize, Void> param) {
                 final TableCell<Prize, Void> cell = new TableCell<>() {
-                    private final Button btn = new Button("Delete");
+//                    private final Button btn = new Button("Delete");
+//
+//                    {
+//                        btn.setOnAction((ActionEvent event) -> {
+//                            Prize prize = getTableView().getItems().get(getIndex());
+//                            deletePrize(prize);
+//                            showPrizesScreen(primaryStage);
+//                        });
+//                    }
 
-                    {
-                        btn.setOnAction((ActionEvent event) -> {
-                            Prize prize = getTableView().getItems().get(getIndex());
+                    Image deleteImage = new Image(getClass().getResourceAsStream("/delete_icon48.png"));
+                    EventHandler<ActionEvent> deleteAction = (ActionEvent event) -> {
+                        Prize prize = getTableView().getItems().get(getIndex());
+                        if (showConfirmationAlert("Confirmation Dialog", "Delete Prize", "Are you sure you want to delete this prize?")) {
                             deletePrize(prize);
                             showPrizesScreen(primaryStage);
-                        });
-                    }
+                        }
+                    };
+                    Button btn = createIconButton(deleteImage, deleteAction);
 
                     @Override
                     public void updateItem(Void item, boolean empty) {
@@ -583,17 +599,48 @@ public class MainUI {
         Button deleteButton = createDeleteButton(primaryStage, profile);
         Button scanButton = createScanButton(primaryStage, profile);
 
-        profileContainer.getChildren().addAll(profileButton, deleteButton, scanButton);
+        profileContainer.getChildren().addAll(profileButton, scanButton, deleteButton);
         return profileContainer;
     }
 
     private Button createDeleteButton(Stage primaryStage, Profile profile) {
-        Button deleteButton = new Button("Delete");
-        deleteButton.setOnAction(e -> {
-            handleDeleteAction(primaryStage, profile);
-        });
-        return deleteButton;
+        Image deleteImage = new Image(getClass().getResourceAsStream(DELETE_ICON));
+
+        EventHandler<ActionEvent> deleteAction = e -> {
+            if (showConfirmationAlert("Confirmation Dialog", "Delete Profile", "Are you sure you want to delete this profile?")) {
+                handleDeleteAction(primaryStage, profile);
+            }
+
+        };
+
+        return createIconButton(deleteImage, deleteAction);
     }
+
+    private boolean showConfirmationAlert(String title, String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
+    }
+
+
+    private Button createIconButton(Image image, EventHandler<ActionEvent> action) {
+        Button button = new Button();
+
+        ImageView imageView = new ImageView(image);
+        int iconSize = 27;
+        imageView.setFitWidth(iconSize);
+        imageView.setFitHeight(iconSize);
+        button.setGraphic(imageView);
+
+        button.setOnAction(action);
+
+        return button;
+    }
+
 
     private void handleDeleteAction(Stage primaryStage, Profile profile) {
         List<Profile> profiles = profileDataManager.loadProfilesFromFile(PROFILES_FILE);
