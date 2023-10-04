@@ -33,6 +33,13 @@ public class MainUI {
     private static final String PROFILES_FILE = "profiles.json";
     private static final String IGNORE_FILE = "ignore.json";
 
+    private static final String TOTAL = "Total";
+    private static final String IGNORE = "Ignore";
+    private static final String PDF_TOTAL = "PDF total";
+    private static final String PDF_FOR_PRIZE = "PDF for prize";
+    private static final String SKILL = "Skill";
+    private static final String SKILL_FOR_PRIZE = "Skill for prize";
+
     private final ProfileDataManager profileDataManager = new ProfileDataManager();
     private final DataExtractor dataExtractor = new DataExtractor();
     private final IgnoredBadgeManager ignoredBadgeManager = new IgnoredBadgeManager();
@@ -286,10 +293,12 @@ public class MainUI {
         String prizesStr = String.join(", ", receivedPrizes);
 
         labelsBox.getChildren().addAll(
-                createTextFlow("Total: ", String.valueOf(badgeCounts.get("Total"))),
-                createTextFlow("PDF badges: ", String.valueOf(badgeCounts.get("PDF"))),
-                createTextFlow("Skill badges: ", String.valueOf(badgeCounts.get("Skill"))),
-                createTextFlow("Ignore badges: ", String.valueOf(badgeCounts.get("Ignore"))),
+                createTextFlow("Total: ", String.valueOf(badgeCounts.get(TOTAL))),
+                createLabel("Ignore: " + badgeCounts.get(IGNORE)),
+                createTextFlow("Skill: ", String.valueOf(badgeCounts.get(SKILL))),
+                createLabel("PDF total: " + badgeCounts.get(PDF_TOTAL)),
+                createTextFlow("PDF for prize: ", String.valueOf(badgeCounts.get(PDF_FOR_PRIZE))),
+                createTextFlow("Skill for prize: ", String.valueOf(badgeCounts.get(SKILL_FOR_PRIZE))),
                 createTextFlow("Prize received: ", prizesStr.isEmpty() ? "None" : prizesStr)
         );
         return labelsBox;
@@ -302,12 +311,30 @@ public class MainUI {
         linksTitle.setStyle("-fx-font-weight: bold;");
         linksVBox.getChildren().add(linksTitle);
 
+        TableView<PdfLinkItem> table = new TableView<>();
+
+        TableColumn<PdfLinkItem, Integer> indexColumn = new TableColumn<>("No.");
+        indexColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
+
+        TableColumn<PdfLinkItem, String> linkColumn = new TableColumn<>("Link");
+        linkColumn.setCellValueFactory(new PropertyValueFactory<>("link"));
+
+        indexColumn.setResizable(false);
+        linkColumn.setResizable(false);
+
+        indexColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.05));
+        linkColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.95));
+
+        table.getColumns().addAll(indexColumn, linkColumn);
+
         if (profile.getPdfLinks() != null) {
+            int index = 1;
             for (String link : profile.getPdfLinks()) {
-                Label linkLabel = new Label(link);
-                linksVBox.getChildren().add(linkLabel);
+                table.getItems().add(new PdfLinkItem(index++, link));
             }
         }
+
+        linksVBox.getChildren().add(table);
 
         return linksVBox;
     }
@@ -422,65 +449,86 @@ public class MainUI {
         return nameField;
     }
 
-    private Map<String, Integer> calculateBadgeCounts(Profile profile, ArrayList<String> siteBadges) {
+    private Map<String, Integer> calculateBadgeCounts(Profile profile, ArrayList<String> receivedBadges) {
         Map<String, Integer> badgeCounts = new HashMap<>();
 
-        List<String> pdfBadges = new ArrayList<>(profile.getPdfLinks());
-        List<String> ignoreBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile(IGNORE_FILE);
+        int total = receivedBadges.size();
 
-        int countAll = siteBadges.size();
-        int countPdf;
-        int countIgnore;
-        int countSkill;
+        List<String> skillBadges = filterSkillBadges(receivedBadges);
+        int skill = skillBadges.size();
+        int ignore = total - skill;
 
-        siteBadges.removeAll(pdfBadges);
-        countPdf = countAll - siteBadges.size();
+        List<String> pdfBadges = getPDFBadges(profile, skillBadges);
+        int totalPDF = pdfBadges.size();
 
-        if(!ignoreBadges.isEmpty()) {
-            siteBadges.removeAll(ignoreBadges);
+        int prizePDF;
+        int constantForPrize = 7;
+
+        if(totalPDF > constantForPrize) {
+            prizePDF = constantForPrize;
+        } else if (totalPDF < constantForPrize){
+            prizePDF = 0;
+        } else {
+            prizePDF = constantForPrize;
         }
 
-        countSkill = siteBadges.size();
-        countIgnore = countAll - (countPdf + countSkill);
+        int prizeSkill;
+        if(prizePDF == 0){
+            prizeSkill = skill;
+        } else {
+            prizeSkill = skill - prizePDF;
+        }
 
         receivedPrizes.clear();
         List<Prize> prizes = loadPrizesFromFile(PRIZES_FILE);
-        boolean isPdfPrizeAdded = false;
-        Prize bestSkillPrize = null;
-
-        int totalSkillCount;
 
         for (Prize prize : prizes) {
-            if ("pdf".equals(prize.getType()) && countPdf >= prize.getCount() && !isPdfPrizeAdded) {
+            if ("pdf".equals(prize.getType()) && prizePDF >= prize.getCount()) {
                 receivedPrizes.add(prize.getName());
-                isPdfPrizeAdded = true;
+            }
+            if ("skill".equals(prize.getType()) && prizeSkill >= prize.getCount()) {
+                receivedPrizes.add(prize.getName());
             }
         }
 
-        if (!isPdfPrizeAdded) {
-            totalSkillCount = countSkill + countPdf;
-        } else {
-            totalSkillCount = countSkill;
-        }
-
-        for (Prize prize : prizes) {
-            if ("skill".equals(prize.getType()) && totalSkillCount >= prize.getCount()) {
-                if (bestSkillPrize == null || prize.getCount() > bestSkillPrize.getCount()) {
-                    bestSkillPrize = prize;
-                }
-            }
-        }
-
-        if (bestSkillPrize != null) {
-            receivedPrizes.add(bestSkillPrize.getName());
-        }
-
-        badgeCounts.put("Total", countAll);
-        badgeCounts.put("PDF", countPdf);
-        badgeCounts.put("Skill", countSkill);
-        badgeCounts.put("Ignore", countIgnore);
+        badgeCounts.put(TOTAL, total);
+        badgeCounts.put(IGNORE, ignore);
+        badgeCounts.put(SKILL, skill);
+        badgeCounts.put(PDF_TOTAL, totalPDF);
+        badgeCounts.put(PDF_FOR_PRIZE, prizePDF);
+        badgeCounts.put(SKILL_FOR_PRIZE, prizeSkill);
 
         return badgeCounts;
+    }
+
+    /**
+     * Matching pdf and filtered badges
+     * @param profile
+     * @param skillBadges
+     * @return PDF badges from received badges
+     */
+    private List<String> getPDFBadges(Profile profile, List<String> skillBadges) {
+        List<String> pdfBadgesFromProfile = new ArrayList<>(profile.getPdfLinks());
+
+        Set<String> intersection = new HashSet<>(skillBadges);
+        intersection.retainAll(pdfBadgesFromProfile);
+
+        List<String> commonBadges = new ArrayList<>(intersection);
+
+        return commonBadges;
+    }
+
+    /**
+     * Delete ignore from received badges
+     * @param receivedBadges
+     * @return received badges without ignore
+     */
+    private List<String> filterSkillBadges(ArrayList<String> receivedBadges) {
+        List<String> ignoreBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile(IGNORE_FILE);
+        if (!ignoreBadges.isEmpty()) {
+            receivedBadges.removeAll(ignoreBadges);
+        }
+        return receivedBadges;
     }
 
     private void deletePrize(Prize prize) {
