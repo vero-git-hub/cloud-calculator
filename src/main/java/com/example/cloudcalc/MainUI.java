@@ -2,11 +2,14 @@ package com.example.cloudcalc;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -46,10 +49,27 @@ public class MainUI {
     private final List<String> receivedPrizes = new ArrayList<>();
 
     public void showMainScreen(Stage primaryStage) {
-        VBox layout = new VBox(10);
-        layout.getChildren().add(createLabel("Profiles:"));
-        List<Profile> profiles = profileDataManager.loadProfilesFromFile(PROFILES_FILE);
+        HBox topLayout = new HBox(10);
+        topLayout.setAlignment(Pos.CENTER);
 
+        Button addButton = ButtonFactory.createAddButton(e -> showCreateProfileScreen(primaryStage));
+        Button ignoreButton = ButtonFactory.createIgnoreButton(e -> showIgnoreScreen(primaryStage));
+        Button prizeButton = ButtonFactory.createPrizeButton(e -> showPrizesScreen(primaryStage));
+        Label titleLabel = createLabel("Profiles");
+
+        Pane leftSpacer = new Pane();
+        Pane rightSpacer = new Pane();
+
+        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
+        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
+
+        topLayout.getChildren().addAll(ignoreButton, leftSpacer, titleLabel, rightSpacer, addButton, prizeButton);
+        topLayout.setMinWidth(560);
+
+        VBox layout = new VBox(10);
+        layout.getChildren().add(topLayout);
+
+        List<Profile> profiles = profileDataManager.loadProfilesFromFile(PROFILES_FILE);
         if (profiles.isEmpty()) {
             layout.getChildren().add(createLabel("No profiles"));
         } else {
@@ -57,13 +77,6 @@ public class MainUI {
                 layout.getChildren().add(createProfileRow(primaryStage, profile));
             }
         }
-
-        layout.getChildren().add(createLabel("Actions:"));
-        layout.getChildren().addAll(
-                ButtonFactory.createButton("Create Profile", e -> showCreateProfileScreen(primaryStage), null),
-                ButtonFactory.createButton("Ignore Badges", e -> showIgnoreScreen(primaryStage), null),
-                ButtonFactory.createButton("Settings Prizes", e -> showPrizesScreen(primaryStage), null)
-        );
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(layout);
@@ -97,8 +110,6 @@ public class MainUI {
         TextField dateField = createTextField("Start Date (e.g., 26.09.2023)");
         TextField linkField = createTextField("Profile Link");
 
-        Button backButton = ButtonFactory.createBackButton(e -> showMainScreen(primaryStage));
-
         Button uploadPdfButton = ButtonFactory.createUploadPdfButton(e -> {
             FileChooser fileChooser = new FileChooser();
             File selectedFile = fileChooser.showOpenDialog(primaryStage);
@@ -111,14 +122,28 @@ public class MainUI {
             handleProfileSave(primaryStage, profile, nameField.getText(), dateField.getText(), linkField.getText());
         });
 
+        HBox topLayout = new HBox();
+        topLayout.setAlignment(Pos.CENTER);
+
+        Button backButton = ButtonFactory.createBackButton(e -> showMainScreen(primaryStage));
+        Label titleLabel = createLabel("Create Profile");
+
+        Pane leftSpacer = new Pane();
+        Pane rightSpacer = new Pane();
+
+        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
+        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
+
+        topLayout.getChildren().addAll(backButton, leftSpacer, titleLabel, rightSpacer);
+
         layout.getChildren().addAll(
-                createLabel("Create Profile Screen"),
+                topLayout,
                 nameField,
                 dateField,
                 linkField,
                 uploadPdfButton,
-                saveButton,
-                backButton
+                saveButton
+
         );
 
         createScene(layout, primaryStage);
@@ -205,13 +230,24 @@ public class MainUI {
         table.getColumns().add(deleteColumn);
         table.getItems().addAll(prizes);
 
+        HBox topLayout = new HBox();
+        topLayout.setAlignment(Pos.CENTER_LEFT);
+
         Button backButton = ButtonFactory.createBackButton(e -> showMainScreen(primaryStage));
+        Label titleLabel = createLabel("Prizes List");
+        Button createButton = ButtonFactory.createAddButton(e -> showAddPrizesScreen(primaryStage));
+
+        Pane spacer1 = new Pane();
+        HBox.setHgrow(spacer1, Priority.ALWAYS);
+
+        Pane spacer2 = new Pane();
+        HBox.setHgrow(spacer2, Priority.ALWAYS);
+
+        topLayout.getChildren().addAll(backButton, spacer1, titleLabel, spacer2, createButton);
 
         layout.getChildren().addAll(
-                createLabel("Settings Prizes Screen"),
-                table,
-                ButtonFactory.createButton("Add Prize", e -> showAddPrizesScreen(primaryStage), null),
-                backButton
+                topLayout,
+                table
         );
 
         createScene(layout, primaryStage);
@@ -466,7 +502,7 @@ public class MainUI {
 
         if(totalPDF > constantForPrize) {
             prizePDF = constantForPrize;
-        } else if (totalPDF < constantForPrize){
+        } else if (totalPDF < constantForPrize) {
             prizePDF = 0;
         } else {
             prizePDF = constantForPrize;
@@ -576,15 +612,26 @@ public class MainUI {
             showPrizesScreen(primaryStage);
         });
 
+        HBox topLayout = new HBox();
+        topLayout.setAlignment(Pos.CENTER);
+
         Button backButton = ButtonFactory.createBackButton(e -> showMainScreen(primaryStage));
+        Label titleLabel = createLabel("Add Prize");
+
+        Pane leftSpacer = new Pane();
+        Pane rightSpacer = new Pane();
+
+        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
+        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
+
+        topLayout.getChildren().addAll(backButton, leftSpacer, titleLabel, rightSpacer);
 
         layout.getChildren().addAll(
-                createLabel("Add Prizes Screen"),
+                topLayout,
                 namePrizeField,
                 badgeCountField,
                 badgeTypeComboBox,
-                saveButton,
-                backButton
+                saveButton
         );
 
         createScene(layout, primaryStage);
