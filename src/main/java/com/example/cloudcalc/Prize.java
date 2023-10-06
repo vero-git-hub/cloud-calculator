@@ -40,4 +40,13 @@ public class Prize {
     public int hashCode() {
         return Objects.hash(name, type, count);
     }
+
+    @Override
+    public String toString() {
+        return "Prize{" +
+                "name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", count=" + count +
+                '}';
+    }
 }

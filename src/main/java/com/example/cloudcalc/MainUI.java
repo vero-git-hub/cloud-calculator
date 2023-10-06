@@ -42,6 +42,8 @@ public class MainUI {
     private static final String PDF_FOR_PRIZE = "PDF for prize";
     private static final String SKILL = "Skill";
     private static final String SKILL_FOR_PRIZE = "Skill for prize";
+    private static final String SKILL_FOR_ACTIVITY = "Skill for activity";
+    private static final String SKILL_FOR_PL = "Skill for pl";
 
     private final ProfileDataManager profileDataManager = new ProfileDataManager();
     private final DataExtractor dataExtractor = new DataExtractor();
@@ -63,7 +65,7 @@ public class MainUI {
         HBox.setHgrow(leftSpacer, Priority.ALWAYS);
         HBox.setHgrow(rightSpacer, Priority.ALWAYS);
 
-        topLayout.getChildren().addAll(ignoreButton, leftSpacer, titleLabel, rightSpacer, addButton, prizeButton);
+        topLayout.getChildren().addAll(addButton, leftSpacer, titleLabel, rightSpacer, ignoreButton, prizeButton);
         topLayout.setMinWidth(560);
 
         VBox layout = new VBox(10);
@@ -143,7 +145,6 @@ public class MainUI {
                 linkField,
                 uploadPdfButton,
                 saveButton
-
         );
 
         createScene(layout, primaryStage);
@@ -324,7 +325,7 @@ public class MainUI {
 
     private VBox createBadgeLabels(Profile profile, ArrayList<String> siteLinks) {
         VBox labelsBox = new VBox(5);
-        Map<String, Integer> badgeCounts = calculateBadgeCounts(profile, siteLinks);
+        Map<String, String> badgeCounts = calculateBadgeCounts(profile, siteLinks);
 
         String prizesStr = String.join(", ", receivedPrizes);
 
@@ -335,6 +336,8 @@ public class MainUI {
                 createLabel("PDF total: " + badgeCounts.get(PDF_TOTAL)),
                 createTextFlow("PDF for prize: ", String.valueOf(badgeCounts.get(PDF_FOR_PRIZE))),
                 createTextFlow("Skill for prize: ", String.valueOf(badgeCounts.get(SKILL_FOR_PRIZE))),
+                createTextFlow("Skill for activity: ", String.valueOf(badgeCounts.get(SKILL_FOR_ACTIVITY))),
+                createTextFlow("Skill for pl: ", String.valueOf(badgeCounts.get(SKILL_FOR_PL))),
                 createTextFlow("Prize received: ", prizesStr.isEmpty() ? "None" : prizesStr)
         );
         return labelsBox;
@@ -448,12 +451,23 @@ public class MainUI {
     private void showScanScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
         VBox layout = new VBox(10);
 
+        HBox topLayout = new HBox();
+        topLayout.setAlignment(Pos.CENTER);
+
         Button backButton = ButtonFactory.createBackButton(e -> showMainScreen(primaryStage));
+        Label titleLabel = createLabel("Scan Results for " + profile.getName());
+
+        Pane leftSpacer = new Pane();
+        Pane rightSpacer = new Pane();
+
+        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
+        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
+
+        topLayout.getChildren().addAll(backButton, leftSpacer, titleLabel, rightSpacer);
 
         layout.getChildren().addAll(
-                new Label("Scan Results for " + profile.getName()),
-                createBadgeLabels(profile, siteLinks),
-                backButton
+                topLayout,
+                createBadgeLabels(profile, siteLinks)
         );
 
         createScene(layout, primaryStage);
@@ -485,8 +499,8 @@ public class MainUI {
         return nameField;
     }
 
-    private Map<String, Integer> calculateBadgeCounts(Profile profile, ArrayList<String> receivedBadges) {
-        Map<String, Integer> badgeCounts = new HashMap<>();
+    private Map<String, String> calculateBadgeCounts(Profile profile, ArrayList<String> receivedBadges) {
+        Map<String, String> badgeCounts = new HashMap<>();
 
         int total = receivedBadges.size();
 
@@ -517,22 +531,63 @@ public class MainUI {
 
         receivedPrizes.clear();
         List<Prize> prizes = loadPrizesFromFile(PRIZES_FILE);
+        prizes.stream()
+                .filter(prize -> "pdf".equals(prize.getType()))
+                .filter(prize -> prizePDF >= prize.getCount())
+                .findFirst()
+                .ifPresent(prize -> receivedPrizes.add(prize.getName()));
 
-        for (Prize prize : prizes) {
-            if ("pdf".equals(prize.getType()) && prizePDF >= prize.getCount()) {
-                receivedPrizes.add(prize.getName());
-            }
-            if ("skill".equals(prize.getType()) && prizeSkill >= prize.getCount()) {
-                receivedPrizes.add(prize.getName());
-            }
+        prizes.stream()
+                .filter(prize -> "skill".equals(prize.getType()))
+                .sorted(Comparator.comparing(Prize::getCount).reversed())
+                .filter(prize -> prizeSkill >= prize.getCount())
+                .findFirst()
+                .ifPresent(prize -> receivedPrizes.add(prize.getName()));
+
+        prizes.stream()
+                .filter(prize -> "activity".equals(prize.getType()))
+                .sorted(Comparator.comparing(Prize::getCount).reversed())
+                .filter(prize -> prizeSkill >= prize.getCount())
+                .findFirst()
+                .ifPresent(prize -> receivedPrizes.add(prize.getName()));
+
+        prizes.stream()
+                .filter(prize -> "pl".equals(prize.getType()))
+                .sorted(Comparator.comparing(Prize::getCount).reversed())
+                .filter(prize -> prizeSkill >= prize.getCount())
+                .findFirst()
+                .ifPresent(prize -> receivedPrizes.add(prize.getName()));
+
+        int prizeActivity;
+        if(skill >= 30) {
+            prizeActivity = skill;
+        } else {
+            prizeActivity = 0;
         }
 
-        badgeCounts.put(TOTAL, total);
-        badgeCounts.put(IGNORE, ignore);
-        badgeCounts.put(SKILL, skill);
-        badgeCounts.put(PDF_TOTAL, totalPDF);
-        badgeCounts.put(PDF_FOR_PRIZE, prizePDF);
-        badgeCounts.put(SKILL_FOR_PRIZE, prizeSkill);
+        badgeCounts.put(TOTAL, String.valueOf(total));
+        badgeCounts.put(IGNORE, String.valueOf(ignore));
+        badgeCounts.put(SKILL, String.valueOf(skill));
+        badgeCounts.put(PDF_TOTAL, String.valueOf(totalPDF));
+
+        String prizePDFString;
+        if (prizePDF == 0) {
+            prizePDFString = "not enough";
+        } else {
+            prizePDFString = String.valueOf(prizePDF);
+        }
+        badgeCounts.put(PDF_FOR_PRIZE, prizePDFString);
+        badgeCounts.put(SKILL_FOR_PRIZE, String.valueOf(prizeSkill));
+
+        String prizeActivityString;
+        if (prizeActivity == 0) {
+            prizeActivityString = "not enough";
+        } else {
+            prizeActivityString = String.valueOf(prizeActivity);
+        }
+
+        badgeCounts.put(SKILL_FOR_ACTIVITY, prizeActivityString);
+        badgeCounts.put(SKILL_FOR_PL, String.valueOf(0));
 
         return badgeCounts;
     }
@@ -604,7 +659,7 @@ public class MainUI {
         badgeCountField.setPromptText("Enter badge count");
 
         ComboBox<String> badgeTypeComboBox = new ComboBox<>();
-        badgeTypeComboBox.getItems().addAll("pdf", "skill");
+        badgeTypeComboBox.getItems().addAll("pdf", "skill", "activity", "pl");
         badgeTypeComboBox.setPromptText("Select badge type");
 
         Button saveButton = ButtonFactory.createSavePrizeButton(e -> {
