@@ -44,7 +44,7 @@ public class MainUI {
     private static final String SKILL = "Skill";
     private static final String SKILL_FOR_PRIZE = "Skill for prize";
     private static final String SKILL_FOR_ACTIVITY = "Skill for activity";
-    private static final String SKILL_FOR_PL = "Skill for pl";
+    private static final String SKILL_FOR_PL = "Skill for pl-02.10.2023";
 
     private final ProfileDataManager profileDataManager = new ProfileDataManager();
     private final TypeBadgeDataManager typeBadgeDataManager = new TypeBadgeDataManager();
@@ -339,7 +339,7 @@ public class MainUI {
                 createTextFlow("PDF for prize: ", String.valueOf(badgeCounts.get(PDF_FOR_PRIZE))),
                 createTextFlow("Skill for prize: ", String.valueOf(badgeCounts.get(SKILL_FOR_PRIZE))),
                 createTextFlow("Skill for activity: ", String.valueOf(badgeCounts.get(SKILL_FOR_ACTIVITY))),
-                createTextFlow("Skill for pl: ", String.valueOf(badgeCounts.get(SKILL_FOR_PL))),
+                createTextFlow("Skill for pl-02.10.2023: ", String.valueOf(badgeCounts.get(SKILL_FOR_PL))),
                 createTextFlow("Prize received: ", prizesStr.isEmpty() ? "None" : prizesStr)
         );
         return labelsBox;
@@ -553,12 +553,7 @@ public class MainUI {
                 .findFirst()
                 .ifPresent(prize -> receivedPrizes.add(prize.getName()));
 
-        prizes.stream()
-                .filter(prize -> "pl".equals(prize.getType()))
-                .sorted(Comparator.comparing(Prize::getCount).reversed())
-                .filter(prize -> prizeSkill >= prize.getCount())
-                .findFirst()
-                .ifPresent(prize -> receivedPrizes.add(prize.getName()));
+
 
         int prizeActivity;
         if(skill >= 30) {
@@ -589,7 +584,20 @@ public class MainUI {
         }
 
         badgeCounts.put(SKILL_FOR_ACTIVITY, prizeActivityString);
-        badgeCounts.put(SKILL_FOR_PL, String.valueOf(0));
+
+
+        List<String> typesList = dataExtractor.typeBadgeExtractedData;
+        typesList = filterSkillBadges(typesList);
+
+        int prizeTypeBadge = typesList.size();
+
+        badgeCounts.put(SKILL_FOR_PL, String.valueOf(prizeTypeBadge));
+        prizes.stream()
+                .filter(prize -> "pl-02.10.2023".equals(prize.getType()))
+                .sorted(Comparator.comparing(Prize::getCount).reversed())
+                .filter(prize ->  prizeTypeBadge >= prize.getCount())
+                .findFirst()
+                .ifPresent(prize -> receivedPrizes.add(prize.getName()));
 
         return badgeCounts;
     }
@@ -616,7 +624,7 @@ public class MainUI {
      * @param receivedBadges
      * @return received badges without ignore
      */
-    private List<String> filterSkillBadges(ArrayList<String> receivedBadges) {
+    private List<String> filterSkillBadges(List<String> receivedBadges) {
         List<String> ignoreBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile(IGNORE_FILE);
         if (!ignoreBadges.isEmpty()) {
             receivedBadges.removeAll(ignoreBadges);

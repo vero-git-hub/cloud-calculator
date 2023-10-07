@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class DateUtils {
 
-    public LocalDate convertProfileStartDate(String startDate) {
+    public LocalDate convertProfileOrTypeBadgeStartDate(String startDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         return LocalDate.parse(startDate, formatter);
     }

@@ -20,6 +20,8 @@ public class DataExtractor {
 
     private final DateUtils dateUtils = new DateUtils();
 
+    List<String> typeBadgeExtractedData = new ArrayList<>();
+
     public List<String> extractHiddenLinksFromPdf(String pdfFilePath) {
         List<String> links = new ArrayList<>();
 
@@ -78,7 +80,22 @@ public class DataExtractor {
     }
 
     public ArrayList<String> performScan(Profile profile) {
+        typeBadgeExtractedData.clear();
         Map<String, String> extractedData = scanProfileLink(profile);
+
+        String dateFromTypeBadge = "02.10.2023";
+        LocalDate typeBadgeDate = dateUtils.convertProfileOrTypeBadgeStartDate(dateFromTypeBadge);
+
+        for (Map.Entry entry: extractedData.entrySet()) {
+            LocalDate valueDate = dateUtils.extractDateFromValue((String) entry.getValue());
+
+            if(!valueDate.isBefore(typeBadgeDate)) {
+                String labName = (String) entry.getKey();
+
+                typeBadgeExtractedData.add(labName);
+            }
+        }
+
         return new ArrayList<>(extractedData.keySet());
     }
 
@@ -91,7 +108,7 @@ public class DataExtractor {
             Elements subheadElements = doc.select(".ql-subhead-1.l-mts");
             Elements bodyElements = doc.select(".ql-body-2.l-mbs");
 
-            LocalDate profileDate = dateUtils.convertProfileStartDate(profile.getStartDate());
+            LocalDate profileDate = dateUtils.convertProfileOrTypeBadgeStartDate(profile.getStartDate());
 
             if(subheadElements.size() == bodyElements.size()) {
                 for(int i = 0; i < subheadElements.size(); i++) {
