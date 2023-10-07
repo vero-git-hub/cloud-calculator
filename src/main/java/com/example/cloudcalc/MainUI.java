@@ -35,6 +35,7 @@ public class MainUI {
     private static final String PRIZES_FILE = "prizes.json";
     private static final String PROFILES_FILE = "profiles.json";
     private static final String IGNORE_FILE = "ignore.json";
+    private static final String TYPES_BADGE_FILE = "types_badge.json";
 
     private static final String TOTAL = "Total";
     private static final String IGNORE = "Ignore";
@@ -46,6 +47,7 @@ public class MainUI {
     private static final String SKILL_FOR_PL = "Skill for pl";
 
     private final ProfileDataManager profileDataManager = new ProfileDataManager();
+    private final TypeBadgeDataManager typeBadgeDataManager = new TypeBadgeDataManager();
     private final DataExtractor dataExtractor = new DataExtractor();
     private final IgnoredBadgeManager ignoredBadgeManager = new IgnoredBadgeManager();
     private final List<String> receivedPrizes = new ArrayList<>();
@@ -120,7 +122,7 @@ public class MainUI {
             }
         });
 
-        Button saveButton = ButtonFactory.createSaveProfileButton(e -> {
+        Button saveButton = ButtonFactory.createSaveButton(e -> {
             handleProfileSave(primaryStage, profile, nameField.getText(), dateField.getText(), linkField.getText());
         });
 
@@ -658,9 +660,21 @@ public class MainUI {
         TextField badgeCountField = new TextField();
         badgeCountField.setPromptText("Enter badge count");
 
+        HBox typeLayout = new HBox();
+        typeLayout.setAlignment(Pos.CENTER);
+
+        List<TypeBadge> typeBadgeList = typeBadgeDataManager.loadTypesBadgeFromFile(TYPES_BADGE_FILE);
         ComboBox<String> badgeTypeComboBox = new ComboBox<>();
-        badgeTypeComboBox.getItems().addAll("pdf", "skill", "activity", "pl");
+        typeBadgeList.forEach(typeBadge -> badgeTypeComboBox.getItems().add(typeBadge.getName()));
         badgeTypeComboBox.setPromptText("Select badge type");
+        Button addButton = ButtonFactory.createAddButton(e -> showAddTypeBadgeScreen(primaryStage));
+
+        Pane leftSpacer = new Pane();
+        Pane rightSpacer = new Pane();
+
+        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
+        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
+        typeLayout.getChildren().addAll(badgeTypeComboBox, addButton, rightSpacer);
 
         Button saveButton = ButtonFactory.createSavePrizeButton(e -> {
             savePrize(namePrizeField.getText(), badgeCountField.getText(), badgeTypeComboBox.getValue());
@@ -670,8 +684,44 @@ public class MainUI {
         HBox topLayout = new HBox();
         topLayout.setAlignment(Pos.CENTER);
 
-        Button backButton = ButtonFactory.createBackButton(e -> showMainScreen(primaryStage));
+        Button backButton = ButtonFactory.createBackButton(e -> showPrizesScreen(primaryStage));
         Label titleLabel = createLabel("Add Prize");
+
+        Pane leftSpacerTop = new Pane();
+        Pane rightSpacerTop = new Pane();
+
+        HBox.setHgrow(leftSpacerTop, Priority.ALWAYS);
+        HBox.setHgrow(rightSpacerTop, Priority.ALWAYS);
+
+        topLayout.getChildren().addAll(backButton, leftSpacerTop, titleLabel, rightSpacerTop);
+
+        layout.getChildren().addAll(
+                topLayout,
+                namePrizeField,
+                badgeCountField,
+                typeLayout,
+                saveButton
+        );
+
+        createScene(layout, primaryStage);
+    }
+
+    private void showAddTypeBadgeScreen(Stage primaryStage) {
+        VBox layout = new VBox(10);
+        TypeBadge typeBadge = new TypeBadge();
+        
+        TextField nameField = createTextField("Name");
+        TextField dateField = createTextField("Start Date (e.g., 26.09.2023)");
+
+        Button saveButton = ButtonFactory.createSaveButton(e -> {
+            handleTypeBadgeSave(primaryStage, typeBadge, nameField.getText(), dateField.getText());
+        });
+
+        HBox topLayout = new HBox();
+        topLayout.setAlignment(Pos.CENTER);
+
+        Button backButton = ButtonFactory.createBackButton(e -> showAddPrizesScreen(primaryStage));
+        Label titleLabel = createLabel("Create Badge Type");
 
         Pane leftSpacer = new Pane();
         Pane rightSpacer = new Pane();
@@ -683,14 +733,26 @@ public class MainUI {
 
         layout.getChildren().addAll(
                 topLayout,
-                namePrizeField,
-                badgeCountField,
-                badgeTypeComboBox,
+                nameField,
+                dateField,
                 saveButton
         );
 
         createScene(layout, primaryStage);
     }
+
+    private void handleTypeBadgeSave(Stage primaryStage, TypeBadge typeBadge, String name, String startDate) {
+        if(name != null && !name.isEmpty() &&
+                startDate != null && !startDate.isEmpty()) {
+
+            typeBadge.setName(name);
+            typeBadge.setStartDate(startDate);
+
+            typeBadgeDataManager.saveTypeBadgeToFile(typeBadge, TYPES_BADGE_FILE);
+            showAddPrizesScreen(primaryStage);
+        }
+    }
+
 
     private void savePrize(String namePrize, String badgeCount, String badgeType) {
         if (namePrize != null && badgeCount != null && !badgeCount.isEmpty() && badgeType != null) {

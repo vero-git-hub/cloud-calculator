@@ -45,7 +45,7 @@ public class ButtonFactory {
         return uploadPdfButton;
     }
 
-    public static Button createSaveProfileButton(Consumer<ActionEvent> action) {
+    public static Button createSaveButton(Consumer<ActionEvent> action) {
         Button saveButton = new Button("Save");
         saveButton.setOnAction(e -> action.accept(e));
         return saveButton;
