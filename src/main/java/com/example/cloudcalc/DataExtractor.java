@@ -21,7 +21,7 @@ public class DataExtractor {
 
     private final DateUtils dateUtils = new DateUtils();
 
-    List<String> typeBadgeExtractedData = new ArrayList<>();
+    public List<String> typeBadgeExtractedData = new ArrayList<>();
 
     public List<String> extractHiddenLinksFromPdf(String pdfFilePath) {
         List<String> links = new ArrayList<>();
@@ -84,7 +84,12 @@ public class DataExtractor {
         typeBadgeExtractedData.clear();
         Map<String, String> extractedData = scanProfileLink(profile);
 
-        String dateFromTypeBadge = "02.10.2023";
+        extractTypeBadgesAfterDate(extractedData, "02.10.2023");
+
+        return new ArrayList<>(extractedData.keySet());
+    }
+
+    private void extractTypeBadgesAfterDate(Map<String, String> extractedData, String dateFromTypeBadge) {
         LocalDate typeBadgeDate = dateUtils.convertProfileOrTypeBadgeStartDate(dateFromTypeBadge);
 
         for (Map.Entry entry: extractedData.entrySet()) {
@@ -92,12 +97,9 @@ public class DataExtractor {
 
             if(!valueDate.isBefore(typeBadgeDate)) {
                 String labName = (String) entry.getKey();
-
                 typeBadgeExtractedData.add(labName);
             }
         }
-
-        return new ArrayList<>(extractedData.keySet());
     }
 
     public Map<String, String> scanProfileLink(Profile profile) {
