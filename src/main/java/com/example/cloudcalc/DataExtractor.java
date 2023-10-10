@@ -1,5 +1,6 @@
 package com.example.cloudcalc;
 
+import com.example.cloudcalc.profile.Profile;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionURI;

@@ -1,4 +1,4 @@
-package com.example.cloudcalc;
+package com.example.cloudcalc.type;
 
 import java.util.Objects;
 

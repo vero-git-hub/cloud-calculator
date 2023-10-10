@@ -10,4 +10,8 @@ module com.example.cloudcalc {
 
     opens com.example.cloudcalc to javafx.fxml;
     exports com.example.cloudcalc;
+    exports com.example.cloudcalc.type;
+    opens com.example.cloudcalc.type to javafx.fxml;
+    exports com.example.cloudcalc.profile;
+    opens com.example.cloudcalc.profile to javafx.fxml;
 }
