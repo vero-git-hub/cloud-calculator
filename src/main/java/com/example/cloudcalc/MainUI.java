@@ -2,10 +2,9 @@ package com.example.cloudcalc;
 
 import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.badge.IgnoredBadgeManager;
+import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
-import com.example.cloudcalc.type.TypeBadge;
-import com.example.cloudcalc.type.TypeBadgeDataManager;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -21,71 +20,21 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Callback;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-public class MainUI {
+public class MainUI implements UICallbacks{
 
     private final ProfileDataManager profileDataManager = new ProfileDataManager();
-    private final TypeBadgeDataManager typeBadgeDataManager = new TypeBadgeDataManager();
-    private final FileManager fileManager = new FileManager();
     private final DataExtractor dataExtractor = new DataExtractor();
     private final IgnoredBadgeManager ignoredBadgeManager = new IgnoredBadgeManager();
     private final BadgeManager badgeManager = new BadgeManager(dataExtractor);
+    private final PrizeManager prizeManager = new PrizeManager(badgeManager, this);
     private final List<String> receivedPrizes = new ArrayList<>();
-
-    public void showMainScreen(Stage primaryStage) {
-        Button addButton = ButtonFactory.createAddButton(e -> showCreateProfileScreen(primaryStage));
-        Button ignoreButton = ButtonFactory.createIgnoreButton(e -> showIgnoreScreen(primaryStage));
-        Button prizeButton = ButtonFactory.createPrizeButton(e -> showPrizesScreen(primaryStage));
-        Label titleLabel = createLabel("Profiles");
-
-        HBox topLayout = createTopLayout(addButton, titleLabel, ignoreButton, prizeButton);
-
-        VBox layout = new VBox(10);
-        layout.getChildren().add(topLayout);
-
-        List<Profile> profiles = profileDataManager.loadProfilesFromFile(Constants.PROFILES_FILE);
-        if (profiles.isEmpty()) {
-            layout.getChildren().add(createLabel("No profiles"));
-        } else {
-            for (Profile profile : profiles) {
-                layout.getChildren().add(createProfileRow(primaryStage, profile));
-            }
-        }
-
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(layout);
-
-        createScene(scrollPane, primaryStage);
-    }
-
-    private HBox createTopLayout(Button leftButton, Label title, Button... rightButtons) {
-        HBox topLayout = new HBox(10);
-        topLayout.setAlignment(Pos.CENTER);
-
-        Pane leftSpacer = new Pane();
-        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
-
-        Pane rightSpacer = new Pane();
-        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
-
-        topLayout.getChildren().add(leftButton);
-        topLayout.getChildren().add(leftSpacer);
-        topLayout.getChildren().add(title);
-        topLayout.getChildren().add(rightSpacer);
-        topLayout.getChildren().addAll(rightButtons);
-        topLayout.setMinWidth(560);
-        return topLayout;
-    }
 
     public void showProfileScreen(Stage primaryStage, Profile profile) {
         VBox layout = new VBox(10);
@@ -120,9 +69,7 @@ public class MainUI {
             }
         });
 
-        Button saveButton = ButtonFactory.createSaveButton(e -> {
-            handleProfileSave(primaryStage, profile, nameField.getText(), dateField.getText(), linkField.getText());
-        });
+        Button saveButton = ButtonFactory.createSaveButton(e -> handleProfileSave(primaryStage, profile, nameField.getText(), dateField.getText(), linkField.getText()));
 
         Button backButton = ButtonFactory.createBackButton(e -> showMainScreen(primaryStage));
         Label titleLabel = createLabel("Create Profile");
@@ -159,93 +106,6 @@ public class MainUI {
         scrollPane.setContent(layout);
 
         createScene(scrollPane, primaryStage);
-    }
-
-    private void showPrizesScreen(Stage primaryStage) {
-        VBox layout = new VBox(10);
-
-        List<Prize> prizes = badgeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
-
-        TableView<Prize> table = new TableView<>();
-
-        TableColumn<Prize, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-        TableColumn<Prize, String> typeColumn = new TableColumn<>("Type");
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
-
-        TableColumn<Prize, Integer> countColumn = new TableColumn<>("Count");
-        countColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
-
-        TableColumn<Prize, Void> deleteColumn = new TableColumn<>("Actions");
-        Callback<TableColumn<Prize, Void>, TableCell<Prize, Void>> cellFactory = new Callback<>() {
-            @Override
-            public TableCell<Prize, Void> call(final TableColumn<Prize, Void> param) {
-                final TableCell<Prize, Void> cell = new TableCell<>() {
-                    EventHandler<ActionEvent> deleteAction = (ActionEvent event) -> {
-                        Prize prize = getTableView().getItems().get(getIndex());
-                        if (showConfirmationAlert("Confirmation Dialog", "Delete Prize", "Are you sure you want to delete this prize?")) {
-                            deletePrize(prize);
-                            showPrizesScreen(primaryStage);
-                        }
-                    };
-
-                    Button deleteButton = ButtonFactory.createDeleteButton(deleteAction);
-
-                    @Override
-                    public void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                        } else {
-                            setGraphic(deleteButton);
-                        }
-                    }
-                };
-                return cell;
-            }
-        };
-        deleteColumn.setCellFactory(cellFactory);
-
-        nameColumn.setResizable(false);
-        typeColumn.setResizable(false);
-        countColumn.setResizable(false);
-        deleteColumn.setResizable(false);
-
-        double width = 0.25;
-        nameColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
-        typeColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
-        countColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
-        deleteColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
-
-        table.getColumns().add(nameColumn);
-        table.getColumns().add(typeColumn);
-        table.getColumns().add(countColumn);
-        table.getColumns().add(deleteColumn);
-        table.getItems().addAll(prizes);
-
-        Button backButton = ButtonFactory.createBackButton(e -> showMainScreen(primaryStage));
-        Label titleLabel = createLabel("Prizes List");
-        Button createButton = ButtonFactory.createAddButton(e -> showAddPrizesScreen(primaryStage));
-
-        HBox topLayout = createTopLayout(backButton, titleLabel, createButton);
-
-        layout.getChildren().addAll(
-                topLayout,
-                table
-        );
-
-        createScene(layout, primaryStage);
-    }
-
-    private TextField createTextField(String promptText) {
-        TextField textField = new TextField();
-        textField.setPromptText(promptText);
-        return textField;
-    }
-
-    private Label createLabel(String text) {
-        return new Label(text);
     }
 
     private VBox createIgnoredBadgesList(Stage primaryStage) {
@@ -384,8 +244,7 @@ public class MainUI {
 
         Text normal = new Text(normalText);
 
-        TextFlow textFlow = new TextFlow(bold, normal);
-        return textFlow;
+        return new TextFlow(bold, normal);
     }
 
     private HBox createProfileRow(Stage primaryStage, Profile profile) {
@@ -412,28 +271,11 @@ public class MainUI {
         return profileContainer;
     }
 
-    private boolean showConfirmationAlert(String title, String header, String content) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == ButtonType.OK;
-    }
-
     private void handleDeleteAction(Stage primaryStage, Profile profile) {
         List<Profile> profiles = profileDataManager.loadProfilesFromFile(Constants.PROFILES_FILE);
         profiles.remove(profile);
         profileDataManager.saveProfilesToFile(profiles, Constants.PROFILES_FILE);
         showMainScreen(primaryStage);
-    }
-
-    private void createScene(Parent layout, Stage primaryStage) {
-        layout.setStyle("-fx-font-size: 18;-fx-padding: 10px;");
-
-        Scene mainScene = new Scene(layout, 600, 400);
-        primaryStage.setScene(mainScene);
     }
 
     private void showScanScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
@@ -478,138 +320,81 @@ public class MainUI {
         return nameField;
     }
 
-    private void deletePrize(Prize prize) {
-        List<Prize> prizes = badgeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
-        prizes.remove(prize);
-        savePrizesToFile(prizes, Constants.PRIZES_FILE);
-    }
+    @Override
+    public void showMainScreen(Stage primaryStage) {
+        Button addButton = ButtonFactory.createAddButton(e -> showCreateProfileScreen(primaryStage));
+        Button ignoreButton = ButtonFactory.createIgnoreButton(e -> showIgnoreScreen(primaryStage));
+        Button prizeButton = ButtonFactory.createPrizeButton(e -> prizeManager.showPrizesScreen(primaryStage));
+        Label titleLabel = createLabel("Profiles");
 
-    private void savePrizesToFile(List<Prize> prizes, String fileName) {
-        JSONArray jsonArray = convertPrizesToJSONArray(prizes);
-        fileManager.writeJsonToFile(jsonArray, fileName);
-    }
+        HBox topLayout = createTopLayout(addButton, titleLabel, ignoreButton, prizeButton);
 
-    private void showAddPrizesScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
+        layout.getChildren().add(topLayout);
 
-        TextField namePrizeField = new TextField();
-        namePrizeField.setPromptText("Enter name prize");
+        List<Profile> profiles = profileDataManager.loadProfilesFromFile(Constants.PROFILES_FILE);
+        if (profiles.isEmpty()) {
+            layout.getChildren().add(createLabel("No profiles"));
+        } else {
+            for (Profile profile : profiles) {
+                layout.getChildren().add(createProfileRow(primaryStage, profile));
+            }
+        }
 
-        TextField badgeCountField = new TextField();
-        badgeCountField.setPromptText("Enter badge count");
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(layout);
 
-        HBox typeLayout = new HBox();
-        typeLayout.setAlignment(Pos.CENTER);
+        createScene(scrollPane, primaryStage);
+    }
 
-        List<TypeBadge> typeBadgeList = typeBadgeDataManager.loadTypesBadgeFromFile(Constants.TYPES_BADGE_FILE);
-        ComboBox<String> badgeTypeComboBox = new ComboBox<>();
-        typeBadgeList.forEach(typeBadge -> badgeTypeComboBox.getItems().add(typeBadge.getName()));
-        badgeTypeComboBox.setPromptText("Select badge type");
-        Button addButton = ButtonFactory.createAddButton(e -> showAddTypeBadgeScreen(primaryStage));
+    @Override
+    public Label createLabel(String text) {
+        return new Label(text);
+    }
+
+    @Override
+    public HBox createTopLayout(Button leftButton, Label title, Button... rightButtons) {
+        HBox topLayout = new HBox(10);
+        topLayout.setAlignment(Pos.CENTER);
 
         Pane leftSpacer = new Pane();
-        Pane rightSpacer = new Pane();
-
         HBox.setHgrow(leftSpacer, Priority.ALWAYS);
+
+        Pane rightSpacer = new Pane();
         HBox.setHgrow(rightSpacer, Priority.ALWAYS);
-        typeLayout.getChildren().addAll(badgeTypeComboBox, addButton, rightSpacer);
 
-        Button saveButton = ButtonFactory.createSavePrizeButton(e -> {
-            savePrize(namePrizeField.getText(), badgeCountField.getText(), badgeTypeComboBox.getValue());
-            showPrizesScreen(primaryStage);
-        });
-
-
-        Button backButton = ButtonFactory.createBackButton(e -> showPrizesScreen(primaryStage));
-        Label titleLabel = createLabel("Add Prize");
-
-        HBox topLayout = createTopLayout(backButton, titleLabel);
-
-        layout.getChildren().addAll(
-                topLayout,
-                namePrizeField,
-                badgeCountField,
-                typeLayout,
-                saveButton
-        );
-
-        createScene(layout, primaryStage);
+        topLayout.getChildren().add(leftButton);
+        topLayout.getChildren().add(leftSpacer);
+        topLayout.getChildren().add(title);
+        topLayout.getChildren().add(rightSpacer);
+        topLayout.getChildren().addAll(rightButtons);
+        topLayout.setMinWidth(560);
+        return topLayout;
     }
 
-    private void showAddTypeBadgeScreen(Stage primaryStage) {
-        VBox layout = new VBox(10);
-        TypeBadge typeBadge = new TypeBadge();
-        
-        TextField nameField = createTextField("Name");
-        TextField dateField = createTextField("Start Date (e.g., 26.09.2023)");
+    @Override
+    public void createScene(Parent layout, Stage primaryStage) {
+        layout.setStyle("-fx-font-size: 18;-fx-padding: 10px;");
 
-        Button saveButton = ButtonFactory.createSaveButton(e -> {
-            handleTypeBadgeSave(primaryStage, typeBadge, nameField.getText(), dateField.getText());
-        });
-
-        Button backButton = ButtonFactory.createBackButton(e -> showAddPrizesScreen(primaryStage));
-        Label titleLabel = createLabel("Create Badge Type");
-
-        HBox topLayout = createTopLayout(backButton, titleLabel);
-
-        layout.getChildren().addAll(
-                topLayout,
-                nameField,
-                dateField,
-                saveButton
-        );
-
-        createScene(layout, primaryStage);
+        Scene mainScene = new Scene(layout, 600, 400);
+        primaryStage.setScene(mainScene);
     }
 
-    private void handleTypeBadgeSave(Stage primaryStage, TypeBadge typeBadge, String name, String startDate) {
-        if(name != null && !name.isEmpty() &&
-                startDate != null && !startDate.isEmpty()) {
+    @Override
+    public boolean showConfirmationAlert(String title, String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
 
-            typeBadge.setName(name);
-            typeBadge.setStartDate(startDate);
-
-            typeBadgeDataManager.saveTypeBadgeToFile(typeBadge, Constants.TYPES_BADGE_FILE);
-            showAddPrizesScreen(primaryStage);
-        }
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
     }
 
-    private void savePrize(String namePrize, String badgeCount, String badgeType) {
-        if (namePrize != null && badgeCount != null && !badgeCount.isEmpty() && badgeType != null) {
-            Prize newPrize = new Prize();
-            newPrize.setName(namePrize);
-            newPrize.setType(badgeType);
-
-            try {
-                newPrize.setCount(Integer.parseInt(badgeCount));
-            } catch (NumberFormatException e) {
-                System.out.println("Error: Badge count must be a valid number.");
-                return;
-            }
-
-            List<Prize> existingPrizes = badgeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
-            existingPrizes.add(newPrize);
-
-            JSONArray jsonArray = convertPrizesToJSONArray(existingPrizes);
-
-            try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(Constants.PRIZES_FILE), StandardCharsets.UTF_8)) {
-                writer.write(jsonArray.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    @Override
+    public TextField createTextField(String promptText) {
+        TextField textField = new TextField();
+        textField.setPromptText(promptText);
+        return textField;
     }
-
-    private JSONArray convertPrizesToJSONArray(List<Prize> prizes) {
-        JSONArray jsonArray = new JSONArray();
-        for (Prize prize : prizes) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", prize.getName());
-            jsonObject.put("type", prize.getType());
-            jsonObject.put("count", prize.getCount());
-            jsonArray.put(jsonObject);
-        }
-        return jsonArray;
-    }
-
 }

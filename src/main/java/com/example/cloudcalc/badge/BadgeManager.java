@@ -3,7 +3,7 @@ package com.example.cloudcalc.badge;
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.DataExtractor;
 import com.example.cloudcalc.FileManager;
-import com.example.cloudcalc.Prize;
+import com.example.cloudcalc.prize.Prize;
 import com.example.cloudcalc.profile.Profile;
 import org.json.JSONArray;
 import org.json.JSONObject;
