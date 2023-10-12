@@ -2,11 +2,9 @@ package com.example.cloudcalc.badge;
 
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.DataExtractor;
-import com.example.cloudcalc.FileManager;
 import com.example.cloudcalc.prize.Prize;
+import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.*;
 
@@ -14,11 +12,11 @@ public class BadgeManager {
 
     private final IgnoredBadgeManager ignoredBadgeManager = new IgnoredBadgeManager();
     private final DataExtractor dataExtractor;
-
-    private final FileManager fileManager = new FileManager();
+    private final PrizeManager prizeManager;
     private final List<String> receivedPrizes = new ArrayList<>();
 
-    public BadgeManager(DataExtractor dataExtractor) {
+    public BadgeManager(DataExtractor dataExtractor, PrizeManager prizeManager) {
+        this.prizeManager = prizeManager;
         this.dataExtractor = dataExtractor;
     }
 
@@ -56,7 +54,8 @@ public class BadgeManager {
         int prizeTypeBadge = typesList.size();
 
         receivedPrizes.clear();
-        List<Prize> prizes = loadPrizesFromFile(Constants.PRIZES_FILE);
+
+        List<Prize> prizes = prizeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
         determinePrizesForBadgeCount(prizes, prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
 
         String prizePDFString;
@@ -186,22 +185,6 @@ public class BadgeManager {
         intersection.retainAll(pdfBadgesFromProfile);
 
         return new ArrayList<>(intersection);
-    }
-
-    public List<Prize> loadPrizesFromFile(String fileName) {
-        List<Prize> prizes = new ArrayList<>();
-        JSONArray jsonArray = fileManager.readJsonArrayFromFile(fileName);
-
-        for (int j = 0; j < jsonArray.length(); j++) {
-            JSONObject prizeObject = jsonArray.getJSONObject(j);
-            Prize prize = new Prize();
-            prize.setName(prizeObject.getString("name"));
-            prize.setType(prizeObject.getString("type"));
-            prize.setCount(prizeObject.getInt("count"));
-            prizes.add(prize);
-        }
-
-        return prizes;
     }
 
     public List<String> getReceivedPrizes() {

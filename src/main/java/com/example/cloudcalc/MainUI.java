@@ -5,6 +5,7 @@ import com.example.cloudcalc.badge.IgnoredBadgeManager;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
+import com.example.cloudcalc.profile.ProfileManager;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -18,10 +19,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,61 +31,10 @@ public class MainUI implements UICallbacks{
     private final ProfileDataManager profileDataManager = new ProfileDataManager();
     private final DataExtractor dataExtractor = new DataExtractor();
     private final IgnoredBadgeManager ignoredBadgeManager = new IgnoredBadgeManager();
-    private final BadgeManager badgeManager = new BadgeManager(dataExtractor);
-    private final PrizeManager prizeManager = new PrizeManager(badgeManager, this);
+    private final PrizeManager prizeManager = new PrizeManager(this);
+    private final BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeManager);
+    private final ProfileManager profileManager = new ProfileManager(dataExtractor, profileDataManager, this);
     private final List<String> receivedPrizes = new ArrayList<>();
-
-    public void showProfileScreen(Stage primaryStage, Profile profile) {
-        VBox layout = new VBox(10);
-
-        Button backButton = ButtonFactory.createBackButton(e -> showMainScreen(primaryStage));
-
-        layout.getChildren().addAll(
-                backButton,
-                createProfileInfo(profile),
-                createPdfLinksSection(profile)
-        );
-
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(layout);
-
-        createScene(scrollPane, primaryStage);
-    }
-
-    public void showCreateProfileScreen(Stage primaryStage) {
-        VBox layout = new VBox(10);
-        Profile profile = new Profile();
-
-        TextField nameField = createTextField("Name");
-        TextField dateField = createTextField("Start Date (e.g., 26.09.2023)");
-        TextField linkField = createTextField("Profile Link");
-
-        Button uploadPdfButton = ButtonFactory.createUploadPdfButton(e -> {
-            FileChooser fileChooser = new FileChooser();
-            File selectedFile = fileChooser.showOpenDialog(primaryStage);
-            if (selectedFile != null) {
-                profile.setPdfFilePath(selectedFile.getAbsolutePath());
-            }
-        });
-
-        Button saveButton = ButtonFactory.createSaveButton(e -> handleProfileSave(primaryStage, profile, nameField.getText(), dateField.getText(), linkField.getText()));
-
-        Button backButton = ButtonFactory.createBackButton(e -> showMainScreen(primaryStage));
-        Label titleLabel = createLabel("Create Profile");
-
-        HBox topLayout = createTopLayout(backButton, titleLabel);
-
-        layout.getChildren().addAll(
-                topLayout,
-                nameField,
-                dateField,
-                linkField,
-                uploadPdfButton,
-                saveButton
-        );
-
-        createScene(layout, primaryStage);
-    }
 
     private void showIgnoreScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
@@ -191,7 +139,7 @@ public class MainUI implements UICallbacks{
         return labelsBox;
     }
 
-    private VBox createPdfLinksSection(Profile profile) {
+    public VBox createPdfLinksSection(Profile profile) {
         VBox linksVBox = new VBox(5);
 
         Label linksTitle = new Label("PDF Links:");
@@ -226,19 +174,7 @@ public class MainUI implements UICallbacks{
         return linksVBox;
     }
 
-    private VBox createProfileInfo(Profile profile) {
-        VBox profileInfoBox = new VBox(10);
-
-        TextFlow nameFlow = createTextFlow("Name: ", profile.getName());
-        TextFlow startDateFlow = createTextFlow("Start Date: ", profile.getStartDate());
-        TextFlow profileLinkFlow = createTextFlow("Profile Link: ", profile.getProfileLink());
-
-        profileInfoBox.getChildren().addAll(nameFlow, startDateFlow, profileLinkFlow);
-
-        return profileInfoBox;
-    }
-
-    private TextFlow createTextFlow(String boldText, String normalText) {
+    public TextFlow createTextFlow(String boldText, String normalText) {
         Text bold = new Text(boldText);
         bold.setStyle("-fx-font-weight: bold;");
 
@@ -264,7 +200,7 @@ public class MainUI implements UICallbacks{
         Button deleteButton = ButtonFactory.createDeleteButton(deleteAction);
 
         profileContainer.getChildren().addAll(
-                ButtonFactory.createButton(profile.getName(), e -> showProfileScreen(primaryStage, profile), null),
+                ButtonFactory.createButton(profile.getName(), e -> profileManager.showProfileScreen(primaryStage, profile), null),
                 scanButton,
                 deleteButton
         );
@@ -294,25 +230,6 @@ public class MainUI implements UICallbacks{
         createScene(layout, primaryStage);
     }
 
-    private void handleProfileSave(Stage primaryStage, Profile profile, String name, String startDate, String profileLink) {
-        if(name != null && !name.isEmpty() &&
-                startDate != null && !startDate.isEmpty() &&
-                profileLink != null && !profileLink.isEmpty()) {
-
-            profile.setName(name);
-            profile.setStartDate(startDate);
-            profile.setProfileLink(profileLink);
-
-            if(profile.getPdfFilePath() != null) {
-                List<String> extractedLinks = dataExtractor.extractHiddenLinksFromPdf(profile.getPdfFilePath());
-                List<String> h1Contents = dataExtractor.extractH1FromLinks(extractedLinks);
-                profile.setPdfLinks(h1Contents);
-            }
-            profileDataManager.saveProfileToFile(profile, Constants.PROFILES_FILE);
-            showMainScreen(primaryStage);
-        }
-    }
-
     private TextField createNameTextField() {
         TextField nameField = new TextField();
         nameField.setId("nameField");
@@ -322,7 +239,7 @@ public class MainUI implements UICallbacks{
 
     @Override
     public void showMainScreen(Stage primaryStage) {
-        Button addButton = ButtonFactory.createAddButton(e -> showCreateProfileScreen(primaryStage));
+        Button addButton = ButtonFactory.createAddButton(e -> profileManager.showCreateProfileScreen(primaryStage));
         Button ignoreButton = ButtonFactory.createIgnoreButton(e -> showIgnoreScreen(primaryStage));
         Button prizeButton = ButtonFactory.createPrizeButton(e -> prizeManager.showPrizesScreen(primaryStage));
         Label titleLabel = createLabel("Profiles");

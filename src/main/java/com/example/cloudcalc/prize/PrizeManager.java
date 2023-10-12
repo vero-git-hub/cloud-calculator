@@ -23,11 +23,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PrizeManager {
-
-    private final BadgeManager badgeManager;
 
     private final UICallbacks uiCallbacks;
 
@@ -36,8 +35,7 @@ public class PrizeManager {
     private final TypeBadgeDataManager typeBadgeDataManager;
     private final TypeBadgeManager typeBadgeManager;
 
-    public PrizeManager(BadgeManager badgeManager, UICallbacks uiCallbacks) {
-        this.badgeManager = badgeManager;
+    public PrizeManager(UICallbacks uiCallbacks) {
         this.uiCallbacks = uiCallbacks;
         this.typeBadgeDataManager = new TypeBadgeDataManager();
         this.typeBadgeManager = new TypeBadgeManager(uiCallbacks, typeBadgeDataManager, this);
@@ -46,7 +44,7 @@ public class PrizeManager {
     public void showPrizesScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
 
-        List<Prize> prizes = badgeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
+        List<Prize> prizes = loadPrizesFromFile(Constants.PRIZES_FILE);
 
         TableView<Prize> table = new TableView<>();
 
@@ -120,7 +118,7 @@ public class PrizeManager {
     }
 
     private void deletePrize(Prize prize) {
-        List<Prize> prizes = badgeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
+        List<Prize> prizes = loadPrizesFromFile(Constants.PRIZES_FILE);
         prizes.remove(prize);
         savePrizesToFile(prizes);
     }
@@ -189,7 +187,7 @@ public class PrizeManager {
                 return;
             }
 
-            List<Prize> existingPrizes = badgeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
+            List<Prize> existingPrizes = loadPrizesFromFile(Constants.PRIZES_FILE);
             existingPrizes.add(newPrize);
 
             JSONArray jsonArray = convertPrizesToJSONArray(existingPrizes);
@@ -200,6 +198,22 @@ public class PrizeManager {
                 e.printStackTrace();
             }
         }
+    }
+
+    public List<Prize> loadPrizesFromFile(String fileName) {
+        List<Prize> prizes = new ArrayList<>();
+        JSONArray jsonArray = fileManager.readJsonArrayFromFile(fileName);
+
+        for (int j = 0; j < jsonArray.length(); j++) {
+            JSONObject prizeObject = jsonArray.getJSONObject(j);
+            Prize prize = new Prize();
+            prize.setName(prizeObject.getString("name"));
+            prize.setType(prizeObject.getString("type"));
+            prize.setCount(prizeObject.getInt("count"));
+            prizes.add(prize);
+        }
+
+        return prizes;
     }
 
     private JSONArray convertPrizesToJSONArray(List<Prize> prizes) {
