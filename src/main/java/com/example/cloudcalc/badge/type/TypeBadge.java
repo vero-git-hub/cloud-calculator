@@ -1,4 +1,4 @@
-package com.example.cloudcalc.type;
+package com.example.cloudcalc.badge.type;
 
 import java.util.Objects;
 

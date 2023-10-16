@@ -1,4 +1,4 @@
-package com.example.cloudcalc.type;
+package com.example.cloudcalc.badge.type;
 
 import com.example.cloudcalc.ButtonFactory;
 import com.example.cloudcalc.Constants;

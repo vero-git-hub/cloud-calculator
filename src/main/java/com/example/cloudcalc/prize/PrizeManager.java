@@ -1,10 +1,9 @@
 package com.example.cloudcalc.prize;
 
 import com.example.cloudcalc.*;
-import com.example.cloudcalc.badge.BadgeManager;
-import com.example.cloudcalc.type.TypeBadge;
-import com.example.cloudcalc.type.TypeBadgeDataManager;
-import com.example.cloudcalc.type.TypeBadgeManager;
+import com.example.cloudcalc.badge.type.TypeBadge;
+import com.example.cloudcalc.badge.type.TypeBadgeDataManager;
+import com.example.cloudcalc.badge.type.TypeBadgeManager;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -104,7 +103,7 @@ public class PrizeManager {
         table.getItems().addAll(prizes);
 
         Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
-        Label titleLabel = uiCallbacks.createLabel("Prizes List");
+        Label titleLabel = uiCallbacks.createLabel("PRIZES");
         Button createButton = ButtonFactory.createAddButton(e -> showAddPrizesScreen(primaryStage));
 
         HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel, createButton);

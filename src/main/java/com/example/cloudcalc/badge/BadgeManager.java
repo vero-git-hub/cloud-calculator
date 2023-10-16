@@ -2,6 +2,7 @@ package com.example.cloudcalc.badge;
 
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.DataExtractor;
+import com.example.cloudcalc.UICallbacks;
 import com.example.cloudcalc.prize.Prize;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
@@ -10,19 +11,19 @@ import java.util.*;
 
 public class BadgeManager {
 
-    private final IgnoredBadgeManager ignoredBadgeManager = new IgnoredBadgeManager();
+    private final IgnoredBadgeManager ignoredBadgeManager;
     private final DataExtractor dataExtractor;
     private final PrizeManager prizeManager;
     private final List<String> receivedPrizes = new ArrayList<>();
 
-    public BadgeManager(DataExtractor dataExtractor, PrizeManager prizeManager) {
-        this.prizeManager = prizeManager;
+    public BadgeManager(DataExtractor dataExtractor, PrizeManager prizeManager, UICallbacks uiCallbacks) {
         this.dataExtractor = dataExtractor;
+        this.prizeManager = prizeManager;
+        this.ignoredBadgeManager = new IgnoredBadgeManager(uiCallbacks);
     }
 
     /**
      * Delete ignore from received badges
-     * @param receivedBadges
      * @return received badges without ignore
      */
     public List<String> filterSkillBadges(List<String> receivedBadges) {
@@ -162,8 +163,6 @@ public class BadgeManager {
 
     /**
      * Matching pdf and filtered badges
-     * @param profile
-     * @param skillBadges
      * @return PDF badges from received badges
      */
     private List<String> getPDFBadges(Profile profile, List<String> skillBadges) throws IllegalArgumentException {

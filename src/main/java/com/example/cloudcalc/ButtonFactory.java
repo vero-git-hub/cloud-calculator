@@ -24,12 +24,6 @@ public class ButtonFactory {
         return saveButton;
     }
 
-    public static Button createScanButton(Consumer<ActionEvent> action) {
-        Button scanButton = new Button("Scan");
-        scanButton.setOnAction(e -> action.accept(e));
-        return scanButton;
-    }
-
     public static Button createSaveIgnoreBadgeButton(Runnable action, Supplier<TextField> nameFieldSupplier) {
         Button saveButton = new Button("Save Ignore Badge");
         saveButton.setOnAction(e -> {
