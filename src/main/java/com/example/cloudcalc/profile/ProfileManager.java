@@ -3,6 +3,7 @@ package com.example.cloudcalc.profile;
 import com.example.cloudcalc.*;
 import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.prize.PrizeManager;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
@@ -151,30 +152,103 @@ public class ProfileManager {
         return profileInfoBox;
     }
 
-    public HBox createProfileRow(Stage primaryStage, Profile profile) {
-        HBox profileContainer = new HBox(10);
+    public TableColumn<Profile, Void> createNumberingColumn(TableView<Profile> table) {
+        TableColumn<Profile, Void> numberColumn = new TableColumn<>("#");
+        numberColumn.setMinWidth(40);
+        numberColumn.setCellValueFactory(param -> null);
+        numberColumn.setCellFactory(col -> {
+            return new TableCell<Profile, Void>() {
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
 
-        Button detailButton = ButtonFactory.createButton("Details", e -> {
-            showProfileScreen(primaryStage, profile);
-        }, null);
+                    if (empty) {
+                        setText(null);
+                    } else {
+                        setText(Integer.toString(getIndex() + 1));
+                    }
+                }
+            };
+        });
+        return numberColumn;
+    }
 
-        EventHandler<ActionEvent> deleteAction = e -> {
-            if (uiCallbacks.showConfirmationAlert("Confirmation Dialog", "Delete Profile", "Are you sure you want to delete this profile?")) {
-                handleDeleteAction(primaryStage, profile);
+    public TableColumn<Profile, String> createNameColumn() {
+        TableColumn<Profile, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        return nameColumn;
+    }
+
+    public TableColumn<Profile, Void> createBadgesColumn(Stage primaryStage) {
+        TableColumn<Profile, Void> badgesColumn = new TableColumn<>("Badges");
+        badgesColumn.setCellValueFactory(param -> null);
+        badgesColumn.setCellFactory(col -> {
+            return new TableCell<Profile, Void>() {
+                final Button scanButton = new Button("Scan");
+
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+
+                    if (empty) {
+                        setGraphic(null);
+                    } else {
+                        Profile profile = getTableView().getItems().get(getIndex());
+                        scanButton.setOnAction(e -> {
+                            ArrayList<String> extractedData = dataExtractor.performScan(profile);
+                            showScanScreen(primaryStage, profile, extractedData);
+                        });
+                        setGraphic(scanButton);
+                    }
+                }
+            };
+        });
+        return badgesColumn;
+    }
+
+    public TableColumn<Profile, Profile> createViewingColumn(Stage primaryStage) {
+        TableColumn<Profile, Profile> viewingColumn = new TableColumn<>("Viewing");
+        viewingColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
+        viewingColumn.setCellFactory(param -> new TableCell<Profile, Profile>() {
+            @Override
+            protected void updateItem(Profile profile, boolean empty) {
+                super.updateItem(profile, empty);
+                if (profile == null || empty) {
+                    setGraphic(null);
+                    return;
+                }
+
+                Button detailButton = ButtonFactory.createButton("Details", e -> {
+                    showProfileScreen(primaryStage, profile);
+                }, null);
+                setGraphic(detailButton);
             }
-        };
+        });
+        return viewingColumn;
+    }
 
-        Button deleteButton = ButtonFactory.createDeleteButton(deleteAction);
+    public TableColumn<Profile, Profile> createActionColumn(Stage primaryStage) {
+        TableColumn<Profile, Profile> actionColumn = new TableColumn<>("Actions");
+        actionColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
+        actionColumn.setCellFactory(param -> new TableCell<Profile, Profile>() {
+            @Override
+            protected void updateItem(Profile profile, boolean empty) {
+                super.updateItem(profile, empty);
+                if (profile == null || empty) {
+                    setGraphic(null);
+                    return;
+                }
 
-        profileContainer.getChildren().addAll(
-                ButtonFactory.createButton(profile.getName(), e -> {
-                    ArrayList<String> extractedData = dataExtractor.performScan(profile);
-                    showScanScreen(primaryStage, profile, extractedData);
-                }, null),
-                detailButton,
-                deleteButton
-        );
-        return profileContainer;
+                EventHandler<ActionEvent> deleteAction = e -> {
+                    if (uiCallbacks.showConfirmationAlert("Confirmation Dialog", "Delete Profile", "Are you sure you want to delete this profile?")) {
+                        handleDeleteAction(primaryStage, profile);
+                    }
+                };
+                Button deleteButton = ButtonFactory.createDeleteButton(deleteAction);
+                setGraphic(deleteButton);
+            }
+        });
+        return actionColumn;
     }
 
     public void showScanScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {

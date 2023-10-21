@@ -27,27 +27,48 @@ public class MainUI implements UICallbacks{
     private final IgnoredBadgeManager ignoredBadgeManager = new IgnoredBadgeManager(this);
     private final PrizeManager prizeManager = new PrizeManager(this);
     private final ProfileManager profileManager = new ProfileManager(dataExtractor, profileDataManager, this, prizeManager);
+    private final int  WIDTH_SCENE = 600;
+    private final int  HEIGHT_SCENE = 500;
 
     @Override
     public void showMainScreen(Stage primaryStage) {
         Button addButton = ButtonFactory.createAddButton(e -> profileManager.showCreateProfileScreen(primaryStage));
         Button ignoreButton = ButtonFactory.createIgnoreButton(e -> ignoredBadgeManager.showIgnoreScreen(primaryStage));
         Button prizeButton = ButtonFactory.createPrizeButton(e -> prizeManager.showPrizesScreen(primaryStage));
-        Label titleLabel = createLabel("Profiles");
+        Label titleLabel = createLabel("PROFILES");
 
         HBox topLayout = createTopLayout(addButton, titleLabel, ignoreButton, prizeButton);
 
         VBox layout = new VBox(10);
         layout.getChildren().add(topLayout);
 
+        TableView<Profile> table = new TableView<>();
+
+        TableColumn<Profile, Void> numberColumn = profileManager.createNumberingColumn(table);
+        TableColumn<Profile, String> nameColumn = profileManager.createNameColumn();
+        TableColumn<Profile, Void> badgesColumn = profileManager.createBadgesColumn(primaryStage);
+        TableColumn<Profile, Profile> viewingColumn = profileManager.createViewingColumn(primaryStage);
+        TableColumn<Profile, Profile> actionColumn = profileManager.createActionColumn(primaryStage);
+
+        numberColumn.setResizable(false);
+        nameColumn.setResizable(false);
+        badgesColumn.setResizable(false);
+        viewingColumn.setResizable(false);
+        actionColumn.setResizable(false);
+
+        double width = 0.18;
+        numberColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.05));
+        nameColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.40));
+        badgesColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
+        viewingColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
+        actionColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
+
+        table.getColumns().addAll(numberColumn, nameColumn, badgesColumn, viewingColumn, actionColumn);
+
         List<Profile> profiles = profileDataManager.loadProfilesFromFile(Constants.PROFILES_FILE);
-        if (profiles.isEmpty()) {
-            layout.getChildren().add(createLabel("No profiles"));
-        } else {
-            for (Profile profile : profiles) {
-                layout.getChildren().add(profileManager.createProfileRow(primaryStage, profile));
-            }
-        }
+        table.getItems().addAll(profiles);
+
+        layout.getChildren().add(table);
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(layout);
@@ -120,7 +141,9 @@ public class MainUI implements UICallbacks{
     public void createScene(Parent layout, Stage primaryStage) {
         layout.setStyle("-fx-font-size: 18;-fx-padding: 10px;");
 
-        Scene mainScene = new Scene(layout, 600, 400);
+        Scene mainScene = new Scene(layout, WIDTH_SCENE, HEIGHT_SCENE);
+        mainScene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+
         primaryStage.setScene(mainScene);
     }
 

@@ -12,11 +12,11 @@ import java.util.function.Supplier;
 
 public class ButtonFactory {
 
-    private static final String DELETE_ICON = "/delete-48.png";
-    private static final String PRIZE_ICON = "/gift-64.png";
-    private static final String ADD_ICON = "/plus-64.png";
-    private static final String BACK_ICON = "/go-back-64.png";
-    private static final String IGNORE_ICON = "/no-image-40.png";
+    private static final String DELETE_ICON = "/images/delete-48.png";
+    private static final String PRIZE_ICON = "/images/gift-64.png";
+    private static final String ADD_ICON = "/images/plus-64.png";
+    private static final String BACK_ICON = "/images/go-back-64.png";
+    private static final String IGNORE_ICON = "/images/no-image-40.png";
 
     public static Button createSavePrizeButton(Consumer<ActionEvent> action) {
         Button saveButton = new Button("Save");
