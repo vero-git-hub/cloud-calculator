@@ -3,12 +3,10 @@ package com.example.cloudcalc.badge;
 import com.example.cloudcalc.ButtonFactory;
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.UICallbacks;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -65,17 +63,10 @@ public class IgnoredBadgeManager {
 
     public void showIgnoreScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
+        HBox topLayout = createTopLayout(primaryStage);
+        TableView<String> table = createBadgeTable(primaryStage);
 
-        Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
-        Label titleLabel = uiCallbacks.createLabel("Ignore Screen");
-        Button addButton = ButtonFactory.createAddButton(e -> showAddIgnoreBadgeScreen(primaryStage));
-
-        HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel, addButton);
-
-        layout.getChildren().addAll(
-                topLayout,
-                createIgnoredBadgesList(primaryStage)
-        );
+        layout.getChildren().addAll(topLayout, table);
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(layout);
@@ -83,20 +74,54 @@ public class IgnoredBadgeManager {
         uiCallbacks.createScene(scrollPane, primaryStage);
     }
 
-    private VBox createIgnoredBadgesList(Stage primaryStage) {
-        VBox badgesList = new VBox(10);
-        List<String> ignoredBadges = loadIgnoredBadgesFromFile(Constants.IGNORE_FILE);
+    private HBox createTopLayout(Stage primaryStage) {
+        Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
+        Label titleLabel = uiCallbacks.createLabel("IGNORE");
+        Button addButton = ButtonFactory.createAddButton(e -> showAddIgnoreBadgeScreen(primaryStage));
 
-        if (ignoredBadges.isEmpty()) {
-            badgesList.getChildren().add(uiCallbacks.createLabel("No ignored badges"));
-        } else {
-            for (String badge : ignoredBadges) {
-                badgesList.getChildren().add(createBadgeRow(primaryStage, badge, ignoredBadges));
-            }
-        }
-
-        return badgesList;
+        return uiCallbacks.createTopLayout(backButton, titleLabel, addButton);
     }
+
+    private TableView<String> createBadgeTable(Stage primaryStage) {
+        TableView<String> table = new TableView<>();
+
+        TableColumn<String, Integer> indexColumn = new TableColumn<>("No.");
+        indexColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(cellData.getValue()) + 1));
+
+        TableColumn<String, String> badgeColumn = new TableColumn<>("Badge");
+        badgeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue()));
+
+        TableColumn<String, Void> actionColumn = new TableColumn<>("Actions");
+        actionColumn.setCellFactory(param -> new TableCell<>() {
+            final Button deleteButton = ButtonFactory.createDeleteButton(e -> {
+                if (uiCallbacks.showConfirmationAlert("Confirmation Dialog", "Delete Badge", "Are you sure you want to delete this badge?")) {
+                    String badge = getTableView().getItems().get(getIndex());
+                    List<String> ignoredBadges = getTableView().getItems();
+                    ignoredBadges.remove(badge);
+                    saveIgnoredBadgesToFile(ignoredBadges, Constants.IGNORE_FILE);
+                    showIgnoreScreen(primaryStage);
+                }
+            });
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(deleteButton);
+                }
+            }
+        });
+
+        table.getColumns().addAll(indexColumn, badgeColumn, actionColumn);
+
+        List<String> ignoredBadges = loadIgnoredBadgesFromFile(Constants.IGNORE_FILE);
+        table.getItems().addAll(ignoredBadges);
+
+        return table;
+    }
+
     private void showAddIgnoreBadgeScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
 
@@ -123,24 +148,6 @@ public class IgnoredBadgeManager {
         );
 
         uiCallbacks.createScene(layout, primaryStage);
-    }
-
-    private HBox createBadgeRow(Stage primaryStage, String badge, List<String> ignoredBadges) {
-        HBox badgeRow = new HBox(10);
-        Label badgeLabel = new Label(badge);
-
-        EventHandler<ActionEvent> deleteAction = e -> {
-            if (uiCallbacks.showConfirmationAlert("Confirmation Dialog", "Delete Badge", "Are you sure you want to delete this badge?")) {
-                ignoredBadges.remove(badge);
-                saveIgnoredBadgesToFile(ignoredBadges, Constants.IGNORE_FILE);
-                showIgnoreScreen(primaryStage);
-            }
-        };
-
-        Button deleteButton = ButtonFactory.createDeleteButton(deleteAction);
-
-        badgeRow.getChildren().addAll(badgeLabel, deleteButton);
-        return badgeRow;
     }
 
 }
