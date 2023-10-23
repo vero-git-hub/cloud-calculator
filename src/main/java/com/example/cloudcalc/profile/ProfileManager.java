@@ -1,8 +1,7 @@
 package com.example.cloudcalc.profile;
 
 import com.example.cloudcalc.*;
-import com.example.cloudcalc.badge.BadgeManager;
-import com.example.cloudcalc.prize.PrizeManager;
+import com.example.cloudcalc.scan.ScanManager;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,21 +16,19 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ProfileManager {
 
     private final UICallbacks uiCallbacks;
     private final DataExtractor dataExtractor;
     private final ProfileDataManager profileDataManager;
-    private final BadgeManager badgeManager;
-    private final List<String> receivedPrizes = new ArrayList<>();
+    private final ScanManager scanManager;
 
-    public ProfileManager(DataExtractor dataExtractor, ProfileDataManager profileDataManager, UICallbacks uiCallbacks, PrizeManager prizeManager) {
+    public ProfileManager(DataExtractor dataExtractor, ProfileDataManager profileDataManager, UICallbacks uiCallbacks, ScanManager scanManager) {
         this.uiCallbacks = uiCallbacks;
         this.dataExtractor = dataExtractor;
         this.profileDataManager = profileDataManager;
-        this.badgeManager = new BadgeManager(dataExtractor, prizeManager, uiCallbacks);
+        this.scanManager = scanManager;
     }
 
     public void showProfileScreen(Stage primaryStage, Profile profile) {
@@ -196,7 +193,7 @@ public class ProfileManager {
                         Profile profile = getTableView().getItems().get(getIndex());
                         scanButton.setOnAction(e -> {
                             ArrayList<String> extractedData = dataExtractor.performScan(profile);
-                            showScanScreen(primaryStage, profile, extractedData);
+                            scanManager.showScanScreen(primaryStage, profile, extractedData);
                         });
                         setGraphic(scanButton);
                     }
@@ -249,44 +246,6 @@ public class ProfileManager {
             }
         });
         return actionColumn;
-    }
-
-    public void showScanScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
-        VBox layout = new VBox(10);
-
-        Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
-        Label titleLabel = uiCallbacks.createLabel("Scan Results for " + profile.getName());
-
-        HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel);
-
-        layout.getChildren().addAll(
-                topLayout,
-                createBadgeLabels(profile, siteLinks)
-        );
-
-        uiCallbacks.createScene(layout, primaryStage);
-    }
-
-    private VBox createBadgeLabels(Profile profile, ArrayList<String> siteLinks) {
-        VBox labelsBox = new VBox(5);
-        Map<String, String> badgeCounts = badgeManager.calculateBadgeCounts(profile, siteLinks);
-        receivedPrizes.clear();
-        receivedPrizes.addAll(badgeManager.getReceivedPrizes());
-
-        String prizesStr = String.join(", ", receivedPrizes);
-
-        labelsBox.getChildren().addAll(
-                uiCallbacks.createTextFlow("Total: ", String.valueOf(badgeCounts.get(Constants.TOTAL))),
-                uiCallbacks.createLabel("Ignore: " + badgeCounts.get(Constants.IGNORE)),
-                uiCallbacks.createTextFlow("Skill: ", String.valueOf(badgeCounts.get(Constants.SKILL))),
-                uiCallbacks.createLabel("PDF total: " + badgeCounts.get(Constants.PDF_TOTAL)),
-                uiCallbacks.createTextFlow("PDF for prize: ", String.valueOf(badgeCounts.get(Constants.PDF_FOR_PRIZE))),
-                uiCallbacks.createTextFlow("Skill for prize: ", String.valueOf(badgeCounts.get(Constants.SKILL_FOR_PRIZE))),
-                uiCallbacks.createTextFlow("Skill for activity: ", String.valueOf(badgeCounts.get(Constants.SKILL_FOR_ACTIVITY))),
-                uiCallbacks.createTextFlow("Skill for pl-02.10.2023: ", String.valueOf(badgeCounts.get(Constants.SKILL_FOR_PL))),
-                uiCallbacks.createTextFlow("Prize received: ", prizesStr.isEmpty() ? "None" : prizesStr)
-        );
-        return labelsBox;
     }
 
     private void handleDeleteAction(Stage primaryStage, Profile profile) {

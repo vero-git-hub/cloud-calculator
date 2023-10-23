@@ -22,8 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class PrizeManager {
 
@@ -34,10 +33,16 @@ public class PrizeManager {
     private final TypeBadgeDataManager typeBadgeDataManager;
     private final TypeBadgeManager typeBadgeManager;
 
+    private final Map<String, Prize> receivedPrizes = new HashMap<>();
+
     public PrizeManager(UICallbacks uiCallbacks) {
         this.uiCallbacks = uiCallbacks;
         this.typeBadgeDataManager = new TypeBadgeDataManager();
         this.typeBadgeManager = new TypeBadgeManager(uiCallbacks, typeBadgeDataManager, this);
+    }
+
+    public Map<String, Prize> getReceivedPrizes() {
+        return receivedPrizes;
     }
 
     public void showPrizesScreen(Stage primaryStage) {
@@ -225,6 +230,40 @@ public class PrizeManager {
             jsonArray.put(jsonObject);
         }
         return jsonArray;
+    }
+
+    public void determinePrizesForBadgeCount(int prizePDF, int prizeSkill, int prizeActivity, int prizeTypeBadge) {
+        List<Prize> prizes = loadPrizesFromFile(Constants.PRIZES_FILE);
+        receivedPrizes.clear();
+
+        prizes.stream()
+                .filter(prize -> "pdf".equals(prize.getType()))
+                .filter(prize -> prizePDF >= prize.getCount())
+                .findFirst()
+                .ifPresent(prize -> receivedPrizes.put(Constants.PDF_FOR_PRIZE, prize));
+
+        prizes.stream()
+                .filter(prize -> "skill".equals(prize.getType()))
+                .sorted(Comparator.comparing(Prize::getCount).reversed())
+                .filter(prize -> prizeSkill >= prize.getCount())
+                .findFirst()
+                .ifPresent(prize -> receivedPrizes.put(Constants.SKILL_FOR_PRIZE, prize));
+
+        if (prizeActivity >= 30) {
+            prizes.stream()
+                    .filter(prize -> "activity".equals(prize.getType()))
+                    .sorted(Comparator.comparing(Prize::getCount).reversed())
+                    .filter(prize -> prizeActivity >= prize.getCount())
+                    .findFirst()
+                    .ifPresent(prize -> receivedPrizes.put(Constants.SKILL_FOR_ACTIVITY, prize));
+        }
+
+        prizes.stream()
+                .filter(prize -> "pl-02.10.2023".equals(prize.getType()))
+                .sorted(Comparator.comparing(Prize::getCount).reversed())
+                .filter(prize ->  prizeTypeBadge >= prize.getCount())
+                .findFirst()
+                .ifPresent(prize -> receivedPrizes.put(Constants.SKILL_FOR_PL, prize));
     }
 
 }

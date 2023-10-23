@@ -3,7 +3,6 @@ package com.example.cloudcalc.badge;
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.DataExtractor;
 import com.example.cloudcalc.UICallbacks;
-import com.example.cloudcalc.prize.Prize;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 
@@ -14,12 +13,16 @@ public class BadgeManager {
     private final IgnoredBadgeManager ignoredBadgeManager;
     private final DataExtractor dataExtractor;
     private final PrizeManager prizeManager;
-    private final List<String> receivedPrizes = new ArrayList<>();
+
 
     public BadgeManager(DataExtractor dataExtractor, PrizeManager prizeManager, UICallbacks uiCallbacks) {
         this.dataExtractor = dataExtractor;
         this.prizeManager = prizeManager;
         this.ignoredBadgeManager = new IgnoredBadgeManager(uiCallbacks);
+    }
+
+    public PrizeManager getPrizeManager() {
+        return prizeManager;
     }
 
     /**
@@ -35,7 +38,7 @@ public class BadgeManager {
     }
 
     public Map<String, String> calculateBadgeCounts(Profile profile, ArrayList<String> receivedBadges) {
-        Map<String, String> badgeCounts = new HashMap<>();
+        Map<String, String> badgeCounts = new LinkedHashMap<>();
         int total = receivedBadges.size();
 
         List<String> skillBadges = filterSkillBadges(receivedBadges);
@@ -54,68 +57,19 @@ public class BadgeManager {
 
         int prizeTypeBadge = typesList.size();
 
-        receivedPrizes.clear();
-
-        List<Prize> prizes = prizeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
-        determinePrizesForBadgeCount(prizes, prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
-
-        String prizePDFString;
-        if (prizePDF == 0) {
-            prizePDFString = "not enough";
-        } else {
-            prizePDFString = String.valueOf(prizePDF);
-        }
-
-        String prizeActivityString;
-        if (prizeActivity == 0) {
-            prizeActivityString = "not enough";
-        } else {
-            prizeActivityString = String.valueOf(prizeActivity);
-        }
+        prizeManager.determinePrizesForBadgeCount(prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
 
         badgeCounts.put(Constants.TOTAL, String.valueOf(total));
         badgeCounts.put(Constants.IGNORE, String.valueOf(ignore));
         badgeCounts.put(Constants.SKILL, String.valueOf(skill));
         badgeCounts.put(Constants.PDF_TOTAL, String.valueOf(totalPDF));
 
-        badgeCounts.put(Constants.PDF_FOR_PRIZE, prizePDFString);
+        badgeCounts.put(Constants.PDF_FOR_PRIZE, String.valueOf(prizePDF));
         badgeCounts.put(Constants.SKILL_FOR_PRIZE, String.valueOf(prizeSkill));
-        badgeCounts.put(Constants.SKILL_FOR_ACTIVITY, prizeActivityString);
+        badgeCounts.put(Constants.SKILL_FOR_ACTIVITY, String.valueOf(prizeActivity));
         badgeCounts.put(Constants.SKILL_FOR_PL, String.valueOf(prizeTypeBadge));
 
         return badgeCounts;
-    }
-
-    private void determinePrizesForBadgeCount(List<Prize> prizes, int prizePDF, int prizeSkill, int prizeActivity, int prizeTypeBadge) {
-        prizes.stream()
-                .filter(prize -> "pdf".equals(prize.getType()))
-                .filter(prize -> prizePDF >= prize.getCount())
-                .findFirst()
-                .ifPresent(prize -> receivedPrizes.add(prize.getName()));
-
-        prizes.stream()
-                .filter(prize -> "skill".equals(prize.getType()))
-                .sorted(Comparator.comparing(Prize::getCount).reversed())
-                .filter(prize -> prizeSkill >= prize.getCount())
-                .findFirst()
-                .ifPresent(prize -> receivedPrizes.add(prize.getName()));
-
-
-        if (prizeActivity >= 30) {
-            prizes.stream()
-                    .filter(prize -> "activity".equals(prize.getType()))
-                    .sorted(Comparator.comparing(Prize::getCount).reversed())
-                    .filter(prize -> prizeActivity >= prize.getCount())
-                    .findFirst()
-                    .ifPresent(prize -> receivedPrizes.add(prize.getName()));
-        }
-
-        prizes.stream()
-                .filter(prize -> "pl-02.10.2023".equals(prize.getType()))
-                .sorted(Comparator.comparing(Prize::getCount).reversed())
-                .filter(prize ->  prizeTypeBadge >= prize.getCount())
-                .findFirst()
-                .ifPresent(prize -> receivedPrizes.add(prize.getName()));
     }
 
     private int calculateActivityBadgeCount(int skill) {
@@ -184,10 +138,6 @@ public class BadgeManager {
         intersection.retainAll(pdfBadgesFromProfile);
 
         return new ArrayList<>(intersection);
-    }
-
-    public List<String> getReceivedPrizes() {
-        return receivedPrizes;
     }
 
 }

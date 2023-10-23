@@ -1,10 +1,12 @@
 package com.example.cloudcalc;
 
+import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.badge.IgnoredBadgeManager;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
 import com.example.cloudcalc.profile.ProfileManager;
+import com.example.cloudcalc.scan.ScanManager;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -26,9 +28,19 @@ public class MainUI implements UICallbacks{
     private final DataExtractor dataExtractor = new DataExtractor();
     private final IgnoredBadgeManager ignoredBadgeManager = new IgnoredBadgeManager(this);
     private final PrizeManager prizeManager = new PrizeManager(this);
-    private final ProfileManager profileManager = new ProfileManager(dataExtractor, profileDataManager, this, prizeManager);
+    private final ScanManager scanManager = createScanManager();
+    private final ProfileManager profileManager = createProfileManager();
     private final int  WIDTH_SCENE = 600;
     private final int  HEIGHT_SCENE = 500;
+
+    private ScanManager createScanManager() {
+        BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeManager, this);
+        return new ScanManager(badgeManager, this);
+    }
+
+    private ProfileManager createProfileManager() {
+        return new ProfileManager(dataExtractor, profileDataManager, this, scanManager);
+    }
 
     @Override
     public void showMainScreen(Stage primaryStage) {

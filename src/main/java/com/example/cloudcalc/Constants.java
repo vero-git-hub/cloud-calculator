@@ -8,10 +8,10 @@ public interface Constants {
 
     String TOTAL = "Total";
     String IGNORE = "Ignore";
-    String PDF_TOTAL = "PDF total";
+    String PDF_TOTAL = "PDF";
     String PDF_FOR_PRIZE = "PDF for prize";
     String SKILL = "Skill";
-    String SKILL_FOR_PRIZE = "Skill for prize";
-    String SKILL_FOR_ACTIVITY = "Skill for activity";
-    String SKILL_FOR_PL = "Skill for pl-02.10.2023";
+    String SKILL_FOR_PRIZE = "No PDF for prize";
+    String SKILL_FOR_ACTIVITY = "Activity for prize";
+    String SKILL_FOR_PL = "PL for prize";
 }
