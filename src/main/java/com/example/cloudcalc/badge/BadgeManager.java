@@ -13,7 +13,7 @@ public class BadgeManager {
     private final IgnoredBadgeManager ignoredBadgeManager;
     private final DataExtractor dataExtractor;
     private final PrizeManager prizeManager;
-
+    private final int COUNT_FOR_PDF_PRIZE = 7;
 
     public BadgeManager(DataExtractor dataExtractor, PrizeManager prizeManager, UICallbacks uiCallbacks) {
         this.dataExtractor = dataExtractor;
@@ -37,8 +37,8 @@ public class BadgeManager {
         return receivedBadges;
     }
 
-    public Map<String, String> calculateBadgeCounts(Profile profile, ArrayList<String> receivedBadges) {
-        Map<String, String> badgeCounts = new LinkedHashMap<>();
+    public BadgeCounts calculateBadgeCounts(Profile profile, ArrayList<String> receivedBadges) {
+        BadgeCounts badgeCounts = new BadgeCounts();
         int total = receivedBadges.size();
 
         List<String> skillBadges = filterSkillBadges(receivedBadges);
@@ -48,9 +48,10 @@ public class BadgeManager {
         List<String> pdfBadges = getPDFBadges(profile, skillBadges);
         int totalPDF = pdfBadges.size();
         int prizePDF = calculatePDFPrizeBadgeCount(totalPDF);
-        int prizeSkill = calculateSkillPrizeBadgeCount(skill, prizePDF);
 
-        int prizeActivity = calculateActivityBadgeCount(skill);
+        int prizeSkill = calculatePrizeNoPDF(skill, prizePDF);
+
+        int prizeActivity = skill;
 
         List<String> typesList = dataExtractor.typeBadgeExtractedData;
         typesList = filterSkillBadges(typesList);
@@ -59,53 +60,42 @@ public class BadgeManager {
 
         prizeManager.determinePrizesForBadgeCount(prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
 
-        badgeCounts.put(Constants.TOTAL, String.valueOf(total));
-        badgeCounts.put(Constants.IGNORE, String.valueOf(ignore));
-        badgeCounts.put(Constants.SKILL, String.valueOf(skill));
-        badgeCounts.put(Constants.PDF_TOTAL, String.valueOf(totalPDF));
-
-        badgeCounts.put(Constants.PDF_FOR_PRIZE, String.valueOf(prizePDF));
-        badgeCounts.put(Constants.SKILL_FOR_PRIZE, String.valueOf(prizeSkill));
-        badgeCounts.put(Constants.SKILL_FOR_ACTIVITY, String.valueOf(prizeActivity));
-        badgeCounts.put(Constants.SKILL_FOR_PL, String.valueOf(prizeTypeBadge));
+        badgeCounts.setTotal(total);
+        badgeCounts.setIgnore(ignore);
+        badgeCounts.setSkill(skill);
+        badgeCounts.setTotalPDF(totalPDF);
+        badgeCounts.setPrizePDF(prizePDF);
+        badgeCounts.setPrizeSkill(prizeSkill);
+        badgeCounts.setPrizeActivity(prizeActivity);
+        badgeCounts.setPrizePL(prizeTypeBadge);
 
         return badgeCounts;
     }
 
-    private int calculateActivityBadgeCount(int skill) {
-        int prizeActivity;
+    /**
+     * prizePDF maybe has only 2 values: 7 or less
+     * @param skill skill badges without ignore
+     * @param prizePDF pdf badges
+     * @return badges without pdf
+     */
+    private int calculatePrizeNoPDF(int skill, int prizePDF) {
+        int prizeNoPDF = 0;
 
-        if(skill >= 30) {
-            prizeActivity = skill;
-        } else {
-            prizeActivity = 0;
+        if(prizePDF == 7) {
+            prizeNoPDF = skill  - prizePDF;
+        } else if (prizePDF < 7) {
+            prizeNoPDF = skill;
         }
-
-        return prizeActivity;
-    }
-
-    private int calculateSkillPrizeBadgeCount(int skill, int prizePDF) {
-        int prizeSkill;
-
-        if(prizePDF == 0) {
-            prizeSkill = skill;
-        } else {
-            prizeSkill = skill - prizePDF;
-        }
-
-        return prizeSkill;
+        return prizeNoPDF;
     }
 
     private int calculatePDFPrizeBadgeCount(int totalPDF) {
         int prizePDF;
-        int constantForPrize = 7;
 
-        if(totalPDF > constantForPrize) {
-            prizePDF = constantForPrize;
-        } else if (totalPDF < constantForPrize) {
-            prizePDF = 0;
+        if(totalPDF >= COUNT_FOR_PDF_PRIZE) {
+            prizePDF = COUNT_FOR_PDF_PRIZE;
         } else {
-            prizePDF = constantForPrize;
+            prizePDF = totalPDF;
         }
 
         return prizePDF;

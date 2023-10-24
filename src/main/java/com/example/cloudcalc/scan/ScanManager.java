@@ -3,6 +3,8 @@ package com.example.cloudcalc.scan;
 import com.example.cloudcalc.ButtonFactory;
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.UICallbacks;
+import com.example.cloudcalc.badge.BadgeCategory;
+import com.example.cloudcalc.badge.BadgeCounts;
 import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.prize.Prize;
 import com.example.cloudcalc.profile.Profile;
@@ -18,10 +20,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ScanManager {
 
@@ -40,36 +40,38 @@ public class ScanManager {
         String title = String.format("SCAN for %s", profile.getName());
         Label titleLabel = uiCallbacks.createLabel(title);
 
+        Label subtitleLabel = new Label("Labs with the same names are counted as one");
+        subtitleLabel.setStyle("-fx-font-style: italic;");
+
         HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel);
 
-        Map<String, String> badgeCounts = badgeManager.calculateBadgeCounts(profile, siteLinks);
-        TableView<Map.Entry<String, String>> mainCategoriesTable = createMainCategoriesTable(badgeCounts);
+        BadgeCounts badgeCounts = badgeManager.calculateBadgeCounts(profile, siteLinks);
+        TableView<BadgeCategory> mainCategoriesTable = createMainCategoriesTable(badgeCounts);
 
-        TableView<Map.Entry<String, String>> prizeCategoriesTable = createPrizeCategoriesTable(badgeCounts);
-        layout.getChildren().addAll(topLayout, mainCategoriesTable, prizeCategoriesTable);
+        TableView<BadgeCategory> prizeCategoriesTable = createPrizeCategoriesTable(badgeCounts);
+        layout.getChildren().addAll(topLayout, mainCategoriesTable, subtitleLabel, prizeCategoriesTable);
 
         uiCallbacks.createScene(layout, primaryStage);
     }
 
+    private TableView<BadgeCategory> createMainCategoriesTable(BadgeCounts badgeCounts) {
+        TableView<BadgeCategory> table = new TableView<>();
 
-    private TableView<Map.Entry<String, String>> createMainCategoriesTable(Map<String, String> badgeCounts) {
-        TableView<Map.Entry<String, String>> table = new TableView<>();
+        List<BadgeCategory> categories = new ArrayList<>();
+        categories.add(new BadgeCategory(Constants.TOTAL, String.valueOf(badgeCounts.getTotal())));
+        categories.add(new BadgeCategory(Constants.IGNORE, String.valueOf(badgeCounts.getIgnore())));
+        categories.add(new BadgeCategory(Constants.SKILL, String.valueOf(badgeCounts.getSkill())));
+        categories.add(new BadgeCategory(Constants.PDF_TOTAL, String.valueOf(badgeCounts.getTotalPDF())));
 
-        List<String> mainCategories = Arrays.asList(Constants.TOTAL, Constants.IGNORE, Constants.SKILL, Constants.PDF_TOTAL);
+        table.getItems().addAll(categories);
 
-        List<Map.Entry<String, String>> mainCategoryEntries = badgeCounts.entrySet().stream()
-                .filter(entry -> mainCategories.contains(entry.getKey()))
-                .collect(Collectors.toList());
-
-        table.getItems().addAll(mainCategoryEntries);
-
-        TableColumn<Map.Entry<String, String>, Integer> indexColumn = new TableColumn<>("No.");
+        TableColumn<BadgeCategory, Integer> indexColumn = new TableColumn<>("No.");
         indexColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(cellData.getValue()) + 1));
 
-        TableColumn<Map.Entry<String, String>, String> categoryColumn = new TableColumn<>("Category");
-        categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getKey()));
+        TableColumn<BadgeCategory, String> categoryColumn = new TableColumn<>("Category");
+        categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCategory()));
 
-        TableColumn<Map.Entry<String, String>, String> valueColumn = new TableColumn<>("Value");
+        TableColumn<BadgeCategory, String> valueColumn = new TableColumn<>("Value");
         valueColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getValue()));
 
         indexColumn.setResizable(false);
@@ -86,36 +88,31 @@ public class ScanManager {
         return table;
     }
 
-    private TableView<Map.Entry<String, String>> createPrizeCategoriesTable(Map<String, String> badgeCounts) {
+    private TableView<BadgeCategory> createPrizeCategoriesTable(BadgeCounts badgeCounts) {
         Map<String, Prize> receivedPrizes = badgeManager.getPrizeManager().getReceivedPrizes();
 
-        TableView<Map.Entry<String, String>> table = new TableView<>();
+        TableView<BadgeCategory> table = new TableView<>();
 
-        List<String> prizeCategories = Arrays.asList(
-                Constants.PDF_FOR_PRIZE,
-                Constants.SKILL_FOR_PRIZE,
-                Constants.SKILL_FOR_ACTIVITY,
-                Constants.SKILL_FOR_PL
-        );
+        List<BadgeCategory> categories = new ArrayList<>();
+        categories.add(new BadgeCategory(Constants.PDF_FOR_PRIZE, String.valueOf(badgeCounts.getPrizePDF())));
+        categories.add(new BadgeCategory(Constants.SKILL_FOR_PRIZE, String.valueOf(badgeCounts.getPrizeSkill())));
+        categories.add(new BadgeCategory(Constants.SKILL_FOR_ACTIVITY, String.valueOf(badgeCounts.getPrizeActivity())));
+        categories.add(new BadgeCategory(Constants.SKILL_FOR_PL, String.valueOf(badgeCounts.getPrizePL())));
 
-        List<Map.Entry<String, String>> prizeCategoryEntries = badgeCounts.entrySet().stream()
-                .filter(entry -> prizeCategories.contains(entry.getKey()))
-                .collect(Collectors.toList());
+        table.getItems().addAll(categories);
 
-        table.getItems().addAll(prizeCategoryEntries);
-
-        TableColumn<Map.Entry<String, String>, Integer> indexColumn = new TableColumn<>("No.");
+        TableColumn<BadgeCategory, Integer> indexColumn = new TableColumn<>("No.");
         indexColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(cellData.getValue()) + 1));
 
-        TableColumn<Map.Entry<String, String>, String> categoryColumn = new TableColumn<>("Category");
-        categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getKey()));
+        TableColumn<BadgeCategory, String> categoryColumn = new TableColumn<>("Category");
+        categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCategory()));
 
-        TableColumn<Map.Entry<String, String>, String> valueColumn = new TableColumn<>("Value");
+        TableColumn<BadgeCategory, String> valueColumn = new TableColumn<>("Value");
         valueColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getValue()));
 
-        TableColumn<Map.Entry<String, String>, String> prizesColumn = new TableColumn<>("Prizes");
+        TableColumn<BadgeCategory, String> prizesColumn = new TableColumn<>("Prizes");
         prizesColumn.setCellValueFactory(cellData -> {
-            String categoryKey = cellData.getValue().getKey();
+            String categoryKey = cellData.getValue().getCategory();
             if (receivedPrizes.containsKey(categoryKey)) {
                 return new SimpleStringProperty(receivedPrizes.get(categoryKey).getName());
             } else {
