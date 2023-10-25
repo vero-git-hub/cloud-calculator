@@ -17,6 +17,7 @@ public class ButtonFactory {
     private static final String ADD_ICON = "/images/plus-64.png";
     private static final String BACK_ICON = "/images/go-back-64.png";
     private static final String IGNORE_ICON = "/images/no-image-40.png";
+    private static final String STATS_ICON = "/images/icons8-euro-money-64.png";
 
     public static Button createSavePrizeButton(Consumer<ActionEvent> action) {
         Button saveButton = new Button("Save");
@@ -62,6 +63,11 @@ public class ButtonFactory {
 
     public static Button createAddButton(EventHandler<ActionEvent> action) {
         Image addImage = new Image(ButtonFactory.class.getResourceAsStream(ADD_ICON));
+        return createButton("", action, addImage);
+    }
+
+    public static Button createStatsButton(EventHandler<ActionEvent> action) {
+        Image addImage = new Image(ButtonFactory.class.getResourceAsStream(STATS_ICON));
         return createButton("", action, addImage);
     }
 

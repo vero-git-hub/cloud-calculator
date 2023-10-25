@@ -1,5 +1,6 @@
 package com.example.cloudcalc.profile;
 
+import com.example.cloudcalc.Constants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,10 +76,37 @@ public class ProfileDataManager {
         profileJson.put("startDate", profile.getStartDate());
         profileJson.put("profileLink", profile.getProfileLink());
         profileJson.put("pdfFilePath", profile.getPdfFilePath());
+
         JSONArray linksArray = new JSONArray(profile.getPdfLinks());
         profileJson.put("extractedLinks", linksArray);
 
+        JSONArray prizesArray = new JSONArray(profile.getPrizes());
+        profileJson.put("prizes", prizesArray);
+
         profilesArray.put(profileJson);
+    }
+
+    public void updateProfile(Profile profileToUpdate) {
+        List<Profile> profiles = loadProfilesFromFile(Constants.PROFILES_FILE);
+        profiles.removeIf(profile -> profile.getName().equals(profileToUpdate.getName()));
+
+        profiles.add(profileToUpdate);
+
+        JSONArray profilesArray = new JSONArray();
+        for (Profile profile : profiles) {
+            updateProfileFile(profile, profilesArray);
+        }
+
+        saveJSONArrayToFile(profilesArray, Constants.PROFILES_FILE);
+    }
+
+    private void saveJSONArrayToFile(JSONArray jsonArray, String fileName) {
+        try (FileWriter file = new FileWriter(fileName)) {
+            file.write(jsonArray.toString());
+            file.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void saveProfilesToFile(List<Profile> profilesList, String fileName) {

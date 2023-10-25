@@ -3,22 +3,27 @@ package com.example.cloudcalc.badge;
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.DataExtractor;
 import com.example.cloudcalc.UICallbacks;
+import com.example.cloudcalc.prize.Prize;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
+import com.example.cloudcalc.profile.ProfileDataManager;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BadgeManager {
 
     private final IgnoredBadgeManager ignoredBadgeManager;
     private final DataExtractor dataExtractor;
     private final PrizeManager prizeManager;
+    private final ProfileDataManager profileDataManager;
     private final int COUNT_FOR_PDF_PRIZE = 7;
 
-    public BadgeManager(DataExtractor dataExtractor, PrizeManager prizeManager, UICallbacks uiCallbacks) {
+    public BadgeManager(DataExtractor dataExtractor, PrizeManager prizeManager, UICallbacks uiCallbacks, ProfileDataManager profileDataManager) {
         this.dataExtractor = dataExtractor;
         this.prizeManager = prizeManager;
         this.ignoredBadgeManager = new IgnoredBadgeManager(uiCallbacks);
+        this.profileDataManager = profileDataManager;
     }
 
     public PrizeManager getPrizeManager() {
@@ -58,7 +63,10 @@ public class BadgeManager {
 
         int prizeTypeBadge = typesList.size();
 
-        prizeManager.determinePrizesForBadgeCount(prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
+        List<Prize> determinedPrizes = prizeManager.determinePrizesForBadgeCount(prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
+        List<String> prizeNames = determinedPrizes.stream().map(Prize::getName).collect(Collectors.toList());
+        profile.setPrizes(prizeNames);
+        profileDataManager.updateProfile(profile);
 
         badgeCounts.setTotal(total);
         badgeCounts.setIgnore(ignore);

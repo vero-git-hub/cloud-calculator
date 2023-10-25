@@ -9,6 +9,7 @@ public class Profile {
     private String profileLink;
     private String pdfFilePath;
     private List<String> pdfLinks;
+    private List<String> prizes;
 
     public String getName() {
         return name;
@@ -48,6 +49,14 @@ public class Profile {
 
     public void setPdfLinks(List<String> pdfLinks) {
         this.pdfLinks = pdfLinks;
+    }
+
+    public List<String> getPrizes() {
+        return prizes;
+    }
+
+    public void setPrizes(List<String> prizes) {
+        this.prizes = prizes;
     }
 
     @Override

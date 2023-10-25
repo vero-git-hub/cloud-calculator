@@ -232,8 +232,10 @@ public class PrizeManager {
         return jsonArray;
     }
 
-    public void determinePrizesForBadgeCount(int prizePDF, int prizeSkill, int prizeActivity, int prizeTypeBadge) {
+    public List<Prize> determinePrizesForBadgeCount(int prizePDF, int prizeSkill, int prizeActivity, int prizeTypeBadge) {
         List<Prize> prizes = loadPrizesFromFile(Constants.PRIZES_FILE);
+        List<Prize> determinedPrizes = new ArrayList<>();
+
         receivedPrizes.clear();
 
         prizes.stream()
@@ -264,6 +266,8 @@ public class PrizeManager {
                 .filter(prize ->  prizeTypeBadge >= prize.getCount())
                 .findFirst()
                 .ifPresent(prize -> receivedPrizes.put(Constants.SKILL_FOR_PL, prize));
+
+        return determinedPrizes;
     }
 
 }
