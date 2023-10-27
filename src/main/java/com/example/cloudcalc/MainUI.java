@@ -32,13 +32,14 @@ public class MainUI implements UICallbacks{
     private final PrizeManager prizeManager = new PrizeManager(this);
     private final ScanManager scanManager = createScanManager();
     private final ProfileManager profileManager = createProfileManager();
-    private final StatsManager statsManager = new StatsManager(this, profileManager, profileDataManager);
+    private final BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeManager, this, profileDataManager);
+    private final StatsManager statsManager = new StatsManager(this, profileManager, profileDataManager, dataExtractor, badgeManager, prizeManager);
     private final int  WIDTH_SCENE = 600;
     private final int  HEIGHT_SCENE = 500;
 
     private ScanManager createScanManager() {
         BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeManager, this, profileDataManager);
-        return new ScanManager(badgeManager, this);
+        return new ScanManager(badgeManager, this, profileDataManager);
     }
 
     private ProfileManager createProfileManager() {

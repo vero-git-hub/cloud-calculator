@@ -8,6 +8,7 @@ import com.example.cloudcalc.badge.BadgeCounts;
 import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.prize.Prize;
 import com.example.cloudcalc.profile.Profile;
+import com.example.cloudcalc.profile.ProfileDataManager;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Button;
@@ -22,15 +23,18 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ScanManager {
 
     private final BadgeManager badgeManager;
     private final UICallbacks uiCallbacks;
+    private final ProfileDataManager profileDataManager;
 
-    public ScanManager(BadgeManager badgeManager, UICallbacks uiCallbacks) {
+    public ScanManager(BadgeManager badgeManager, UICallbacks uiCallbacks, ProfileDataManager profileDataManager) {
         this.badgeManager = badgeManager;
         this.uiCallbacks = uiCallbacks;
+        this.profileDataManager = profileDataManager;
     }
 
     public void showScanScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
@@ -50,6 +54,10 @@ public class ScanManager {
 
         TableView<BadgeCategory> prizeCategoriesTable = createPrizeCategoriesTable(badgeCounts);
         layout.getChildren().addAll(topLayout, mainCategoriesTable, subtitleLabel, prizeCategoriesTable);
+
+        Map<String, Prize> receivedPrizes = badgeManager.getPrizeManager().getReceivedPrizes();
+        profile.setPrizes(receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList()));
+        profileDataManager.updateProfile(profile);
 
         uiCallbacks.createScene(layout, primaryStage);
     }
@@ -89,27 +97,72 @@ public class ScanManager {
     }
 
     private TableView<BadgeCategory> createPrizeCategoriesTable(BadgeCounts badgeCounts) {
-        Map<String, Prize> receivedPrizes = badgeManager.getPrizeManager().getReceivedPrizes();
+        Map<String, Prize> receivedPrizes = getReceivedPrizes();
+        printReceivedPrizes(receivedPrizes);
 
         TableView<BadgeCategory> table = new TableView<>();
+        table.getItems().addAll(createBadgeCategoriesList(badgeCounts));
 
+        setupTableColumns(table, receivedPrizes);
+
+        return table;
+    }
+
+    private Map<String, Prize> getReceivedPrizes() {
+        return badgeManager.getPrizeManager().getReceivedPrizes();
+    }
+
+    private void printReceivedPrizes(Map<String, Prize> receivedPrizes) {
+        for (Map.Entry<String, Prize> entry : receivedPrizes.entrySet()) {
+            String key = entry.getKey();
+            Prize value = entry.getValue();
+            System.out.println("Key: " + key + ", Value: " + value);
+        }
+    }
+
+    private List<BadgeCategory> createBadgeCategoriesList(BadgeCounts badgeCounts) {
         List<BadgeCategory> categories = new ArrayList<>();
         categories.add(new BadgeCategory(Constants.PDF_FOR_PRIZE, String.valueOf(badgeCounts.getPrizePDF())));
         categories.add(new BadgeCategory(Constants.SKILL_FOR_PRIZE, String.valueOf(badgeCounts.getPrizeSkill())));
         categories.add(new BadgeCategory(Constants.SKILL_FOR_ACTIVITY, String.valueOf(badgeCounts.getPrizeActivity())));
         categories.add(new BadgeCategory(Constants.SKILL_FOR_PL, String.valueOf(badgeCounts.getPrizePL())));
+        return categories;
+    }
 
-        table.getItems().addAll(categories);
+    private void setupTableColumns(TableView<BadgeCategory> table, Map<String, Prize> receivedPrizes) {
+        table.getColumns().addAll(
+                createIndexColumn(table),
+                createCategoryColumn(table),
+                createValueColumn(table),
+                createPrizesColumn(receivedPrizes, table)
+        );
+    }
 
+    private TableColumn<BadgeCategory, Integer> createIndexColumn(TableView<BadgeCategory> table) {
         TableColumn<BadgeCategory, Integer> indexColumn = new TableColumn<>("No.");
         indexColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(cellData.getValue()) + 1));
+        indexColumn.setResizable(false);
+        indexColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.10));
+        return indexColumn;
+    }
 
+    private TableColumn<BadgeCategory, String> createCategoryColumn(TableView<BadgeCategory> table) {
         TableColumn<BadgeCategory, String> categoryColumn = new TableColumn<>("Category");
         categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCategory()));
+        categoryColumn.setResizable(false);
+        categoryColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.30));
+        return categoryColumn;
+    }
 
+    private TableColumn<BadgeCategory, String> createValueColumn(TableView<BadgeCategory> table) {
         TableColumn<BadgeCategory, String> valueColumn = new TableColumn<>("Value");
         valueColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getValue()));
+        valueColumn.setResizable(false);
+        valueColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.30));
+        return valueColumn;
+    }
 
+    private TableColumn<BadgeCategory, String> createPrizesColumn(Map<String, Prize> receivedPrizes, TableView<BadgeCategory> table) {
         TableColumn<BadgeCategory, String> prizesColumn = new TableColumn<>("Prizes");
         prizesColumn.setCellValueFactory(cellData -> {
             String categoryKey = cellData.getValue().getCategory();
@@ -119,20 +172,9 @@ public class ScanManager {
                 return new SimpleStringProperty("");
             }
         });
-
-        indexColumn.setResizable(false);
-        categoryColumn.setResizable(false);
-        valueColumn.setResizable(false);
         prizesColumn.setResizable(false);
-
-        indexColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.10));
-        categoryColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.30));
-        valueColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.30));
         prizesColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.30));
-
-        table.getColumns().addAll(indexColumn, categoryColumn, valueColumn, prizesColumn);
-
-        return table;
+        return prizesColumn;
     }
 
 }

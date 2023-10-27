@@ -61,6 +61,14 @@ public class ProfileDataManager {
                     }
                     profile.setPdfLinks(links);
                 }
+                if (json.has("prizes")) {
+                    JSONArray prizesArray = json.getJSONArray("prizes");
+                    List<String> prizes = new ArrayList<>();
+                    for (int i = 0; i < prizesArray.length(); i++) {
+                        prizes.add(prizesArray.getString(i));
+                    }
+                    profile.setPrizes(prizes);
+                }
 
                 profiles.add(profile);
             }
@@ -76,27 +84,25 @@ public class ProfileDataManager {
         profileJson.put("startDate", profile.getStartDate());
         profileJson.put("profileLink", profile.getProfileLink());
         profileJson.put("pdfFilePath", profile.getPdfFilePath());
-
         JSONArray linksArray = new JSONArray(profile.getPdfLinks());
         profileJson.put("extractedLinks", linksArray);
-
         JSONArray prizesArray = new JSONArray(profile.getPrizes());
         profileJson.put("prizes", prizesArray);
+
+        for (int i = 0; i < profilesArray.length(); i++) {
+            JSONObject existingProfile = profilesArray.getJSONObject(i);
+            if (existingProfile.getString("name").equals(profile.getName())) {
+                profilesArray.put(i, profileJson);
+                return;
+            }
+        }
 
         profilesArray.put(profileJson);
     }
 
     public void updateProfile(Profile profileToUpdate) {
-        List<Profile> profiles = loadProfilesFromFile(Constants.PROFILES_FILE);
-        profiles.removeIf(profile -> profile.getName().equals(profileToUpdate.getName()));
-
-        profiles.add(profileToUpdate);
-
-        JSONArray profilesArray = new JSONArray();
-        for (Profile profile : profiles) {
-            updateProfileFile(profile, profilesArray);
-        }
-
+        JSONArray profilesArray = new JSONArray(loadProfilesFromFile(Constants.PROFILES_FILE));
+        updateProfileFile(profileToUpdate, profilesArray);
         saveJSONArrayToFile(profilesArray, Constants.PROFILES_FILE);
     }
 
