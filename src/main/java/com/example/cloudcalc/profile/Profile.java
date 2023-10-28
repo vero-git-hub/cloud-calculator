@@ -76,4 +76,12 @@ public class Profile {
         return Objects.hash(name, startDate, profileLink, pdfFilePath, pdfLinks);
     }
 
+    @Override
+    public String toString() {
+        return "Profile{" +
+                "name='" + name + '\'' +
+                ", startDate='" + startDate + '\'' +
+                ", prizes=" + prizes +
+                '}';
+    }
 }

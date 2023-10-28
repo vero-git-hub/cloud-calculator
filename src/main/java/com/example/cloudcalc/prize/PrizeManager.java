@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PrizeManager {
 
@@ -232,9 +233,8 @@ public class PrizeManager {
         return jsonArray;
     }
 
-    public List<Prize> determinePrizesForBadgeCount(int prizePDF, int prizeSkill, int prizeActivity, int prizeTypeBadge) {
+    public List<String> determinePrizesForBadgeCount(int prizePDF, int prizeSkill, int prizeActivity, int prizeTypeBadge) {
         List<Prize> prizes = loadPrizesFromFile(Constants.PRIZES_FILE);
-        List<Prize> determinedPrizes = new ArrayList<>();
 
         receivedPrizes.clear();
 
@@ -267,7 +267,9 @@ public class PrizeManager {
                 .findFirst()
                 .ifPresent(prize -> receivedPrizes.put(Constants.SKILL_FOR_PL, prize));
 
-        return determinedPrizes;
+        return receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
+
+
     }
 
 }

@@ -192,8 +192,8 @@ public class ProfileManager {
                     } else {
                         Profile profile = getTableView().getItems().get(getIndex());
                         scanButton.setOnAction(e -> {
-                            ArrayList<String> extractedData = dataExtractor.performScan(profile);
-                            scanManager.showScanScreen(primaryStage, profile, extractedData);
+                            ArrayList<String> siteLinks = dataExtractor.performScan(profile);
+                            scanManager.showScanScreen(primaryStage, profile, siteLinks);
                         });
                         setGraphic(scanButton);
                     }
