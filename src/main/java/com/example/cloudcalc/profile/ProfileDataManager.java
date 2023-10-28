@@ -70,6 +70,10 @@ public class ProfileDataManager {
                     profile.setPrizes(prizes);
                 }
 
+                if (json.has("lastScannedDate")) {
+                    profile.setLastScannedDate(json.getString("lastScannedDate"));
+                }
+
                 profiles.add(profile);
             }
         } catch (IOException | JSONException e) {
@@ -84,10 +88,14 @@ public class ProfileDataManager {
         profileJson.put("startDate", profile.getStartDate());
         profileJson.put("profileLink", profile.getProfileLink());
         profileJson.put("pdfFilePath", profile.getPdfFilePath());
+
         JSONArray linksArray = new JSONArray(profile.getPdfLinks());
         profileJson.put("pdfLinks", linksArray);
+
         JSONArray prizesArray = new JSONArray(profile.getPrizes());
         profileJson.put("prizes", prizesArray);
+
+        profileJson.put("lastScannedDate", profile.getLastScannedDate());
 
         for (int i = 0; i < profilesArray.length(); i++) {
             JSONObject existingProfile = profilesArray.getJSONObject(i);

@@ -10,6 +10,7 @@ public class Profile {
     private String pdfFilePath;
     private List<String> pdfLinks;
     private List<String> prizes;
+    private String lastScannedDate;
 
     public String getName() {
         return name;
@@ -57,6 +58,14 @@ public class Profile {
 
     public void setPrizes(List<String> prizes) {
         this.prizes = prizes;
+    }
+
+    public String getLastScannedDate() {
+        return lastScannedDate;
+    }
+
+    public void setLastScannedDate(String lastScannedDate) {
+        this.lastScannedDate = lastScannedDate;
     }
 
     @Override

@@ -13,10 +13,13 @@ import com.example.cloudcalc.profile.ProfileManager;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,19 +66,43 @@ public class StatsManager {
     private TableView<Profile> createMainTable() {
         TableView<Profile> table = new TableView<>();
 
+        TableColumn<Profile, ?> numberColumn = createNumberColumn(table);
+        numberColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.05));
+
+        TableColumn<Profile, ?> dateColumn = createLastUpdatedColumn();
+        dateColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.20));
+
+        TableColumn<Profile, ?> nameColumn = profileManager.createNameColumn();
+        nameColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.10));
+
+        TableColumn<Profile, ?> prizesColumn = createPrizesColumn();
+        prizesColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.50));
+
+        TableColumn<Profile, ?> updateColumn = createUpdateColumn(table);
+        updateColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.10));
+
         table.getColumns().addAll(
-                createNumberColumn(table),
-                profileManager.createNameColumn(),
-                createPrizesColumn(),
-                createGetPrizesColumn(table)
+                numberColumn,
+                dateColumn,
+                nameColumn,
+                prizesColumn,
+                updateColumn
         );
+
         List<Profile> profiles = profileDataManager.loadProfilesFromFile(Constants.PROFILES_FILE);
         table.getItems().addAll(profiles);
         return table;
     }
 
+    private TableColumn<Profile, String> createLastUpdatedColumn() {
+        TableColumn<Profile, String> lastUpdatedColumn = new TableColumn<>("Date");
+        lastUpdatedColumn.setCellValueFactory(new PropertyValueFactory<>("lastScannedDate"));
+        return lastUpdatedColumn;
+    }
+
+
     private TableColumn<Profile, Integer> createNumberColumn(TableView<Profile> table) {
-        TableColumn<Profile, Integer> numberColumn = new TableColumn<>("No.");
+        TableColumn<Profile, Integer> numberColumn = new TableColumn<>("№");
         numberColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(cellData.getValue()) + 1));
         return numberColumn;
     }
@@ -92,12 +119,12 @@ public class StatsManager {
         return prizesColumn;
     }
 
-    private TableColumn<Profile, Void> createGetPrizesColumn(TableView<Profile> table) {
-        TableColumn<Profile, Void> getPrizesColumn = new TableColumn<>("Get Prizes");
+    private TableColumn<Profile, Void> createUpdateColumn(TableView<Profile> table) {
+        TableColumn<Profile, Void> getPrizesColumn = new TableColumn<>("Update");
         getPrizesColumn.setCellValueFactory(param -> null);
         getPrizesColumn.setCellFactory(col -> {
             return new TableCell<Profile, Void>() {
-                final Button getPrizesButton = new Button("Get Prizes");
+                final Button getPrizesButton = ButtonFactory.createUpdateButton(null);
 
                 @Override
                 protected void updateItem(Void item, boolean empty) {
@@ -109,7 +136,6 @@ public class StatsManager {
                         Profile profile = getTableView().getItems().get(getIndex());
 
                         getPrizesButton.setOnAction(e -> {
-
                             ArrayList<String> siteLinks = dataExtractor.performScan(profile);
                             BadgeCounts badgeCounts = badgeManager.calculateBadgeCounts(profile, siteLinks);
                             List<String> prizes = badgeManager.getPrizeManager().determinePrizesForBadgeCount(
@@ -119,6 +145,11 @@ public class StatsManager {
                                     badgeCounts.getPrizePL()
                             );
                             profile.setPrizes(prizes);
+
+                            LocalDate currentDate = LocalDate.now();
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+                            profile.setLastScannedDate(currentDate.format(formatter));
+
                             profileDataManager.updateProfile(profile);
 
                             table.refresh();

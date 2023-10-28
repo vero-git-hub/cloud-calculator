@@ -14,6 +14,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -193,6 +195,9 @@ public class ProfileManager {
                         Profile profile = getTableView().getItems().get(getIndex());
                         scanButton.setOnAction(e -> {
                             ArrayList<String> siteLinks = dataExtractor.performScan(profile);
+                            profile.setLastScannedDate(getCurrentDate());
+                            profileDataManager.updateProfile(profile);
+
                             scanManager.showScanScreen(primaryStage, profile, siteLinks);
                         });
                         setGraphic(scanButton);
@@ -202,6 +207,13 @@ public class ProfileManager {
         });
         return badgesColumn;
     }
+
+    private String getCurrentDate() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        LocalDate localDate = LocalDate.now();
+        return dtf.format(localDate);
+    }
+
 
     public TableColumn<Profile, Profile> createViewingColumn(Stage primaryStage) {
         TableColumn<Profile, Profile> viewingColumn = new TableColumn<>("Viewing");
