@@ -52,12 +52,8 @@ public class ScanManager {
         BadgeCounts badgeCounts = badgeManager.calculateBadgeCounts(profile, siteLinks);
         TableView<BadgeCategory> mainCategoriesTable = createMainCategoriesTable(badgeCounts);
 
-        TableView<BadgeCategory> prizeCategoriesTable = createPrizeCategoriesTable(badgeCounts);
+        TableView<BadgeCategory> prizeCategoriesTable = createPrizeCategoriesTable(profile, badgeCounts);
         layout.getChildren().addAll(topLayout, mainCategoriesTable, subtitleLabel, prizeCategoriesTable);
-
-        Map<String, Prize> receivedPrizes = badgeManager.getPrizeManager().getReceivedPrizes();
-        profile.setPrizes(receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList()));
-        profileDataManager.updateProfile(profile);
 
         uiCallbacks.createScene(layout, primaryStage);
     }
@@ -80,9 +76,12 @@ public class ScanManager {
         return categories;
     }
 
-    private TableView<BadgeCategory> createPrizeCategoriesTable(BadgeCounts badgeCounts) {
+    private TableView<BadgeCategory> createPrizeCategoriesTable(Profile profile, BadgeCounts badgeCounts) {
         Map<String, Prize> receivedPrizes = getReceivedPrizes();
-        //printReceivedPrizes(receivedPrizes);
+
+        List<String> prizeNames = receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
+        profile.setPrizes(prizeNames);
+        profileDataManager.updateProfile(profile);
 
         TableView<BadgeCategory> table = new TableView<>();
         table.getItems().addAll(createBadgeCategoriesList(badgeCounts));

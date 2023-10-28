@@ -53,8 +53,8 @@ public class ProfileDataManager {
                 if (json.has("pdfFilePath")) {
                     profile.setPdfFilePath(json.getString("pdfFilePath"));
                 }
-                if (json.has("extractedLinks")) {
-                    JSONArray linksArray = json.getJSONArray("extractedLinks");
+                if (json.has("pdfLinks")) {
+                    JSONArray linksArray = json.getJSONArray("pdfLinks");
                     List<String> links = new ArrayList<>();
                     for (int i = 0; i < linksArray.length(); i++) {
                         links.add(linksArray.getString(i));
@@ -85,7 +85,7 @@ public class ProfileDataManager {
         profileJson.put("profileLink", profile.getProfileLink());
         profileJson.put("pdfFilePath", profile.getPdfFilePath());
         JSONArray linksArray = new JSONArray(profile.getPdfLinks());
-        profileJson.put("extractedLinks", linksArray);
+        profileJson.put("pdfLinks", linksArray);
         JSONArray prizesArray = new JSONArray(profile.getPrizes());
         profileJson.put("prizes", prizesArray);
 

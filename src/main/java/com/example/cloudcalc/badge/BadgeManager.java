@@ -3,13 +3,14 @@ package com.example.cloudcalc.badge;
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.DataExtractor;
 import com.example.cloudcalc.UICallbacks;
-import com.example.cloudcalc.prize.Prize;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class BadgeManager {
 
@@ -63,10 +64,7 @@ public class BadgeManager {
 
         int prizeTypeBadge = typesList.size();
 
-        List<Prize> determinedPrizes = prizeManager.determinePrizesForBadgeCount(prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
-        List<String> prizeNames = determinedPrizes.stream().map(Prize::getName).collect(Collectors.toList());
-        profile.setPrizes(prizeNames);
-        profileDataManager.updateProfile(profile);
+        prizeManager.determinePrizesForBadgeCount(prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
 
         badgeCounts.setTotal(total);
         badgeCounts.setIgnore(ignore);
