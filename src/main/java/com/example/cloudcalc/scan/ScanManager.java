@@ -64,41 +64,25 @@ public class ScanManager {
 
     private TableView<BadgeCategory> createMainCategoriesTable(BadgeCounts badgeCounts) {
         TableView<BadgeCategory> table = new TableView<>();
+        table.getItems().addAll(createBadgeCategoryList(badgeCounts));
+        table.setFixedCellSize(Region.USE_COMPUTED_SIZE);
+        table.getColumns().addAll(createIndexColumn(table), createCategoryColumn(table, 0.45), createValueColumn(table, 0.45));
 
+        return table;
+    }
+
+    private List<BadgeCategory> createBadgeCategoryList(BadgeCounts badgeCounts) {
         List<BadgeCategory> categories = new ArrayList<>();
         categories.add(new BadgeCategory(Constants.TOTAL, String.valueOf(badgeCounts.getTotal())));
         categories.add(new BadgeCategory(Constants.IGNORE, String.valueOf(badgeCounts.getIgnore())));
         categories.add(new BadgeCategory(Constants.SKILL, String.valueOf(badgeCounts.getSkill())));
         categories.add(new BadgeCategory(Constants.PDF_TOTAL, String.valueOf(badgeCounts.getTotalPDF())));
-
-        table.getItems().addAll(categories);
-
-        TableColumn<BadgeCategory, Integer> indexColumn = new TableColumn<>("No.");
-        indexColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(cellData.getValue()) + 1));
-
-        TableColumn<BadgeCategory, String> categoryColumn = new TableColumn<>("Category");
-        categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCategory()));
-
-        TableColumn<BadgeCategory, String> valueColumn = new TableColumn<>("Value");
-        valueColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getValue()));
-
-        indexColumn.setResizable(false);
-        categoryColumn.setResizable(false);
-        valueColumn.setResizable(false);
-
-        indexColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.10));
-        categoryColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.45));
-        valueColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.45));
-        table.setFixedCellSize(Region.USE_COMPUTED_SIZE);
-
-        table.getColumns().addAll(indexColumn, categoryColumn, valueColumn);
-
-        return table;
+        return categories;
     }
 
     private TableView<BadgeCategory> createPrizeCategoriesTable(BadgeCounts badgeCounts) {
         Map<String, Prize> receivedPrizes = getReceivedPrizes();
-        printReceivedPrizes(receivedPrizes);
+        //printReceivedPrizes(receivedPrizes);
 
         TableView<BadgeCategory> table = new TableView<>();
         table.getItems().addAll(createBadgeCategoriesList(badgeCounts));
@@ -132,8 +116,8 @@ public class ScanManager {
     private void setupTableColumns(TableView<BadgeCategory> table, Map<String, Prize> receivedPrizes) {
         table.getColumns().addAll(
                 createIndexColumn(table),
-                createCategoryColumn(table),
-                createValueColumn(table),
+                createCategoryColumn(table, 0.30),
+                createValueColumn(table, 0.30),
                 createPrizesColumn(receivedPrizes, table)
         );
     }
@@ -146,19 +130,19 @@ public class ScanManager {
         return indexColumn;
     }
 
-    private TableColumn<BadgeCategory, String> createCategoryColumn(TableView<BadgeCategory> table) {
+    private TableColumn<BadgeCategory, String> createCategoryColumn(TableView<BadgeCategory> table, double width) {
         TableColumn<BadgeCategory, String> categoryColumn = new TableColumn<>("Category");
         categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCategory()));
         categoryColumn.setResizable(false);
-        categoryColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.30));
+        categoryColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
         return categoryColumn;
     }
 
-    private TableColumn<BadgeCategory, String> createValueColumn(TableView<BadgeCategory> table) {
+    private TableColumn<BadgeCategory, String> createValueColumn(TableView<BadgeCategory> table, double width) {
         TableColumn<BadgeCategory, String> valueColumn = new TableColumn<>("Value");
         valueColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getValue()));
         valueColumn.setResizable(false);
-        valueColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.30));
+        valueColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
         return valueColumn;
     }
 
