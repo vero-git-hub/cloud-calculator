@@ -6,11 +6,13 @@ import com.example.cloudcalc.DataExtractor;
 import com.example.cloudcalc.UICallbacks;
 import com.example.cloudcalc.badge.BadgeCounts;
 import com.example.cloudcalc.badge.BadgeManager;
+import com.example.cloudcalc.prize.Prize;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
 import com.example.cloudcalc.profile.ProfileManager;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -21,14 +23,15 @@ import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class StatsManager {
 
     private final UICallbacks uiCallbacks;
-
     private final ProfileManager profileManager;
-
     private final ProfileDataManager profileDataManager;
     private final DataExtractor dataExtractor;
     private final BadgeManager badgeManager;
@@ -45,9 +48,50 @@ public class StatsManager {
 
     public void showStatsScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
-        layout.getChildren().addAll(createTopLayout(primaryStage), createSubtitleLabel(), createMainTable());
+
+        List<Profile> profiles = profileDataManager.loadProfilesFromFile(Constants.PROFILES_FILE);
+        TableView<Map.Entry<String, Long>> prizeTable = createCountPrizeTable(profiles);
+
+        layout.getChildren().addAll(createTopLayout(primaryStage), prizeTable, createSubtitleLabel(), createMainTable());
 
         uiCallbacks.createScene(layout, primaryStage);
+    }
+
+    private TableView<Map.Entry<String, Long>> createCountPrizeTable(List<Profile> profiles) {
+        TableView<Map.Entry<String, Long>> table = new TableView<>();
+
+        List<Prize> availablePrizes = prizeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
+        List<String> allAvailablePrizeNames = availablePrizes.stream().map(Prize::getName).collect(Collectors.toList());
+
+        List<String> allProfilePrizes = profiles.stream()
+                .flatMap(profile -> profile.getPrizes().stream())
+                .collect(Collectors.toList());
+
+        Map<String, Long> prizeCounts = new LinkedHashMap<>();
+
+        for (String prizeName : allAvailablePrizeNames) {
+            prizeCounts.put(prizeName, allProfilePrizes.stream().filter(prizeName::equals).count());
+        }
+
+        long totalPrizesCount = prizeCounts.values().stream().mapToLong(Long::longValue).sum();
+
+        prizeCounts.put("Total", totalPrizesCount);
+
+        TableColumn<Map.Entry<String, Long>, Number> numberColumn = new TableColumn<>("№");
+        numberColumn.setCellValueFactory(column -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(column.getValue()) + 1));
+        numberColumn.setSortable(false);
+
+        TableColumn<Map.Entry<String, Long>, String> prizeColumn = new TableColumn<>("Prize");
+        prizeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getKey()));
+
+        TableColumn<Map.Entry<String, Long>, Long> countColumn = new TableColumn<>("Count");
+        countColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getValue()));
+
+        table.getColumns().addAll(numberColumn, prizeColumn, countColumn);
+
+        table.getItems().addAll(prizeCounts.entrySet());
+
+        return table;
     }
 
     private HBox createTopLayout(Stage primaryStage) {
