@@ -215,6 +215,9 @@ public class PrizeManager {
             prize.setName(prizeObject.getString("name"));
             prize.setType(prizeObject.getString("type"));
             prize.setCount(prizeObject.getInt("count"));
+            if (prizeObject.has("program")) {
+                prize.setProgram(prizeObject.getString("program"));
+            }
             prizes.add(prize);
         }
 
@@ -228,6 +231,7 @@ public class PrizeManager {
             jsonObject.put("name", prize.getName());
             jsonObject.put("type", prize.getType());
             jsonObject.put("count", prize.getCount());
+            jsonObject.put("program", prize.getProgram());
             jsonArray.put(jsonObject);
         }
         return jsonArray;

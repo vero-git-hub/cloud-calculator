@@ -5,6 +5,7 @@ import java.util.Objects;
 public class Prize {
     private String name;
     private String type;
+    private String program;
     private int count;
 
     public String getName() {
@@ -19,6 +20,15 @@ public class Prize {
     public void setType(String type) {
         this.type = type;
     }
+
+    public String getProgram() {
+        return program;
+    }
+
+    public void setProgram(String program) {
+        this.program = program;
+    }
+
     public int getCount() {
         return count;
     }

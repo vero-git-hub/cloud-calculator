@@ -60,6 +60,37 @@ public class StatsManager {
     private TableView<Map.Entry<String, Long>> createCountPrizeTable(List<Profile> profiles) {
         TableView<Map.Entry<String, Long>> table = new TableView<>();
 
+        Map<String, Long> prizeCounts = getPrizeCounts(profiles);
+
+        List<Prize> availablePrizes = prizeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
+
+        table.getColumns().addAll(
+                createNumberColumnForCountTable(table),
+                createPrizeColumn(),
+                createProgramColumn(availablePrizes),
+                createCountColumn()
+        );
+
+        table.getItems().addAll(prizeCounts.entrySet());
+
+        table.setRowFactory(tv -> new TableRow<>() {
+            @Override
+            protected void updateItem(Map.Entry<String, Long> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null && "Total".equals(item.getKey())) {
+                    setStyle("-fx-font-weight: bold;");
+                } else {
+                    setStyle("");
+                }
+            }
+        });
+
+        setColumnWidths(table);
+
+        return table;
+    }
+
+    private Map<String, Long> getPrizeCounts(List<Profile> profiles) {
         List<Prize> availablePrizes = prizeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
         List<String> allAvailablePrizeNames = availablePrizes.stream().map(Prize::getName).collect(Collectors.toList());
 
@@ -74,24 +105,57 @@ public class StatsManager {
         }
 
         long totalPrizesCount = prizeCounts.values().stream().mapToLong(Long::longValue).sum();
-
         prizeCounts.put("Total", totalPrizesCount);
 
-        TableColumn<Map.Entry<String, Long>, Number> numberColumn = new TableColumn<>("№");
-        numberColumn.setCellValueFactory(column -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(column.getValue()) + 1));
-        numberColumn.setSortable(false);
+        return prizeCounts;
+    }
 
+    private TableColumn<Map.Entry<String, Long>, Number> createNumberColumnForCountTable(TableView<Map.Entry<String, Long>> table) {
+        TableColumn<Map.Entry<String, Long>, Number> numberColumn = new TableColumn<>("№");
+        numberColumn.setCellValueFactory(column -> {
+            if (column.getValue().getKey().equals("Total")) {
+                return null;
+            }
+            return new ReadOnlyObjectWrapper<>(table.getItems().indexOf(column.getValue()) + 1);
+        });
+        numberColumn.setSortable(false);
+        return numberColumn;
+    }
+
+    private TableColumn<Map.Entry<String, Long>, String> createPrizeColumn() {
         TableColumn<Map.Entry<String, Long>, String> prizeColumn = new TableColumn<>("Prize");
         prizeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getKey()));
+        return prizeColumn;
+    }
 
+    private TableColumn<Map.Entry<String, Long>, String> createProgramColumn(List<Prize> availablePrizes) {
+        Map<String, String> prizeToProgramMap = availablePrizes.stream()
+                .collect(Collectors.toMap(Prize::getName, Prize::getProgram));
+
+        TableColumn<Map.Entry<String, Long>, String> programColumn = new TableColumn<>("Program");
+        programColumn.setCellValueFactory(cellData -> {
+            String prizeName = cellData.getValue().getKey();
+            return new SimpleStringProperty(prizeToProgramMap.getOrDefault(prizeName, ""));
+        });
+        return programColumn;
+    }
+
+    private TableColumn<Map.Entry<String, Long>, Long> createCountColumn() {
         TableColumn<Map.Entry<String, Long>, Long> countColumn = new TableColumn<>("Count");
         countColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getValue()));
+        return countColumn;
+    }
 
-        table.getColumns().addAll(numberColumn, prizeColumn, countColumn);
+    private void setColumnWidths(TableView<Map.Entry<String, Long>> table) {
+        double numberColumnPercentage = 0.1;
+        double countColumnPercentage = 0.2;
+        double programColumnPercentage = 0.2;
+        double prizeColumnPercentage = 1.0 - (numberColumnPercentage + countColumnPercentage + programColumnPercentage);
 
-        table.getItems().addAll(prizeCounts.entrySet());
-
-        return table;
+        table.getColumns().get(0).prefWidthProperty().bind(table.widthProperty().multiply(numberColumnPercentage));
+        table.getColumns().get(1).prefWidthProperty().bind(table.widthProperty().multiply(prizeColumnPercentage));
+        table.getColumns().get(2).prefWidthProperty().bind(table.widthProperty().multiply(programColumnPercentage));
+        table.getColumns().get(3).prefWidthProperty().bind(table.widthProperty().multiply(countColumnPercentage));
     }
 
     private HBox createTopLayout(Stage primaryStage) {
@@ -127,10 +191,10 @@ public class StatsManager {
 
         table.getColumns().addAll(
                 numberColumn,
-                dateColumn,
                 nameColumn,
                 prizesColumn,
-                updateColumn
+                updateColumn,
+                dateColumn
         );
 
         List<Profile> profiles = profileDataManager.loadProfilesFromFile(Constants.PROFILES_FILE);
