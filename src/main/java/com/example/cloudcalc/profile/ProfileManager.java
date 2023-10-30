@@ -151,8 +151,8 @@ public class ProfileManager {
         return profileInfoBox;
     }
 
-    public TableColumn<Profile, Void> createNumberingColumn(TableView<Profile> table) {
-        TableColumn<Profile, Void> numberColumn = new TableColumn<>("#");
+    public TableColumn<Profile, Void> createNumberingColumn() {
+        TableColumn<Profile, Void> numberColumn = new TableColumn<>("№");
         numberColumn.setMinWidth(40);
         numberColumn.setCellValueFactory(param -> null);
         numberColumn.setCellFactory(col -> {
@@ -179,12 +179,10 @@ public class ProfileManager {
     }
 
     public TableColumn<Profile, Void> createBadgesColumn(Stage primaryStage) {
-        TableColumn<Profile, Void> badgesColumn = new TableColumn<>("Badges");
+        TableColumn<Profile, Void> badgesColumn = new TableColumn<>("Scan");
         badgesColumn.setCellValueFactory(param -> null);
         badgesColumn.setCellFactory(col -> {
             return new TableCell<Profile, Void>() {
-                final Button scanButton = new Button("Scan");
-
                 @Override
                 protected void updateItem(Void item, boolean empty) {
                     super.updateItem(item, empty);
@@ -193,13 +191,14 @@ public class ProfileManager {
                         setGraphic(null);
                     } else {
                         Profile profile = getTableView().getItems().get(getIndex());
-                        scanButton.setOnAction(e -> {
+                        EventHandler<ActionEvent> scanAction = e -> {
                             ArrayList<String> siteLinks = dataExtractor.performScan(profile);
                             profile.setLastScannedDate(getCurrentDate());
                             profileDataManager.updateProfile(profile);
 
                             scanManager.showScanScreen(primaryStage, profile, siteLinks);
-                        });
+                        };
+                        Button scanButton = ButtonFactory.createScanButton(scanAction);
                         setGraphic(scanButton);
                     }
                 }
@@ -216,7 +215,7 @@ public class ProfileManager {
 
 
     public TableColumn<Profile, Profile> createViewingColumn(Stage primaryStage) {
-        TableColumn<Profile, Profile> viewingColumn = new TableColumn<>("Viewing");
+        TableColumn<Profile, Profile> viewingColumn = new TableColumn<>("View");
         viewingColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
         viewingColumn.setCellFactory(param -> new TableCell<Profile, Profile>() {
             @Override
@@ -227,17 +226,18 @@ public class ProfileManager {
                     return;
                 }
 
-                Button detailButton = ButtonFactory.createButton("Details", e -> {
+                EventHandler<ActionEvent> viewAction = e -> {
                     showProfileScreen(primaryStage, profile);
-                }, null);
-                setGraphic(detailButton);
+                };
+                Button viewButton = ButtonFactory.createViewButton(viewAction);
+                setGraphic(viewButton);
             }
         });
         return viewingColumn;
     }
 
     public TableColumn<Profile, Profile> createActionColumn(Stage primaryStage) {
-        TableColumn<Profile, Profile> actionColumn = new TableColumn<>("Actions");
+        TableColumn<Profile, Profile> actionColumn = new TableColumn<>("Delete");
         actionColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
         actionColumn.setCellFactory(param -> new TableCell<Profile, Profile>() {
             @Override

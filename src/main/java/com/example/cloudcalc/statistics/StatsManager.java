@@ -36,6 +36,8 @@ public class StatsManager {
     private final DataExtractor dataExtractor;
     private final BadgeManager badgeManager;
     private final PrizeManager prizeManager;
+    private TableView<Profile> mainTable;
+    private TableView<Map.Entry<String, Long>> prizeTable;
 
     public StatsManager(UICallbacks uiCallbacks, ProfileManager profileManager, ProfileDataManager profileDataManager, DataExtractor dataExtractor, BadgeManager badgeManager, PrizeManager prizeManager) {
         this.uiCallbacks = uiCallbacks;
@@ -50,7 +52,7 @@ public class StatsManager {
         VBox layout = new VBox(10);
 
         List<Profile> profiles = profileDataManager.loadProfilesFromFile(Constants.PROFILES_FILE);
-        TableView<Map.Entry<String, Long>> prizeTable = createCountPrizeTable(profiles);
+        prizeTable = createCountPrizeTable(profiles);
 
         layout.getChildren().addAll(createTopLayout(primaryStage), prizeTable, createSubtitleLabel(), createMainTable());
 
@@ -58,22 +60,22 @@ public class StatsManager {
     }
 
     private TableView<Map.Entry<String, Long>> createCountPrizeTable(List<Profile> profiles) {
-        TableView<Map.Entry<String, Long>> table = new TableView<>();
+        prizeTable = new TableView<>();
 
         Map<String, Long> prizeCounts = getPrizeCounts(profiles);
 
         List<Prize> availablePrizes = prizeManager.loadPrizesFromFile(Constants.PRIZES_FILE);
 
-        table.getColumns().addAll(
-                createNumberColumnForCountTable(table),
+        prizeTable.getColumns().addAll(
+                createNumberColumnForCountTable(),
                 createPrizeColumn(),
                 createProgramColumn(availablePrizes),
                 createCountColumn()
         );
 
-        table.getItems().addAll(prizeCounts.entrySet());
+        prizeTable.getItems().addAll(prizeCounts.entrySet());
 
-        table.setRowFactory(tv -> new TableRow<>() {
+        prizeTable.setRowFactory(tv -> new TableRow<>() {
             @Override
             protected void updateItem(Map.Entry<String, Long> item, boolean empty) {
                 super.updateItem(item, empty);
@@ -85,9 +87,9 @@ public class StatsManager {
             }
         });
 
-        setColumnWidths(table);
+        setColumnWidths();
 
-        return table;
+        return prizeTable;
     }
 
     private Map<String, Long> getPrizeCounts(List<Profile> profiles) {
@@ -110,13 +112,13 @@ public class StatsManager {
         return prizeCounts;
     }
 
-    private TableColumn<Map.Entry<String, Long>, Number> createNumberColumnForCountTable(TableView<Map.Entry<String, Long>> table) {
+    private TableColumn<Map.Entry<String, Long>, Number> createNumberColumnForCountTable() {
         TableColumn<Map.Entry<String, Long>, Number> numberColumn = new TableColumn<>("№");
         numberColumn.setCellValueFactory(column -> {
             if (column.getValue().getKey().equals("Total")) {
                 return null;
             }
-            return new ReadOnlyObjectWrapper<>(table.getItems().indexOf(column.getValue()) + 1);
+            return new ReadOnlyObjectWrapper<>(prizeTable.getItems().indexOf(column.getValue()) + 1);
         });
         numberColumn.setSortable(false);
         return numberColumn;
@@ -146,16 +148,16 @@ public class StatsManager {
         return countColumn;
     }
 
-    private void setColumnWidths(TableView<Map.Entry<String, Long>> table) {
+    private void setColumnWidths() {
         double numberColumnPercentage = 0.1;
         double countColumnPercentage = 0.2;
         double programColumnPercentage = 0.2;
         double prizeColumnPercentage = 1.0 - (numberColumnPercentage + countColumnPercentage + programColumnPercentage);
 
-        table.getColumns().get(0).prefWidthProperty().bind(table.widthProperty().multiply(numberColumnPercentage));
-        table.getColumns().get(1).prefWidthProperty().bind(table.widthProperty().multiply(prizeColumnPercentage));
-        table.getColumns().get(2).prefWidthProperty().bind(table.widthProperty().multiply(programColumnPercentage));
-        table.getColumns().get(3).prefWidthProperty().bind(table.widthProperty().multiply(countColumnPercentage));
+        prizeTable.getColumns().get(0).prefWidthProperty().bind(prizeTable.widthProperty().multiply(numberColumnPercentage));
+        prizeTable.getColumns().get(1).prefWidthProperty().bind(prizeTable.widthProperty().multiply(prizeColumnPercentage));
+        prizeTable.getColumns().get(2).prefWidthProperty().bind(prizeTable.widthProperty().multiply(programColumnPercentage));
+        prizeTable.getColumns().get(3).prefWidthProperty().bind(prizeTable.widthProperty().multiply(countColumnPercentage));
     }
 
     private HBox createTopLayout(Stage primaryStage) {
@@ -172,24 +174,24 @@ public class StatsManager {
     }
 
     private TableView<Profile> createMainTable() {
-        TableView<Profile> table = new TableView<>();
+        mainTable = new TableView<>();
 
-        TableColumn<Profile, ?> numberColumn = createNumberColumn(table);
-        numberColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.05));
+        TableColumn<Profile, ?> numberColumn = createNumberColumn();
+        numberColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.05));
 
         TableColumn<Profile, ?> dateColumn = createLastUpdatedColumn();
-        dateColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.20));
+        dateColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.20));
 
         TableColumn<Profile, ?> nameColumn = profileManager.createNameColumn();
-        nameColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.10));
+        nameColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.10));
 
         TableColumn<Profile, ?> prizesColumn = createPrizesColumn();
-        prizesColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.50));
+        prizesColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.50));
 
-        TableColumn<Profile, ?> updateColumn = createUpdateColumn(table);
-        updateColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.10));
+        TableColumn<Profile, ?> updateColumn = createUpdateColumn();
+        updateColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.10));
 
-        table.getColumns().addAll(
+        mainTable.getColumns().addAll(
                 numberColumn,
                 nameColumn,
                 prizesColumn,
@@ -198,21 +200,20 @@ public class StatsManager {
         );
 
         List<Profile> profiles = profileDataManager.loadProfilesFromFile(Constants.PROFILES_FILE);
-        table.getItems().addAll(profiles);
-        return table;
+        mainTable.getItems().addAll(profiles);
+        return mainTable;
+    }
+
+    private TableColumn<Profile, Integer> createNumberColumn() {
+        TableColumn<Profile, Integer> numberColumn = new TableColumn<>("№");
+        numberColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(mainTable.getItems().indexOf(cellData.getValue()) + 1));
+        return numberColumn;
     }
 
     private TableColumn<Profile, String> createLastUpdatedColumn() {
         TableColumn<Profile, String> lastUpdatedColumn = new TableColumn<>("Date");
         lastUpdatedColumn.setCellValueFactory(new PropertyValueFactory<>("lastScannedDate"));
         return lastUpdatedColumn;
-    }
-
-
-    private TableColumn<Profile, Integer> createNumberColumn(TableView<Profile> table) {
-        TableColumn<Profile, Integer> numberColumn = new TableColumn<>("№");
-        numberColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(cellData.getValue()) + 1));
-        return numberColumn;
     }
 
     private TableColumn<Profile, String> createPrizesColumn() {
@@ -227,7 +228,7 @@ public class StatsManager {
         return prizesColumn;
     }
 
-    private TableColumn<Profile, Void> createUpdateColumn(TableView<Profile> table) {
+    private TableColumn<Profile, Void> createUpdateColumn() {
         TableColumn<Profile, Void> getPrizesColumn = new TableColumn<>("Update");
         getPrizesColumn.setCellValueFactory(param -> null);
         getPrizesColumn.setCellFactory(col -> {
@@ -260,7 +261,8 @@ public class StatsManager {
 
                             profileDataManager.updateProfile(profile);
 
-                            table.refresh();
+                            mainTable.refresh();
+                            updatePrizeTable();
                         });
                         setGraphic(getPrizesButton);
                     }
@@ -268,6 +270,13 @@ public class StatsManager {
             };
         });
         return getPrizesColumn;
+    }
+
+    private void updatePrizeTable() {
+        Map<String, Long> updatedPrizeCounts = getPrizeCounts(profileDataManager.loadProfilesFromFile(Constants.PROFILES_FILE));
+        prizeTable.getItems().clear();
+        prizeTable.getItems().addAll(updatedPrizeCounts.entrySet());
+        prizeTable.refresh();
     }
 
 }

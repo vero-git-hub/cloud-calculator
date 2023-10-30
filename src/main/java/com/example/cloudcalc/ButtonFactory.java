@@ -12,13 +12,15 @@ import java.util.function.Supplier;
 
 public class ButtonFactory {
 
-    private static final String DELETE_ICON = "/images/delete-48.png";
-    private static final String PRIZE_ICON = "/images/gift-64.png";
+    private static final String DELETE_ICON = "/images/main/delete-48.png";
+    private static final String PRIZE_ICON = "/images/main/gift-64.png";
     private static final String ADD_ICON = "/images/plus-64.png";
     private static final String BACK_ICON = "/images/go-back-64.png";
-    private static final String IGNORE_ICON = "/images/no-image-40.png";
-    private static final String STATS_ICON = "/images/icons8-euro-money-64.png";
+    private static final String IGNORE_ICON = "/images/main/no-image-40.png";
+    private static final String STATS_ICON = "/images/main/euro-money-64.png";
     private static final String UPDATE_ICON = "/images/update-64.png";
+    private static final String VIEW_ICON = "/images/main/eye-64.png";
+    private static final String SCAN_ICON = "/images/main/scan/loupe-32.png";
 
     public static Button createSavePrizeButton(Consumer<ActionEvent> action) {
         Button saveButton = new Button("Save");
@@ -79,6 +81,16 @@ public class ButtonFactory {
 
     public static Button createUpdateButton(EventHandler<ActionEvent> action) {
         Image image = new Image(ButtonFactory.class.getResourceAsStream(UPDATE_ICON));
+        return createButton("", action, image);
+    }
+
+    public static Button createViewButton(EventHandler<ActionEvent> action) {
+        Image image = new Image(ButtonFactory.class.getResourceAsStream(VIEW_ICON));
+        return createButton("", action, image);
+    }
+
+    public static Button createScanButton(EventHandler<ActionEvent> action) {
+        Image image = new Image(ButtonFactory.class.getResourceAsStream(SCAN_ICON));
         return createButton("", action, image);
     }
 

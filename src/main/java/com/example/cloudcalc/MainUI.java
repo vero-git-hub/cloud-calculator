@@ -34,8 +34,9 @@ public class MainUI implements UICallbacks{
     private final ProfileManager profileManager = createProfileManager();
     private final BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeManager, this, profileDataManager);
     private final StatsManager statsManager = new StatsManager(this, profileManager, profileDataManager, dataExtractor, badgeManager, prizeManager);
-    private final int  WIDTH_SCENE = 600;
-    private final int  HEIGHT_SCENE = 500;
+    private final int  WIDTH_SCENE = 820;
+    private final int  HEIGHT_SCENE = 620;
+    private TableView<Profile> mainTable;
 
     private ScanManager createScanManager() {
         BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeManager, this, profileDataManager);
@@ -59,6 +60,10 @@ public class MainUI implements UICallbacks{
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(layout);
 
+        VBox.setVgrow(table, Priority.ALWAYS);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+
         createScene(scrollPane, primaryStage);
     }
 
@@ -73,36 +78,34 @@ public class MainUI implements UICallbacks{
     }
 
     private TableView<Profile> initializeTable(Stage primaryStage) {
-        TableView<Profile> table = new TableView<>();
+        mainTable = new TableView<>();
 
-        TableColumn<Profile, Void> numberColumn = profileManager.createNumberingColumn(table);
+        TableColumn<Profile, Void> numberColumn = profileManager.createNumberingColumn();
         TableColumn<Profile, String> nameColumn = profileManager.createNameColumn();
         TableColumn<Profile, Void> badgesColumn = profileManager.createBadgesColumn(primaryStage);
         TableColumn<Profile, Profile> viewingColumn = profileManager.createViewingColumn(primaryStage);
         TableColumn<Profile, Profile> actionColumn = profileManager.createActionColumn(primaryStage);
 
-        configureTableColumnsWidth(table, numberColumn, nameColumn, badgesColumn, viewingColumn, actionColumn);
-        table.getColumns().addAll(numberColumn, nameColumn, badgesColumn, viewingColumn, actionColumn);
+        mainTable.getColumns().addAll(numberColumn, nameColumn, badgesColumn, viewingColumn, actionColumn);
 
         List<Profile> profiles = profileDataManager.loadProfilesFromFile(Constants.PROFILES_FILE);
-        table.getItems().addAll(profiles);
-
-        return table;
+        mainTable.getItems().addAll(profiles);
+        configureTableColumnsWidth();
+        return mainTable;
     }
 
-    private void configureTableColumnsWidth(TableView<Profile> table, TableColumn<Profile, Void> numberColumn, TableColumn<Profile, String> nameColumn, TableColumn<Profile, Void> badgesColumn, TableColumn<Profile, Profile> viewingColumn, TableColumn<Profile, Profile> actionColumn) {
-        double width = 0.18;
-        numberColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.05));
-        nameColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.40));
-        badgesColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
-        viewingColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
-        actionColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
+    private void configureTableColumnsWidth() {
+        double numberColumnPercentage = 0.05;
+        double badgesColumnPercentage = 0.1;
+        double viewingColumnPercentage = 0.1;
+        double actionColumnPercentage = 0.1;
+        double nameColumnPercentage = 1.0 - (numberColumnPercentage + badgesColumnPercentage + viewingColumnPercentage + actionColumnPercentage);
 
-        numberColumn.setResizable(false);
-        nameColumn.setResizable(false);
-        badgesColumn.setResizable(false);
-        viewingColumn.setResizable(false);
-        actionColumn.setResizable(false);
+        mainTable.getColumns().get(0).prefWidthProperty().bind(mainTable.widthProperty().multiply(numberColumnPercentage));
+        mainTable.getColumns().get(1).prefWidthProperty().bind(mainTable.widthProperty().multiply(nameColumnPercentage));
+        mainTable.getColumns().get(2).prefWidthProperty().bind(mainTable.widthProperty().multiply(badgesColumnPercentage));
+        mainTable.getColumns().get(3).prefWidthProperty().bind(mainTable.widthProperty().multiply(viewingColumnPercentage));
+        mainTable.getColumns().get(4).prefWidthProperty().bind(mainTable.widthProperty().multiply(actionColumnPercentage));
     }
 
     @Override
