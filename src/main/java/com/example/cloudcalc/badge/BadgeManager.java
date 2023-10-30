@@ -2,7 +2,7 @@ package com.example.cloudcalc.badge;
 
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.DataExtractor;
-import com.example.cloudcalc.UICallbacks;
+import com.example.cloudcalc.badge.ignored.FileOperationManager;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
@@ -14,16 +14,16 @@ import java.util.Set;
 
 public class BadgeManager {
 
-    private final IgnoredBadgeManager ignoredBadgeManager;
     private final DataExtractor dataExtractor;
     private final PrizeManager prizeManager;
     private final ProfileDataManager profileDataManager;
+    private final FileOperationManager fileOperationManager;
     private final int COUNT_FOR_PDF_PRIZE = 7;
 
-    public BadgeManager(DataExtractor dataExtractor, PrizeManager prizeManager, UICallbacks uiCallbacks, ProfileDataManager profileDataManager) {
+    public BadgeManager(DataExtractor dataExtractor, PrizeManager prizeManager, ProfileDataManager profileDataManager, FileOperationManager fileOperationManager) {
         this.dataExtractor = dataExtractor;
         this.prizeManager = prizeManager;
-        this.ignoredBadgeManager = new IgnoredBadgeManager(uiCallbacks);
+        this.fileOperationManager = fileOperationManager;
         this.profileDataManager = profileDataManager;
     }
 
@@ -36,7 +36,7 @@ public class BadgeManager {
      * @return received badges without ignore
      */
     public List<String> filterSkillBadges(List<String> receivedBadges) {
-        List<String> ignoreBadges = ignoredBadgeManager.loadIgnoredBadgesFromFile(Constants.IGNORE_FILE);
+        List<String> ignoreBadges = fileOperationManager.loadIgnoredBadgesFromFile(Constants.IGNORE_FILE);
         if (!ignoreBadges.isEmpty()) {
             receivedBadges.removeAll(ignoreBadges);
         }

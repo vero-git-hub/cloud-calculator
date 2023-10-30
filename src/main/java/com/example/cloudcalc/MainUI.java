@@ -1,7 +1,8 @@
 package com.example.cloudcalc;
 
 import com.example.cloudcalc.badge.BadgeManager;
-import com.example.cloudcalc.badge.IgnoredBadgeManager;
+import com.example.cloudcalc.badge.ignored.FileOperationManager;
+import com.example.cloudcalc.badge.ignored.IgnoredBadgeScreen;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
@@ -28,18 +29,23 @@ public class MainUI implements UICallbacks{
 
     private final ProfileDataManager profileDataManager = new ProfileDataManager();
     private final DataExtractor dataExtractor = new DataExtractor();
-    private final IgnoredBadgeManager ignoredBadgeManager = new IgnoredBadgeManager(this);
     private final PrizeManager prizeManager = new PrizeManager(this);
+    private final FileOperationManager fileOperationManager = new FileOperationManager();
     private final ScanManager scanManager = createScanManager();
     private final ProfileManager profileManager = createProfileManager();
-    private final BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeManager, this, profileDataManager);
+    private final IgnoredBadgeScreen ignoredBadgeScreen = createIgnoredBadgeScreen();
+
+    private final BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeManager, profileDataManager, fileOperationManager);
     private final StatsManager statsManager = new StatsManager(this, profileManager, profileDataManager, dataExtractor, badgeManager, prizeManager);
-    private final int  WIDTH_SCENE = 820;
-    private final int  HEIGHT_SCENE = 620;
+
     private TableView<Profile> mainTable;
 
+    private IgnoredBadgeScreen createIgnoredBadgeScreen() {
+        return new IgnoredBadgeScreen(this, fileOperationManager);
+    }
+
     private ScanManager createScanManager() {
-        BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeManager, this, profileDataManager);
+        BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeManager, profileDataManager, fileOperationManager);
         return new ScanManager(badgeManager, this, profileDataManager);
     }
 
@@ -70,7 +76,7 @@ public class MainUI implements UICallbacks{
     private HBox initializeButtons(Stage primaryStage) {
         Button addButton = ButtonFactory.createAddButton(e -> profileManager.showCreateProfileScreen(primaryStage));
         Button statsButton = ButtonFactory.createStatsButton(e -> statsManager.showStatsScreen(primaryStage));
-        Button ignoreButton = ButtonFactory.createIgnoreButton(e -> ignoredBadgeManager.showIgnoreScreen(primaryStage));
+        Button ignoreButton = ButtonFactory.createIgnoreButton(e -> ignoredBadgeScreen.showIgnoreScreen(primaryStage));
         Button prizeButton = ButtonFactory.createPrizeButton(e -> prizeManager.showPrizesScreen(primaryStage));
 
         Label titleLabel = createLabel("PROFILES");
@@ -190,9 +196,30 @@ public class MainUI implements UICallbacks{
     }
 
     @Override
+    public HBox createTopLayoutForScan(Button backButton, TextFlow textFlow) {
+        HBox topLayout = new HBox(10);
+        topLayout.setAlignment(Pos.CENTER);
+
+        Pane leftSpacer = new Pane();
+        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
+
+        Pane rightSpacer = new Pane();
+        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
+
+        topLayout.getChildren().add(backButton);
+        topLayout.getChildren().add(leftSpacer);
+        topLayout.getChildren().add(textFlow);
+        topLayout.getChildren().add(rightSpacer);
+
+        return topLayout;
+    }
+
+    @Override
     public void createScene(Parent layout, Stage primaryStage) {
         layout.setStyle("-fx-font-size: 18;-fx-padding: 10px;");
 
+        int WIDTH_SCENE = 820;
+        int HEIGHT_SCENE = 620;
         Scene mainScene = new Scene(layout, WIDTH_SCENE, HEIGHT_SCENE);
         mainScene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
 

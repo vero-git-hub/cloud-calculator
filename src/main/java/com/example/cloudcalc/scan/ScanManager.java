@@ -11,15 +11,20 @@ import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,13 +46,23 @@ public class ScanManager {
         VBox layout = new VBox(10);
 
         Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
-        String title = String.format("SCAN for %s", profile.getName());
-        Label titleLabel = uiCallbacks.createLabel(title);
+
+        String preText = "SCAN for ";
+        Text preTextLabel = new Text(preText);
+        Hyperlink nameLink = new Hyperlink(profile.getName());
+        nameLink.setOnAction(e -> {
+            try {
+                Desktop.getDesktop().browse(new URI(profile.getProfileLink()));
+            } catch (IOException | URISyntaxException ex) {
+                ex.printStackTrace();
+            }
+        });
+        TextFlow textFlow = new TextFlow(preTextLabel, nameLink);
 
         Label subtitleLabel = new Label("Labs with the same names are counted as one");
         subtitleLabel.setStyle("-fx-font-style: italic;");
 
-        HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel);
+        HBox topLayout = uiCallbacks.createTopLayoutForScan(backButton, textFlow);
 
         BadgeCounts badgeCounts = badgeManager.calculateBadgeCounts(profile, siteLinks);
         TableView<BadgeCategory> mainCategoriesTable = createMainCategoriesTable(badgeCounts);
