@@ -1,6 +1,6 @@
 package com.example.cloudcalc.scan;
 
-import com.example.cloudcalc.ButtonFactory;
+import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.UICallbacks;
 import com.example.cloudcalc.badge.BadgeCategory;
@@ -11,9 +11,9 @@ import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -86,8 +86,9 @@ public class ScanManager {
         List<BadgeCategory> categories = new ArrayList<>();
         categories.add(new BadgeCategory(Constants.TOTAL, String.valueOf(badgeCounts.getTotal())));
         categories.add(new BadgeCategory(Constants.IGNORE, String.valueOf(badgeCounts.getIgnore())));
+        categories.add(new BadgeCategory(Constants.ARCADE, String.valueOf(badgeCounts.getArcade())));
         categories.add(new BadgeCategory(Constants.SKILL, String.valueOf(badgeCounts.getSkill())));
-        categories.add(new BadgeCategory(Constants.PDF_TOTAL, String.valueOf(badgeCounts.getTotalPDF())));
+        categories.add(new BadgeCategory(Constants.PDF_TOTAL, String.valueOf(badgeCounts.getPdf())));
         return categories;
     }
 
@@ -137,9 +138,11 @@ public class ScanManager {
     }
 
     private TableColumn<BadgeCategory, Integer> createIndexColumn(TableView<BadgeCategory> table) {
-        TableColumn<BadgeCategory, Integer> indexColumn = new TableColumn<>("No.");
-        indexColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(cellData.getValue()) + 1));
-        indexColumn.setResizable(false);
+        TableColumn<BadgeCategory, Integer> indexColumn = new TableColumn<>("№");
+        indexColumn.setCellValueFactory(column -> {
+            return new ReadOnlyObjectWrapper<>(table.getItems().indexOf(column.getValue()) + 1);
+        });
+
         indexColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.10));
         return indexColumn;
     }

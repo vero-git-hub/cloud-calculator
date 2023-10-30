@@ -2,7 +2,6 @@ package com.example.cloudcalc.badge;
 
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.DataExtractor;
-import com.example.cloudcalc.badge.ignored.FileOperationManager;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
@@ -19,6 +18,8 @@ public class BadgeManager {
     private final ProfileDataManager profileDataManager;
     private final FileOperationManager fileOperationManager;
     private final int COUNT_FOR_PDF_PRIZE = 7;
+    int countIgnoreBadge;
+    int countArcadeBadge;
 
     public BadgeManager(DataExtractor dataExtractor, PrizeManager prizeManager, ProfileDataManager profileDataManager, FileOperationManager fileOperationManager) {
         this.dataExtractor = dataExtractor;
@@ -31,25 +32,12 @@ public class BadgeManager {
         return prizeManager;
     }
 
-    /**
-     * Delete ignore from received badges
-     * @return received badges without ignore
-     */
-    public List<String> filterSkillBadges(List<String> receivedBadges) {
-        List<String> ignoreBadges = fileOperationManager.loadIgnoredBadgesFromFile(Constants.IGNORE_FILE);
-        if (!ignoreBadges.isEmpty()) {
-            receivedBadges.removeAll(ignoreBadges);
-        }
-        return receivedBadges;
-    }
-
     public BadgeCounts calculateBadgeCounts(Profile profile, ArrayList<String> receivedBadges) {
         BadgeCounts badgeCounts = new BadgeCounts();
         int total = receivedBadges.size();
 
-        List<String> skillBadges = filterSkillBadges(receivedBadges);
+        List<String> skillBadges = filterSkillBadges(receivedBadges, false);
         int skill = skillBadges.size();
-        int ignore = calculateIgnoreBadges(total, skill);
 
         List<String> pdfBadges = getPDFBadges(profile, skillBadges);
         int totalPDF = pdfBadges.size();
@@ -60,22 +48,59 @@ public class BadgeManager {
         int prizeActivity = skill;
 
         List<String> typesList = dataExtractor.typeBadgeExtractedData;
-        typesList = filterSkillBadges(typesList);
+        typesList = filterSkillBadges(typesList, true);
 
         int prizeTypeBadge = typesList.size();
 
         prizeManager.determinePrizesForBadgeCount(prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
 
+        countArcadeBadge = countArcadeBadge + (skill / 3);
+
         badgeCounts.setTotal(total);
-        badgeCounts.setIgnore(ignore);
+        badgeCounts.setIgnore(countIgnoreBadge);
+        badgeCounts.setArcade(countArcadeBadge);
         badgeCounts.setSkill(skill);
-        badgeCounts.setTotalPDF(totalPDF);
+        badgeCounts.setPdf(totalPDF);
         badgeCounts.setPrizePDF(prizePDF);
         badgeCounts.setPrizeSkill(prizeSkill);
         badgeCounts.setPrizeActivity(prizeActivity);
         badgeCounts.setPrizePL(prizeTypeBadge);
 
         return badgeCounts;
+    }
+
+    /**
+     * Delete ignore & arcade from received badges
+     * @return received skills badges
+     */
+    public List<String> filterSkillBadges(List<String> receivedBadges, boolean isType) {
+        List<String> ignoreBadges = fileOperationManager.loadBadgesFromFile(Constants.IGNORE_FILE);
+        List<String> matchedIgnoreBadges = new ArrayList<>();
+        List<String> arcadeBadges = fileOperationManager.loadBadgesFromFile(Constants.ARCADE_FILE);
+        List<String> matchedArcadeBadges = new ArrayList<>();
+
+        for (String badge : receivedBadges) {
+            if (ignoreBadges.contains(badge)) {
+                matchedIgnoreBadges.add(badge);
+            }
+        }
+
+        receivedBadges.removeAll(matchedIgnoreBadges);
+
+        for (String badge : receivedBadges) {
+            if (arcadeBadges.contains(badge)) {
+                matchedArcadeBadges.add(badge);
+            }
+        }
+
+        receivedBadges.removeAll(matchedArcadeBadges);
+
+        if(!isType) {
+            countIgnoreBadge = matchedIgnoreBadges.size();
+            countArcadeBadge = matchedArcadeBadges.size();
+        }
+
+        return receivedBadges;
     }
 
     /**
@@ -105,10 +130,6 @@ public class BadgeManager {
         }
 
         return prizePDF;
-    }
-
-    private int calculateIgnoreBadges(int total, int skill) {
-        return total - skill;
     }
 
     /**

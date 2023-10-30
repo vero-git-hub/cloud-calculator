@@ -1,8 +1,10 @@
 package com.example.cloudcalc;
 
 import com.example.cloudcalc.badge.BadgeManager;
-import com.example.cloudcalc.badge.ignored.FileOperationManager;
-import com.example.cloudcalc.badge.ignored.IgnoredBadgeScreen;
+import com.example.cloudcalc.badge.arcade.ArcadeManager;
+import com.example.cloudcalc.badge.FileOperationManager;
+import com.example.cloudcalc.badge.ignored.IgnoreManager;
+import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
@@ -33,15 +35,21 @@ public class MainUI implements UICallbacks{
     private final FileOperationManager fileOperationManager = new FileOperationManager();
     private final ScanManager scanManager = createScanManager();
     private final ProfileManager profileManager = createProfileManager();
-    private final IgnoredBadgeScreen ignoredBadgeScreen = createIgnoredBadgeScreen();
+    private final IgnoreManager ignoreManager = createIgnoredBadgeScreen();
 
     private final BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeManager, profileDataManager, fileOperationManager);
     private final StatsManager statsManager = new StatsManager(this, profileManager, profileDataManager, dataExtractor, badgeManager, prizeManager);
 
+    private final ArcadeManager arcadeManager = createArcadeManager();
+
     private TableView<Profile> mainTable;
 
-    private IgnoredBadgeScreen createIgnoredBadgeScreen() {
-        return new IgnoredBadgeScreen(this, fileOperationManager);
+    private ArcadeManager createArcadeManager() {
+        return new ArcadeManager(this, fileOperationManager);
+    }
+
+    private IgnoreManager createIgnoredBadgeScreen() {
+        return new IgnoreManager(this, fileOperationManager);
     }
 
     private ScanManager createScanManager() {
@@ -76,11 +84,12 @@ public class MainUI implements UICallbacks{
     private HBox initializeButtons(Stage primaryStage) {
         Button addButton = ButtonFactory.createAddButton(e -> profileManager.showCreateProfileScreen(primaryStage));
         Button statsButton = ButtonFactory.createStatsButton(e -> statsManager.showStatsScreen(primaryStage));
-        Button ignoreButton = ButtonFactory.createIgnoreButton(e -> ignoredBadgeScreen.showIgnoreScreen(primaryStage));
+        Button ignoreButton = ButtonFactory.createIgnoreButton(e -> ignoreManager.getIgnoreScreen().showScreen(primaryStage));
         Button prizeButton = ButtonFactory.createPrizeButton(e -> prizeManager.showPrizesScreen(primaryStage));
+        Button arcadeButton = ButtonFactory.createArcadeButton(e -> arcadeManager.getArcadeScreen().showScreen(primaryStage));
 
         Label titleLabel = createLabel("PROFILES");
-        return createExtendedTopLayout(Arrays.asList(statsButton, addButton), titleLabel, ignoreButton, prizeButton);
+        return createExtendedTopLayout(Arrays.asList(statsButton, addButton), titleLabel, arcadeButton, ignoreButton, prizeButton);
     }
 
     private TableView<Profile> initializeTable(Stage primaryStage) {

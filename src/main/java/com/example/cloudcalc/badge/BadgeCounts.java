@@ -3,9 +3,10 @@ package com.example.cloudcalc.badge;
 public class BadgeCounts {
 
     private int total;
-    private int skill;
     private int ignore;
-    private int totalPDF;
+    private int arcade;
+    private int skill;
+    private int pdf;
     private int prizePDF;
     private int prizeSkill;
     private int prizeActivity;
@@ -19,14 +20,6 @@ public class BadgeCounts {
         this.total = total;
     }
 
-    public int getSkill() {
-        return skill;
-    }
-
-    public void setSkill(int skill) {
-        this.skill = skill;
-    }
-
     public int getIgnore() {
         return ignore;
     }
@@ -35,12 +28,28 @@ public class BadgeCounts {
         this.ignore = ignore;
     }
 
-    public int getTotalPDF() {
-        return totalPDF;
+    public int getArcade() {
+        return arcade;
     }
 
-    public void setTotalPDF(int totalPDF) {
-        this.totalPDF = totalPDF;
+    public void setArcade(int arcade) {
+        this.arcade = arcade;
+    }
+
+    public int getSkill() {
+        return skill;
+    }
+
+    public void setSkill(int skill) {
+        this.skill = skill;
+    }
+
+    public int getPdf() {
+        return pdf;
+    }
+
+    public void setPdf(int pdf) {
+        this.pdf = pdf;
     }
 
     public int getPrizePDF() {

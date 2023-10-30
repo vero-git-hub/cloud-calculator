@@ -1,6 +1,7 @@
 package com.example.cloudcalc.profile;
 
 import com.example.cloudcalc.*;
+import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.scan.ScanManager;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;

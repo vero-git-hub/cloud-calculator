@@ -1,4 +1,4 @@
-package com.example.cloudcalc;
+package com.example.cloudcalc.button;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -20,7 +20,8 @@ public class ButtonFactory {
     private static final String STATS_ICON = "/images/main/euro-money-64.png";
     private static final String UPDATE_ICON = "/images/update-64.png";
     private static final String VIEW_ICON = "/images/main/eye-64.png";
-    private static final String SCAN_ICON = "/images/main/scan/loupe-32.png";
+    private static final String SCAN_ICON = "/images/main/scan/search-64.png";
+    private static final String ARCADE_ICON = "/images/main/a-64.png";
 
     public static Button createSavePrizeButton(Consumer<ActionEvent> action) {
         Button saveButton = new Button("Save");
@@ -30,6 +31,15 @@ public class ButtonFactory {
 
     public static Button createSaveIgnoreBadgeButton(Runnable action, Supplier<TextField> nameFieldSupplier) {
         Button saveButton = new Button("Save Ignore Badge");
+        saveButton.setOnAction(e -> {
+            TextField nameField = nameFieldSupplier.get();
+            action.run();
+        });
+        return saveButton;
+    }
+
+    public static Button createSaveArcadeButton(Runnable action, Supplier<TextField> nameFieldSupplier) {
+        Button saveButton = new Button("Save");
         saveButton.setOnAction(e -> {
             TextField nameField = nameFieldSupplier.get();
             action.run();
@@ -91,6 +101,11 @@ public class ButtonFactory {
 
     public static Button createScanButton(EventHandler<ActionEvent> action) {
         Image image = new Image(ButtonFactory.class.getResourceAsStream(SCAN_ICON));
+        return createButton("", action, image);
+    }
+
+    public static Button createArcadeButton(EventHandler<ActionEvent> action) {
+        Image image = new Image(ButtonFactory.class.getResourceAsStream(ARCADE_ICON));
         return createButton("", action, image);
     }
 

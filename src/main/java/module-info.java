@@ -18,4 +18,6 @@ module com.example.cloudcalc {
     opens com.example.cloudcalc.badge to javafx.fxml;
     exports com.example.cloudcalc.prize;
     opens com.example.cloudcalc.prize to javafx.fxml;
+    exports com.example.cloudcalc.button;
+    opens com.example.cloudcalc.button to javafx.fxml;
 }

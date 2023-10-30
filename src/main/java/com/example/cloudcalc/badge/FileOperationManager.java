@@ -1,4 +1,4 @@
-package com.example.cloudcalc.badge.ignored;
+package com.example.cloudcalc.badge;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,12 +14,12 @@ import java.util.List;
 
 public class FileOperationManager {
 
-    public List<String> loadIgnoredBadgesFromFile(String fileName) {
-        List<String> ignoredBadges = new ArrayList<>();
+    public List<String> loadBadgesFromFile(String fileName) {
+        List<String> badges = new ArrayList<>();
 
         Path filePath = Paths.get(fileName);
         if (!Files.exists(filePath)) {
-            return ignoredBadges;
+            return badges;
         }
 
         try {
@@ -27,16 +27,16 @@ public class FileOperationManager {
             JSONArray jsonArray = new JSONArray(content);
 
             for (int j = 0; j < jsonArray.length(); j++) {
-                ignoredBadges.add(jsonArray.getString(j));
+                badges.add(jsonArray.getString(j));
             }
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
-        return ignoredBadges;
+        return badges;
     }
 
-    public void saveIgnoredBadgesToFile(List<String> ignoredBadges, String fileName) {
-        JSONArray jsonArray = new JSONArray(ignoredBadges);
+    public void saveBadgesToFile(List<String> badges, String fileName) {
+        JSONArray jsonArray = new JSONArray(badges);
 
         try (FileWriter fileWriter = new FileWriter(fileName)) {
             fileWriter.write(jsonArray.toString());

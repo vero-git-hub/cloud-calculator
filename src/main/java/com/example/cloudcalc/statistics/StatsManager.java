@@ -1,6 +1,6 @@
 package com.example.cloudcalc.statistics;
 
-import com.example.cloudcalc.ButtonFactory;
+import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.DataExtractor;
 import com.example.cloudcalc.UICallbacks;

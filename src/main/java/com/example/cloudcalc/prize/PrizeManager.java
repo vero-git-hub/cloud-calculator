@@ -4,6 +4,7 @@ import com.example.cloudcalc.*;
 import com.example.cloudcalc.badge.type.TypeBadge;
 import com.example.cloudcalc.badge.type.TypeBadgeDataManager;
 import com.example.cloudcalc.badge.type.TypeBadgeManager;
+import com.example.cloudcalc.button.ButtonFactory;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
