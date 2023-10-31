@@ -1,6 +1,8 @@
 package com.example.cloudcalc;
 
+import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
 import com.example.cloudcalc.profile.Profile;
+import com.example.cloudcalc.util.Notification;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionURI;
@@ -82,9 +84,15 @@ public class DataExtractor {
 
     public ArrayList<String> performScan(Profile profile) {
         typeBadgeExtractedData.clear();
-        Map<String, String> extractedData = scanProfileLink(profile);
 
-        extractTypeBadgesAfterDate(extractedData, "02.10.2023");
+        Map<String, String> extractedData = null;
+        try {
+            extractedData = scanProfileLink(profile);
+            extractTypeBadgesAfterDate(extractedData, "02.10.2023");
+
+        } catch (ProfilePageStructureChangedException ex) {
+            Notification.showErrorMessage("Error", "The given HTML structure was not found on the page.");
+        }
 
         return new ArrayList<>(extractedData.keySet());
     }
@@ -102,30 +110,30 @@ public class DataExtractor {
         }
     }
 
-    public Map<String, String> scanProfileLink(Profile profile) {
+    public Map<String, String> scanProfileLink(Profile profile) throws ProfilePageStructureChangedException {
         Map<String, String> resultMap = new LinkedHashMap<>();
 
         try {
             Document doc = Jsoup.connect(profile.getProfileLink()).timeout(10 * 1000).get();
 
-            Elements subheadElements = doc.select(".ql-subhead-1.l-mts");
-            Elements bodyElements = doc.select(".ql-body-2.l-mbs");
+            Elements subheadElements = doc.select(".ql-title-medium.l-mts");
+            Elements bodyElements = doc.select(".ql-body-medium.l-mbs");
+
+            if (subheadElements.isEmpty() || bodyElements.isEmpty() || subheadElements.size() != bodyElements.size()) {
+                throw new ProfilePageStructureChangedException("The structure of the profile page has changed!");
+            }
 
             LocalDate profileDate = dateUtils.convertProfileOrTypeBadgeStartDate(profile.getStartDate());
 
-            if(subheadElements.size() == bodyElements.size()) {
-                for(int i = 0; i < subheadElements.size(); i++) {
-                    String key = subheadElements.get(i).text();
-                    String valueStr = bodyElements.get(i).text();
+            for(int i = 0; i < subheadElements.size(); i++) {
+                String key = subheadElements.get(i).text();
+                String valueStr = bodyElements.get(i).text();
 
-                    LocalDate valueDate = dateUtils.extractDateFromValue(valueStr);
+                LocalDate valueDate = dateUtils.extractDateFromValue(valueStr);
 
-                    if(!valueDate.isBefore(profileDate)) {
-                        resultMap.put(key, valueStr);
-                    }
+                if(!valueDate.isBefore(profileDate)) {
+                    resultMap.put(key, valueStr);
                 }
-            } else {
-                System.out.println("Number of subhead and body elements do not match!");
             }
 
         } catch (IOException e) {
