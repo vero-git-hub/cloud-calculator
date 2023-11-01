@@ -1,5 +1,6 @@
 package com.example.cloudcalc;
 
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -14,7 +15,7 @@ public interface UICallbacks {
     void showMainScreen(Stage primaryStage);
     Label createLabel(String text);
     HBox createTopLayout(Button leftButton, Label title, Button... rightButtons);
-    HBox createExtendedTopLayout(List<Button> leftButtons, Label title, Button... rightButtons);
+    HBox createExtendedTopLayout(List<Button> leftButtons, Label title, Node... rightNodes);
     void createScene(Parent layout, Stage primaryStage);
     boolean showConfirmationAlert(String title, String header, String content);
     TextField createTextField(String promptText);

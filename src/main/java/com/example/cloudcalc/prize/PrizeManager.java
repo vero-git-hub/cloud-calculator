@@ -29,9 +29,6 @@ import java.util.stream.Collectors;
 public class PrizeManager {
 
     private final UICallbacks uiCallbacks;
-
-    private final FileManager fileManager = new FileManager();
-
     private final TypeBadgeDataManager typeBadgeDataManager;
     private final TypeBadgeManager typeBadgeManager;
 
@@ -131,7 +128,7 @@ public class PrizeManager {
 
     private void savePrizesToFile(List<Prize> prizes) {
         JSONArray jsonArray = convertPrizesToJSONArray(prizes);
-        fileManager.writeJsonToFile(jsonArray, Constants.PRIZES_FILE);
+        FileManager.writeJsonToFile(jsonArray, Constants.PRIZES_FILE);
     }
 
     public void showAddPrizesScreen(Stage primaryStage) {
@@ -208,7 +205,7 @@ public class PrizeManager {
 
     public List<Prize> loadPrizesFromFile(String fileName) {
         List<Prize> prizes = new ArrayList<>();
-        JSONArray jsonArray = fileManager.readJsonArrayFromFile(fileName);
+        JSONArray jsonArray = FileManager.readJsonArrayFromFile(fileName);
 
         for (int j = 0; j < jsonArray.length(); j++) {
             JSONObject prizeObject = jsonArray.getJSONObject(j);

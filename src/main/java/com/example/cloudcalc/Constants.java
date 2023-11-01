@@ -6,6 +6,7 @@ public interface Constants {
     String IGNORE_FILE = "ignore.json";
     String ARCADE_FILE = "arcade.json";
     String TYPES_BADGE_FILE = "types_badge.json";
+    String SETTINGS_FILE = "settings.json";
 
     String TOTAL = "Total";
     String IGNORE = "Ignore";

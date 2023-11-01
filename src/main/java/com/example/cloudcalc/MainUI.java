@@ -1,10 +1,12 @@
 package com.example.cloudcalc;
 
 import com.example.cloudcalc.badge.BadgeManager;
-import com.example.cloudcalc.badge.arcade.ArcadeManager;
 import com.example.cloudcalc.badge.FileOperationManager;
+import com.example.cloudcalc.badge.arcade.ArcadeManager;
 import com.example.cloudcalc.badge.ignored.IgnoreManager;
 import com.example.cloudcalc.button.ButtonFactory;
+import com.example.cloudcalc.language.Language;
+import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
@@ -12,6 +14,7 @@ import com.example.cloudcalc.profile.ProfileManager;
 import com.example.cloudcalc.scan.ScanManager;
 import com.example.cloudcalc.statistics.StatsManager;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -23,9 +26,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class MainUI implements UICallbacks{
 
@@ -43,6 +44,7 @@ public class MainUI implements UICallbacks{
     private final ArcadeManager arcadeManager = createArcadeManager();
 
     private TableView<Profile> mainTable;
+    private ResourceBundle bundle;
 
     private ArcadeManager createArcadeManager() {
         return new ArcadeManager(this, fileOperationManager);
@@ -63,6 +65,7 @@ public class MainUI implements UICallbacks{
 
     @Override
     public void showMainScreen(Stage primaryStage) {
+        bundle = ResourceBundle.getBundle("messages", new Locale("en"));
         HBox topLayout = initializeButtons(primaryStage);
 
         VBox layout = new VBox(10);
@@ -88,9 +91,14 @@ public class MainUI implements UICallbacks{
         Button prizeButton = ButtonFactory.createPrizeButton(e -> prizeManager.showPrizesScreen(primaryStage));
         Button arcadeButton = ButtonFactory.createArcadeButton(e -> arcadeManager.getArcadeScreen().showScreen(primaryStage));
 
-        Label titleLabel = createLabel("PROFILES");
-        return createExtendedTopLayout(Arrays.asList(statsButton, addButton), titleLabel, arcadeButton, ignoreButton, prizeButton);
+        Label titleLabel = createLabel(bundle.getString("profilesLabel"));
+
+        ComboBox<Language> languageComboBox = LanguageManager.createLanguageComboBox();
+
+        return createExtendedTopLayout(Arrays.asList(statsButton, addButton), titleLabel, arcadeButton, ignoreButton, prizeButton, languageComboBox);
     }
+
+
 
     private TableView<Profile> initializeTable(Stage primaryStage) {
         mainTable = new TableView<>();
@@ -185,7 +193,7 @@ public class MainUI implements UICallbacks{
     }
 
     @Override
-    public HBox createExtendedTopLayout(List<Button> leftButtons, Label title, Button... rightButtons) {
+    public HBox createExtendedTopLayout(List<Button> leftButtons, Label title, Node... rightNodes) {
         HBox topLayout = new HBox(10);
         topLayout.setAlignment(Pos.CENTER);
 
@@ -199,7 +207,7 @@ public class MainUI implements UICallbacks{
         topLayout.getChildren().add(leftSpacer);
         topLayout.getChildren().add(title);
         topLayout.getChildren().add(rightSpacer);
-        topLayout.getChildren().addAll(rightButtons);
+        topLayout.getChildren().addAll(rightNodes);
         topLayout.setMinWidth(560);
         return topLayout;
     }
