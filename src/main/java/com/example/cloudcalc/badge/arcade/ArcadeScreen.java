@@ -14,8 +14,8 @@ public class ArcadeScreen implements ScreenDisplayable {
     }
 
     public void showScreen(Stage primaryStage) {
-        TableBuilder tableBuilder = new TableBuilder(arcadeManager.getUiCallbacks(), arcadeManager.getFileOperationManager(), arcadeManager.getAddArcadeScreen(), this);
-        tableBuilder.buildScreen(primaryStage, "ARCADE", Constants.ARCADE_FILE);
+        TableBuilder.initVariables(Constants.ARCADE_FILE, arcadeManager.getUiCallbacks(), arcadeManager.getFileOperationManager(), this, "Add Arcade Badge");
+        TableBuilder.buildScreen(primaryStage, "ARCADE");
     }
 
 }

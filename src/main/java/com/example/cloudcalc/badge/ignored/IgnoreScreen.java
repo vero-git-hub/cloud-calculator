@@ -15,8 +15,8 @@ public class IgnoreScreen implements ScreenDisplayable {
 
     @Override
     public void showScreen(Stage primaryStage) {
-        TableBuilder tableBuilder = new TableBuilder(ignoreManager.getUiCallbacks(), ignoreManager.getFileOperationManager(), ignoreManager.getAddIgnoreScreen(), this);
-        tableBuilder.buildScreen(primaryStage, "IGNORE", Constants.IGNORE_FILE);
+        TableBuilder.initVariables(Constants.IGNORE_FILE, ignoreManager.getUiCallbacks(), ignoreManager.getFileOperationManager(), this, "Add Ignore Badge");
+        TableBuilder.buildScreen(primaryStage, "IGNORE");
     }
 
 }

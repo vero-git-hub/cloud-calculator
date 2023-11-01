@@ -7,13 +7,11 @@ public class ArcadeManager {
 
     private final UICallbacks uiCallbacks;
     private final ArcadeScreen arcadeScreen;
-    private final AddArcadeScreen addArcadeScreen;
     private final FileOperationManager fileOperationManager;
 
     public ArcadeManager(UICallbacks uiCallbacks, FileOperationManager fileOperationManager) {
         this.uiCallbacks = uiCallbacks;
         this.arcadeScreen = new ArcadeScreen(this);
-        this.addArcadeScreen = new AddArcadeScreen(this);
         this.fileOperationManager = fileOperationManager;
     }
 
@@ -23,10 +21,6 @@ public class ArcadeManager {
 
     public ArcadeScreen getArcadeScreen() {
         return arcadeScreen;
-    }
-
-    public AddArcadeScreen getAddArcadeScreen() {
-        return addArcadeScreen;
     }
 
     public FileOperationManager getFileOperationManager() {

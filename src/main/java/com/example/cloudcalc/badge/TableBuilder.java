@@ -1,7 +1,9 @@
 package com.example.cloudcalc.badge;
 
+import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.UICallbacks;
 import com.example.cloudcalc.button.ButtonFactory;
+import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -13,24 +15,25 @@ import java.util.List;
 
 public class TableBuilder {
 
-    private final UICallbacks uiCallbacks;
-    private final FileOperationManager fileOperationManager;
-    private final ScreenDisplayable screenDisplayable;
-    private final ScreenDisplayable badgeScreen;
-    private TableView<String> table;
-    private String fileName;
+    private static String fileName;
+    private static UICallbacks uiCallbacks;
+    private static FileOperationManager fileOperationManager;
+    private static ScreenDisplayable screenDisplayable;
+    private static String addScreenLabel;
+    private static TableView<String> table;
 
-    public TableBuilder(UICallbacks uiCallbacks, FileOperationManager fileOperationManager, ScreenDisplayable addBadgeScreen, ScreenDisplayable badgeScreen) {
-        this.uiCallbacks = uiCallbacks;
-        this.fileOperationManager = fileOperationManager;
-        this.screenDisplayable = addBadgeScreen;
-        this.badgeScreen = badgeScreen;
+    public static void initVariables(String fileName, UICallbacks uiCallbacks, FileOperationManager fileOperationManager, ScreenDisplayable screenDisplayable, String addScreenLabel) {
+        TableBuilder.fileName = fileName;
+        TableBuilder.uiCallbacks = uiCallbacks;
+        TableBuilder.fileOperationManager = fileOperationManager;
+        TableBuilder.screenDisplayable = screenDisplayable;
+        TableBuilder.addScreenLabel = addScreenLabel;
     }
 
-    public void buildScreen(Stage primaryStage, String title, String fileName) {
+    public static void buildScreen(Stage primaryStage, String title) {
         VBox layout = new VBox(10);
         HBox topLayout = createTopLayout(primaryStage, title);
-        this.fileName = fileName;
+
         TableView<String> table = createBadgeTable(primaryStage);
 
         layout.getChildren().addAll(topLayout, table);
@@ -45,15 +48,15 @@ public class TableBuilder {
         uiCallbacks.createScene(scrollPane, primaryStage);
     }
 
-    private HBox createTopLayout(Stage primaryStage, String title) {
+    private static HBox createTopLayout(Stage primaryStage, String title) {
         Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
         Label titleLabel = uiCallbacks.createLabel(title);
-        Button addButton = ButtonFactory.createAddButton(e -> screenDisplayable.showScreen(primaryStage));
+        Button addButton = ButtonFactory.createAddButton(e -> buildAddScreen(primaryStage));
 
         return uiCallbacks.createTopLayout(backButton, titleLabel, addButton);
     }
 
-    private TableView<String> createBadgeTable(Stage primaryStage) {
+    private static TableView<String> createBadgeTable(Stage primaryStage) {
         table = new TableView<>();
 
         TableColumn<String, Integer> indexColumn = createIndexColumn(table);
@@ -70,19 +73,19 @@ public class TableBuilder {
         return table;
     }
 
-    private TableColumn<String, Integer> createIndexColumn(TableView<String> table) {
+    private static TableColumn<String, Integer> createIndexColumn(TableView<String> table) {
         TableColumn<String, Integer> indexColumn = new TableColumn<>("№");
         indexColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(cellData.getValue()) + 1));
         return indexColumn;
     }
 
-    private TableColumn<String, String> createNameColumn() {
+    private static TableColumn<String, String> createNameColumn() {
         TableColumn<String, String> nameColumn = new TableColumn<>("Badge name");
         nameColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue()));
         return nameColumn;
     }
 
-    private TableColumn<String, Void> createDeleteColumn(Stage primaryStage, TableView<String> table) {
+    private static TableColumn<String, Void> createDeleteColumn(Stage primaryStage, TableView<String> table) {
         TableColumn<String, Void> deleteColumn = new TableColumn<>("Delete");
         deleteColumn.setCellFactory(param -> new TableCell<>() {
             final Button deleteButton = ButtonFactory.createDeleteButton(e -> {
@@ -91,7 +94,7 @@ public class TableBuilder {
                     List<String> badges = getTableView().getItems();
                     badges.remove(badge);
                     fileOperationManager.saveBadgesToFile(badges, fileName);
-                    badgeScreen.showScreen(primaryStage);
+                    screenDisplayable.showScreen(primaryStage);
                 }
             });
 
@@ -108,7 +111,7 @@ public class TableBuilder {
         return deleteColumn;
     }
 
-    private void configureTableColumnsWidth() {
+    private static void configureTableColumnsWidth() {
         double indexColumnPercentage = 0.05;
         double deleteColumnPercentage = 0.1;
         double nameColumnPercentage = 1.0 - (indexColumnPercentage + deleteColumnPercentage);
@@ -116,5 +119,40 @@ public class TableBuilder {
         table.getColumns().get(0).prefWidthProperty().bind(table.widthProperty().multiply(indexColumnPercentage));
         table.getColumns().get(1).prefWidthProperty().bind(table.widthProperty().multiply(nameColumnPercentage));
         table.getColumns().get(2).prefWidthProperty().bind(table.widthProperty().multiply(deleteColumnPercentage));
+    }
+
+    private static void buildAddScreen(Stage primaryStage) {
+        VBox layout = new VBox(10);
+
+        Button backButton = ButtonFactory.createBackButton(e -> screenDisplayable.showScreen(primaryStage));
+        Label titleLabel = uiCallbacks.createLabel(addScreenLabel);
+
+        Button saveIgnoreBadgeButton = ButtonFactory.createSaveIgnoreBadgeButton(
+                () -> {
+                    List<String> ignoredBadges = fileOperationManager.loadBadgesFromFile(fileName);
+                    TextField nameField = (TextField) layout.getScene().lookup("#nameField");
+
+                    String badgeName = nameField.getText().trim();
+                    if (badgeName.isEmpty()) {
+                        Notification.showAlert("Input Error", "Empty Badge Name", "Please enter a valid badge name.");
+                        return;
+                    }
+
+                    ignoredBadges.add(nameField.getText());
+                    fileOperationManager.saveBadgesToFile(ignoredBadges, fileName);
+                    screenDisplayable.showScreen(primaryStage);
+                },
+                () -> (TextField) layout.getScene().lookup("#nameField")
+        );
+
+        HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel);
+
+        layout.getChildren().addAll(
+                topLayout,
+                uiCallbacks.createNameTextField(),
+                saveIgnoreBadgeButton
+        );
+
+        uiCallbacks.createScene(layout, primaryStage);
     }
 }
