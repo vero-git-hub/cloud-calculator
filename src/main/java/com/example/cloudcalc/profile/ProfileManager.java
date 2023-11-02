@@ -2,36 +2,67 @@ package com.example.cloudcalc.profile;
 
 import com.example.cloudcalc.*;
 import com.example.cloudcalc.button.ButtonFactory;
+import com.example.cloudcalc.language.LanguageManager;
+import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.scan.ScanManager;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
-public class ProfileManager {
+public class ProfileManager implements Localizable {
 
     private final UICallbacks uiCallbacks;
     private final DataExtractor dataExtractor;
     private final ProfileDataManager profileDataManager;
     private final ScanManager scanManager;
+    private Label titleLabel;
+    TextField nameField;
+    TextField dateField;
+    TextField linkField;
+    private String preText;
+    private String startDateText;
+    private Label linksTitle = new Label("PDF Links:");
 
     public ProfileManager(DataExtractor dataExtractor, ProfileDataManager profileDataManager, UICallbacks uiCallbacks, ScanManager scanManager) {
         this.uiCallbacks = uiCallbacks;
         this.dataExtractor = dataExtractor;
         this.profileDataManager = profileDataManager;
         this.scanManager = scanManager;
+
+        titleLabel = uiCallbacks.createLabel("Create Profile");
+
+        nameField = uiCallbacks.createTextField("Name");
+        dateField = uiCallbacks.createTextField("Start Date (e.g., 26.09.2023)");
+        linkField = uiCallbacks.createTextField("Profile Link");
+
+        preText = "DETAILS for";
+        startDateText = "Start Date:";
+
+        LanguageManager.registerLocalizable(this);
     }
 
     public void showProfileScreen(Stage primaryStage, Profile profile) {
@@ -39,13 +70,28 @@ public class ProfileManager {
 
         Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
 
+        Text preTextLabel = new Text(preText);
+        Hyperlink nameLink = new Hyperlink(profile.getName());
+        nameLink.setOnAction(e -> {
+            try {
+                Desktop.getDesktop().browse(new URI(profile.getProfileLink()));
+            } catch (IOException | URISyntaxException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        TextFlow textFlow = new TextFlow(preTextLabel, nameLink);
+        HBox topLayout = uiCallbacks.createTopLayoutWithBackAndText(backButton, textFlow);
+
         layout.getChildren().addAll(
-                backButton,
+                topLayout,
                 createProfileInfo(profile),
                 createPdfLinksSection(profile)
         );
 
         ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
         scrollPane.setContent(layout);
 
         uiCallbacks.createScene(scrollPane, primaryStage);
@@ -54,8 +100,6 @@ public class ProfileManager {
     private VBox createPdfLinksSection(Profile profile) {
         VBox linksVBox = new VBox(5);
 
-        Label linksTitle = new Label("PDF Links:");
-        linksTitle.setStyle("-fx-font-weight: bold;");
         linksVBox.getChildren().add(linksTitle);
 
         TableView<PdfLinkItem> table = new TableView<>();
@@ -80,19 +124,24 @@ public class ProfileManager {
                 table.getItems().add(new PdfLinkItem(index++, link));
             }
         }
-
+        table.setFixedCellSize(Region.USE_COMPUTED_SIZE);
         linksVBox.getChildren().add(table);
 
         return linksVBox;
     }
 
+    private VBox createProfileInfo(Profile profile) {
+        VBox profileInfoBox = new VBox(10);
+
+        TextFlow startDateFlow = uiCallbacks.createTextFlow(startDateText + " ", profile.getStartDate());
+        profileInfoBox.getChildren().addAll(startDateFlow);
+
+        return profileInfoBox;
+    }
+
     public void showCreateProfileScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
         Profile profile = new Profile();
-
-        TextField nameField = uiCallbacks.createTextField("Name");
-        TextField dateField = uiCallbacks.createTextField("Start Date (e.g., 26.09.2023)");
-        TextField linkField = uiCallbacks.createTextField("Profile Link");
 
         Button uploadPdfButton = ButtonFactory.createUploadPdfButton(e -> {
             FileChooser fileChooser = new FileChooser();
@@ -105,7 +154,7 @@ public class ProfileManager {
         Button saveButton = ButtonFactory.createSaveButton(e -> handleProfileSave(primaryStage, profile, nameField.getText(), dateField.getText(), linkField.getText()));
 
         Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
-        Label titleLabel = uiCallbacks.createLabel("Create Profile");
+
 
         HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel);
 
@@ -138,18 +187,6 @@ public class ProfileManager {
             profileDataManager.saveProfileToFile(profile, Constants.PROFILES_FILE);
             uiCallbacks.showMainScreen(primaryStage);
         }
-    }
-
-    private VBox createProfileInfo(Profile profile) {
-        VBox profileInfoBox = new VBox(10);
-
-        TextFlow nameFlow = uiCallbacks.createTextFlow("Name: ", profile.getName());
-        TextFlow startDateFlow = uiCallbacks.createTextFlow("Start Date: ", profile.getStartDate());
-        TextFlow profileLinkFlow = uiCallbacks.createTextFlow("Profile Link: ", profile.getProfileLink());
-
-        profileInfoBox.getChildren().addAll(nameFlow, startDateFlow, profileLinkFlow);
-
-        return profileInfoBox;
     }
 
     public TableColumn<Profile, Void> createNumberingColumn() {
@@ -267,5 +304,18 @@ public class ProfileManager {
         profileDataManager.saveProfilesToFile(profiles, Constants.PROFILES_FILE);
 
         uiCallbacks.showMainScreen(primaryStage);
+    }
+
+    @Override
+    public void updateLocalization(ResourceBundle bundle) {
+        titleLabel.setText(bundle.getString("createProfileTitle"));
+        nameField.setPromptText(bundle.getString("createProfileNameField"));
+        dateField.setPromptText(bundle.getString("createProfileDateField"));
+        linkField.setPromptText(bundle.getString("createProfileLinkField"));
+
+        preText = bundle.getString("detailsTitle");
+        startDateText = bundle.getString("detailsStartDateText");
+
+        linksTitle.setText(bundle.getString("detailsLinksTitle"));
     }
 }

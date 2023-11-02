@@ -26,12 +26,14 @@ public class LanguageManager {
     }
 
     public static ComboBox<Language> createLanguageComboBox() {
-        languageComboBox = new ComboBox<>();
-        languageComboBox.getItems().addAll(
-                new Language("en", "English"),
-                new Language("ru", "Русский"),
-                new Language("uk", "Українська")
-        );
+        if (languageComboBox == null) {
+            languageComboBox = new ComboBox<>();
+            languageComboBox.getItems().addAll(
+                    new Language("en", "English"),
+                    new Language("ru", "Русский"),
+                    new Language("uk", "Українська")
+            );
+        }
 
         JSONObject settings = FileManager.readJsonObjectFromFile(Constants.SETTINGS_FILE);
 
@@ -47,6 +49,7 @@ public class LanguageManager {
             if (newLanguage != null) {
                 Locale locale = new Locale(newLanguage.getCode());
                 ResourceBundle bundle = ResourceBundle.getBundle("messages", locale);
+                saveLanguagePreference();
                 updateLocalizableComponents(bundle);
             }
         });

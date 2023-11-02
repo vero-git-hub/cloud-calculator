@@ -1,6 +1,8 @@
 package com.example.cloudcalc;
 
 import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
+import com.example.cloudcalc.language.LanguageManager;
+import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.util.Notification;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -19,11 +21,17 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.util.*;
 
-public class DataExtractor {
+public class DataExtractor implements Localizable {
 
     private final DateUtils dateUtils = new DateUtils();
-
     public List<String> typeBadgeExtractedData = new ArrayList<>();
+    private String dataExtractorError = "Error";
+    private String dataExtractorTitleError = "The given HTML structure was not found on the page.";
+    private String dataExtractorDescriptionError = "The structure of the profile page has changed!";
+
+    public DataExtractor() {
+        LanguageManager.registerLocalizable(this);
+    }
 
     public List<String> extractHiddenLinksFromPdf(String pdfFilePath) {
         List<String> links = new ArrayList<>();
@@ -91,7 +99,7 @@ public class DataExtractor {
             extractTypeBadgesAfterDate(extractedData, "02.10.2023");
 
         } catch (ProfilePageStructureChangedException ex) {
-            Notification.showErrorMessage("Error", "The given HTML structure was not found on the page.");
+            Notification.showErrorMessage(dataExtractorError, dataExtractorTitleError);
         }
 
         return new ArrayList<>(extractedData.keySet());
@@ -120,7 +128,7 @@ public class DataExtractor {
             Elements bodyElements = doc.select(".ql-body-medium.l-mbs");
 
             if (subheadElements.isEmpty() || bodyElements.isEmpty() || subheadElements.size() != bodyElements.size()) {
-                throw new ProfilePageStructureChangedException("The structure of the profile page has changed!");
+                throw new ProfilePageStructureChangedException(dataExtractorDescriptionError);
             }
 
             LocalDate profileDate = dateUtils.convertProfileOrTypeBadgeStartDate(profile.getStartDate());
@@ -143,4 +151,10 @@ public class DataExtractor {
         return resultMap;
     }
 
+    @Override
+    public void updateLocalization(ResourceBundle bundle) {
+        dataExtractorError = bundle.getString("dataExtractorError");
+        dataExtractorTitleError = bundle.getString("dataExtractorTitleError");
+        dataExtractorDescriptionError = bundle.getString("dataExtractorDescriptionError");
+    }
 }

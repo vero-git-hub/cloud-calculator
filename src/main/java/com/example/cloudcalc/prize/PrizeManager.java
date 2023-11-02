@@ -5,6 +5,8 @@ import com.example.cloudcalc.badge.type.TypeBadge;
 import com.example.cloudcalc.badge.type.TypeBadgeDataManager;
 import com.example.cloudcalc.badge.type.TypeBadgeManager;
 import com.example.cloudcalc.button.ButtonFactory;
+import com.example.cloudcalc.language.LanguageManager;
+import com.example.cloudcalc.language.Localizable;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -26,18 +28,37 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PrizeManager {
+public class PrizeManager implements Localizable {
 
     private final UICallbacks uiCallbacks;
     private final TypeBadgeDataManager typeBadgeDataManager;
     private final TypeBadgeManager typeBadgeManager;
 
     private final Map<String, Prize> receivedPrizes = new HashMap<>();
+    private Label titleLabel;
+    private Label addPrizeTitle;
+    private TextField namePrizeField;
+    private TextField badgeCountField;
+    private ComboBox<String> badgeTypeComboBox;
 
     public PrizeManager(UICallbacks uiCallbacks) {
         this.uiCallbacks = uiCallbacks;
         this.typeBadgeDataManager = new TypeBadgeDataManager();
         this.typeBadgeManager = new TypeBadgeManager(uiCallbacks, typeBadgeDataManager, this);
+
+        titleLabel = uiCallbacks.createLabel("PRIZES");
+        addPrizeTitle = uiCallbacks.createLabel("Add Prize");
+
+        namePrizeField = new TextField();
+        namePrizeField.setPromptText("Enter name prize");
+
+        badgeCountField = new TextField();
+        badgeCountField.setPromptText("Enter badge count");
+
+        badgeTypeComboBox = new ComboBox<>();
+        badgeTypeComboBox.setPromptText("Select badge type");
+
+        LanguageManager.registerLocalizable(this);
     }
 
     public Map<String, Prize> getReceivedPrizes() {
@@ -107,7 +128,7 @@ public class PrizeManager {
         table.getItems().addAll(prizes);
 
         Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
-        Label titleLabel = uiCallbacks.createLabel("PRIZES");
+
         Button createButton = ButtonFactory.createAddButton(e -> showAddPrizesScreen(primaryStage));
 
         HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel, createButton);
@@ -134,19 +155,14 @@ public class PrizeManager {
     public void showAddPrizesScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
 
-        TextField namePrizeField = new TextField();
-        namePrizeField.setPromptText("Enter name prize");
-
-        TextField badgeCountField = new TextField();
-        badgeCountField.setPromptText("Enter badge count");
-
         HBox typeLayout = new HBox();
         typeLayout.setAlignment(Pos.CENTER);
 
         List<TypeBadge> typeBadgeList = typeBadgeDataManager.loadTypesBadgeFromFile(Constants.TYPES_BADGE_FILE);
-        ComboBox<String> badgeTypeComboBox = new ComboBox<>();
+
+
         typeBadgeList.forEach(typeBadge -> badgeTypeComboBox.getItems().add(typeBadge.getName()));
-        badgeTypeComboBox.setPromptText("Select badge type");
+
         Button addButton = ButtonFactory.createAddButton(e -> typeBadgeManager.showAddTypeBadgeScreen(primaryStage));
 
         Pane leftSpacer = new Pane();
@@ -156,15 +172,15 @@ public class PrizeManager {
         HBox.setHgrow(rightSpacer, Priority.ALWAYS);
         typeLayout.getChildren().addAll(badgeTypeComboBox, addButton, rightSpacer);
 
-        Button saveButton = ButtonFactory.createSavePrizeButton(e -> {
+        Button saveButton = ButtonFactory.createSaveButton(e -> {
             savePrize(namePrizeField.getText(), badgeCountField.getText(), badgeTypeComboBox.getValue());
             showPrizesScreen(primaryStage);
         });
 
         Button backButton = ButtonFactory.createBackButton(e -> showPrizesScreen(primaryStage));
-        Label titleLabel = uiCallbacks.createLabel("Add Prize");
 
-        HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel);
+
+        HBox topLayout = uiCallbacks.createTopLayout(backButton, addPrizeTitle);
 
         layout.getChildren().addAll(
                 topLayout,
@@ -186,7 +202,6 @@ public class PrizeManager {
             try {
                 newPrize.setCount(Integer.parseInt(badgeCount));
             } catch (NumberFormatException e) {
-                System.out.println("Error: Badge count must be a valid number.");
                 return;
             }
 
@@ -274,4 +289,12 @@ public class PrizeManager {
 
     }
 
+    @Override
+    public void updateLocalization(ResourceBundle bundle) {
+        titleLabel.setText(bundle.getString("prizeTitle"));
+        addPrizeTitle.setText(bundle.getString("addPrizeTitle"));
+        namePrizeField.setPromptText(bundle.getString("addPrizeNameField"));
+        badgeCountField.setPromptText(bundle.getString("addPrizeCountField"));
+        badgeTypeComboBox.setPromptText(bundle.getString("addPrizeTypeComboBox"));
+    }
 }

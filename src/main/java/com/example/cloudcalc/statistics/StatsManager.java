@@ -6,6 +6,8 @@ import com.example.cloudcalc.DataExtractor;
 import com.example.cloudcalc.UICallbacks;
 import com.example.cloudcalc.badge.BadgeCounts;
 import com.example.cloudcalc.badge.BadgeManager;
+import com.example.cloudcalc.language.LanguageManager;
+import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.prize.Prize;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
@@ -22,13 +24,10 @@ import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class StatsManager {
+public class StatsManager implements Localizable {
 
     private final UICallbacks uiCallbacks;
     private final ProfileManager profileManager;
@@ -38,6 +37,8 @@ public class StatsManager {
     private final PrizeManager prizeManager;
     private TableView<Profile> mainTable;
     private TableView<Map.Entry<String, Long>> prizeTable;
+    private Label subtitleLabel;
+    private Label titleLabel;
 
     public StatsManager(UICallbacks uiCallbacks, ProfileManager profileManager, ProfileDataManager profileDataManager, DataExtractor dataExtractor, BadgeManager badgeManager, PrizeManager prizeManager) {
         this.uiCallbacks = uiCallbacks;
@@ -46,6 +47,10 @@ public class StatsManager {
         this.dataExtractor = dataExtractor;
         this.badgeManager = badgeManager;
         this.prizeManager = prizeManager;
+
+        subtitleLabel = new Label();
+        titleLabel = new Label();
+        LanguageManager.registerLocalizable(this);
     }
 
     public void showStatsScreen(Stage primaryStage) {
@@ -162,13 +167,10 @@ public class StatsManager {
 
     private HBox createTopLayout(Stage primaryStage) {
         Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
-        String title = String.format("STATISTICS");
-        Label titleLabel = uiCallbacks.createLabel(title);
         return uiCallbacks.createTopLayout(backButton, titleLabel);
     }
 
     private Label createSubtitleLabel() {
-        Label subtitleLabel = new Label("To get up-to-date results, click the Get prizes button");
         subtitleLabel.setStyle("-fx-font-style: italic;");
         return subtitleLabel;
     }
@@ -279,4 +281,15 @@ public class StatsManager {
         prizeTable.refresh();
     }
 
+    @Override
+    public void updateLocalization(ResourceBundle bundle) {
+        if(subtitleLabel != null) {
+            subtitleLabel.setText(bundle.getString("statsSubtitle"));
+        }
+
+        if(titleLabel != null) {
+            titleLabel.setText(bundle.getString("statsTitle"));
+        }
+
+    }
 }

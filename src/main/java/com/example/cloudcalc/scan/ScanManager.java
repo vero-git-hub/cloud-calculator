@@ -6,6 +6,8 @@ import com.example.cloudcalc.UICallbacks;
 import com.example.cloudcalc.badge.BadgeCategory;
 import com.example.cloudcalc.badge.BadgeCounts;
 import com.example.cloudcalc.badge.BadgeManager;
+import com.example.cloudcalc.language.LanguageManager;
+import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.prize.Prize;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
@@ -28,18 +30,26 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class ScanManager {
+public class ScanManager implements Localizable {
 
     private final BadgeManager badgeManager;
     private final UICallbacks uiCallbacks;
     private final ProfileDataManager profileDataManager;
+    private Label subtitleLabel;
+    private String preText;
 
     public ScanManager(BadgeManager badgeManager, UICallbacks uiCallbacks, ProfileDataManager profileDataManager) {
         this.badgeManager = badgeManager;
         this.uiCallbacks = uiCallbacks;
         this.profileDataManager = profileDataManager;
+
+        preText = "SCAN for ";
+        subtitleLabel = new Label("Labs with the same names are counted as one");
+        subtitleLabel.setStyle("-fx-font-style: italic;");
+        LanguageManager.registerLocalizable(this);
     }
 
     public void showScanScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
@@ -47,7 +57,6 @@ public class ScanManager {
 
         Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
 
-        String preText = "SCAN for ";
         Text preTextLabel = new Text(preText);
         Hyperlink nameLink = new Hyperlink(profile.getName());
         nameLink.setOnAction(e -> {
@@ -59,10 +68,7 @@ public class ScanManager {
         });
         TextFlow textFlow = new TextFlow(preTextLabel, nameLink);
 
-        Label subtitleLabel = new Label("Labs with the same names are counted as one");
-        subtitleLabel.setStyle("-fx-font-style: italic;");
-
-        HBox topLayout = uiCallbacks.createTopLayoutForScan(backButton, textFlow);
+        HBox topLayout = uiCallbacks.createTopLayoutWithBackAndText(backButton, textFlow);
 
         BadgeCounts badgeCounts = badgeManager.calculateBadgeCounts(profile, siteLinks);
         TableView<BadgeCategory> mainCategoriesTable = createMainCategoriesTable(badgeCounts);
@@ -178,4 +184,9 @@ public class ScanManager {
         return prizesColumn;
     }
 
+    @Override
+    public void updateLocalization(ResourceBundle bundle) {
+        preText = bundle.getString("scanTitle");
+        subtitleLabel.setText(bundle.getString("scanSubtitle"));
+    }
 }

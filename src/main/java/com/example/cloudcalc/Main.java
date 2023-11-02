@@ -9,10 +9,11 @@ import java.util.ResourceBundle;
 
 public class Main extends Application {
 
-    private static final MainUI mainUI = new MainUI();
-
     @Override
     public void start(Stage stage) {
+        MainUI mainUI = new MainUI();
+        LanguageManager.registerLocalizable(mainUI);
+
         mainUI.showMainScreen(stage);
 
         String savedLanguageCode = FileManager.readJsonObjectFromFile(Constants.SETTINGS_FILE).optString("language", "en");
@@ -26,7 +27,7 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-        LanguageManager.registerLocalizable(mainUI);
+
         launch(args);
     }
 

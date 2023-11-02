@@ -27,7 +27,10 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 public class MainUI implements UICallbacks, Localizable {
 
@@ -47,6 +50,11 @@ public class MainUI implements UICallbacks, Localizable {
     private TableView<Profile> mainTable;
 
     Label titleLabel;
+
+    public MainUI() {
+        titleLabel = createLabel("PROFILES");
+        LanguageManager.registerLocalizable(this);
+    }
 
     private ArcadeManager createArcadeManager() {
         return new ArcadeManager(this, fileOperationManager);
@@ -91,8 +99,6 @@ public class MainUI implements UICallbacks, Localizable {
         Button ignoreButton = ButtonFactory.createIgnoreButton(e -> ignoreManager.getIgnoreScreen().showScreen(primaryStage));
         Button prizeButton = ButtonFactory.createPrizeButton(e -> prizeManager.showPrizesScreen(primaryStage));
         Button arcadeButton = ButtonFactory.createArcadeButton(e -> arcadeManager.getArcadeScreen().showScreen(primaryStage));
-
-        titleLabel = createLabel("PROFILES");
 
         ComboBox<Language> languageComboBox = LanguageManager.createLanguageComboBox();
 
@@ -159,14 +165,6 @@ public class MainUI implements UICallbacks, Localizable {
     }
 
     @Override
-    public TextField createNameTextField() {
-        TextField nameField = new TextField();
-        nameField.setId("nameField");
-        nameField.setPromptText("Lab name");
-        return nameField;
-    }
-
-    @Override
     public Label createLabel(String text) {
         return new Label(text);
     }
@@ -212,7 +210,7 @@ public class MainUI implements UICallbacks, Localizable {
     }
 
     @Override
-    public HBox createTopLayoutForScan(Button backButton, TextFlow textFlow) {
+    public HBox createTopLayoutWithBackAndText(Button backButton, TextFlow textFlow) {
         HBox topLayout = new HBox(10);
         topLayout.setAlignment(Pos.CENTER);
 

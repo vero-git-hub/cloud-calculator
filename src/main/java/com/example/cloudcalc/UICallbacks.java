@@ -20,6 +20,6 @@ public interface UICallbacks {
     boolean showConfirmationAlert(String title, String header, String content);
     TextField createTextField(String promptText);
     TextFlow createTextFlow(String s, String name);
-    TextField createNameTextField();
-    HBox createTopLayoutForScan(Button backButton, TextFlow textFlow);
+    HBox createTopLayoutWithBackAndText(Button backButton, TextFlow textFlow);
+
 }

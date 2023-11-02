@@ -1,7 +1,8 @@
-package com.example.cloudcalc.badge;
+package com.example.cloudcalc.table;
 
-import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.UICallbacks;
+import com.example.cloudcalc.badge.FileOperationManager;
+import com.example.cloudcalc.badge.ScreenDisplayable;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -21,13 +22,17 @@ public class TableBuilder {
     private static ScreenDisplayable screenDisplayable;
     private static String addScreenLabel;
     private static TableView<String> table;
+    private static Label titleLabel;
+    private static Label titleAddScreenLabel;
+    static NameTextFieldUpdatable nameTextFieldUpdatable;
 
-    public static void initVariables(String fileName, UICallbacks uiCallbacks, FileOperationManager fileOperationManager, ScreenDisplayable screenDisplayable, String addScreenLabel) {
+    public static void initVariables(String fileName, UICallbacks uiCallbacks, FileOperationManager fileOperationManager, ScreenDisplayable screenDisplayable, String addScreenLabel, NameTextFieldUpdatable nameTextFieldUpdatable) {
         TableBuilder.fileName = fileName;
         TableBuilder.uiCallbacks = uiCallbacks;
         TableBuilder.fileOperationManager = fileOperationManager;
         TableBuilder.screenDisplayable = screenDisplayable;
         TableBuilder.addScreenLabel = addScreenLabel;
+        TableBuilder.nameTextFieldUpdatable = nameTextFieldUpdatable;
     }
 
     public static void buildScreen(Stage primaryStage, String title) {
@@ -50,7 +55,7 @@ public class TableBuilder {
 
     private static HBox createTopLayout(Stage primaryStage, String title) {
         Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
-        Label titleLabel = uiCallbacks.createLabel(title);
+        titleLabel = uiCallbacks.createLabel(title);
         Button addButton = ButtonFactory.createAddButton(e -> buildAddScreen(primaryStage));
 
         return uiCallbacks.createTopLayout(backButton, titleLabel, addButton);
@@ -125,34 +130,47 @@ public class TableBuilder {
         VBox layout = new VBox(10);
 
         Button backButton = ButtonFactory.createBackButton(e -> screenDisplayable.showScreen(primaryStage));
-        Label titleLabel = uiCallbacks.createLabel(addScreenLabel);
+        titleAddScreenLabel = uiCallbacks.createLabel(addScreenLabel);
 
-        Button saveIgnoreBadgeButton = ButtonFactory.createSaveIgnoreBadgeButton(
-                () -> {
-                    List<String> ignoredBadges = fileOperationManager.loadBadgesFromFile(fileName);
-                    TextField nameField = (TextField) layout.getScene().lookup("#nameField");
+        Button saveButton = ButtonFactory.createSaveButton(event -> {
+            List<String> ignoredBadges = fileOperationManager.loadBadgesFromFile(fileName);
+            TextField nameField = nameTextFieldUpdatable.getNameTextField();
 
-                    String badgeName = nameField.getText().trim();
-                    if (badgeName.isEmpty()) {
-                        Notification.showAlert("Input Error", "Empty Badge Name", "Please enter a valid badge name.");
-                        return;
-                    }
+            String badgeName = nameField.getText().trim();
+            if (badgeName.isEmpty()) {
+                Notification.showAlert("Input Error", "Empty Badge Name", "Please enter a valid badge name.");
+                return;
+            }
 
-                    ignoredBadges.add(nameField.getText());
-                    fileOperationManager.saveBadgesToFile(ignoredBadges, fileName);
-                    screenDisplayable.showScreen(primaryStage);
-                },
-                () -> (TextField) layout.getScene().lookup("#nameField")
-        );
+            ignoredBadges.add(badgeName);
+            fileOperationManager.saveBadgesToFile(ignoredBadges, fileName);
+            nameField.setText("");
 
-        HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel);
+            screenDisplayable.showScreen(primaryStage);
+        });
+
+
+        HBox topLayout = uiCallbacks.createTopLayout(backButton, titleAddScreenLabel);
 
         layout.getChildren().addAll(
                 topLayout,
-                uiCallbacks.createNameTextField(),
-                saveIgnoreBadgeButton
+                nameTextFieldUpdatable.getNameTextField(),
+                saveButton
         );
 
         uiCallbacks.createScene(layout, primaryStage);
     }
+
+    public static void updateTitle(String newTitle) {
+        if (titleLabel != null) {
+            titleLabel.setText(newTitle);
+        }
+    }
+
+    public static void updateAddScreenTitle(String newAddScreenTitle) {
+        if (titleAddScreenLabel != null) {
+            titleAddScreenLabel.setText(newAddScreenTitle);
+        }
+    }
+
 }
