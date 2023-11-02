@@ -7,6 +7,7 @@ import com.example.cloudcalc.badge.ignored.IgnoreManager;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.language.Language;
 import com.example.cloudcalc.language.LanguageManager;
+import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.prize.PrizeManager;
 import com.example.cloudcalc.profile.Profile;
 import com.example.cloudcalc.profile.ProfileDataManager;
@@ -28,7 +29,7 @@ import javafx.stage.Stage;
 
 import java.util.*;
 
-public class MainUI implements UICallbacks{
+public class MainUI implements UICallbacks, Localizable {
 
     private final ProfileDataManager profileDataManager = new ProfileDataManager();
     private final DataExtractor dataExtractor = new DataExtractor();
@@ -44,7 +45,8 @@ public class MainUI implements UICallbacks{
     private final ArcadeManager arcadeManager = createArcadeManager();
 
     private TableView<Profile> mainTable;
-    private ResourceBundle bundle;
+
+    Label titleLabel;
 
     private ArcadeManager createArcadeManager() {
         return new ArcadeManager(this, fileOperationManager);
@@ -65,7 +67,6 @@ public class MainUI implements UICallbacks{
 
     @Override
     public void showMainScreen(Stage primaryStage) {
-        bundle = ResourceBundle.getBundle("messages", new Locale("en"));
         HBox topLayout = initializeButtons(primaryStage);
 
         VBox layout = new VBox(10);
@@ -91,14 +92,12 @@ public class MainUI implements UICallbacks{
         Button prizeButton = ButtonFactory.createPrizeButton(e -> prizeManager.showPrizesScreen(primaryStage));
         Button arcadeButton = ButtonFactory.createArcadeButton(e -> arcadeManager.getArcadeScreen().showScreen(primaryStage));
 
-        Label titleLabel = createLabel(bundle.getString("profilesLabel"));
+        titleLabel = createLabel("PROFILES");
 
         ComboBox<Language> languageComboBox = LanguageManager.createLanguageComboBox();
 
         return createExtendedTopLayout(Arrays.asList(statsButton, addButton), titleLabel, arcadeButton, ignoreButton, prizeButton, languageComboBox);
     }
-
-
 
     private TableView<Profile> initializeTable(Stage primaryStage) {
         mainTable = new TableView<>();
@@ -243,4 +242,8 @@ public class MainUI implements UICallbacks{
         primaryStage.setScene(mainScene);
     }
 
+    @Override
+    public void updateLocalization(ResourceBundle bundle) {
+        titleLabel.setText(bundle.getString("profilesLabel"));
+    }
 }

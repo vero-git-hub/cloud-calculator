@@ -5,9 +5,25 @@ import com.example.cloudcalc.FileManager;
 import javafx.scene.control.ComboBox;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 public class LanguageManager {
 
     public static ComboBox<Language> languageComboBox;
+    private static List<Localizable> localizables = new ArrayList<>();
+
+    public static void registerLocalizable(Localizable localizable) {
+        localizables.add(localizable);
+    }
+
+    public static void updateLocalizableComponents(ResourceBundle bundle) {
+        for (Localizable localizable : localizables) {
+            localizable.updateLocalization(bundle);
+        }
+    }
 
     public static ComboBox<Language> createLanguageComboBox() {
         languageComboBox = new ComboBox<>();
@@ -28,7 +44,11 @@ public class LanguageManager {
 
         languageComboBox.setValue(savedLanguage);
         languageComboBox.valueProperty().addListener((obs, oldLanguage, newLanguage) -> {
-
+            if (newLanguage != null) {
+                Locale locale = new Locale(newLanguage.getCode());
+                ResourceBundle bundle = ResourceBundle.getBundle("messages", locale);
+                updateLocalizableComponents(bundle);
+            }
         });
 
         return languageComboBox;
@@ -38,11 +58,9 @@ public class LanguageManager {
         Language selectedLanguage = languageComboBox.getValue();
         if (selectedLanguage != null) {
             String languageCode = selectedLanguage.getCode();
-
             JSONObject settings = FileManager.readJsonObjectFromFile(Constants.SETTINGS_FILE);
 
             settings.put("language", languageCode);
-
             FileManager.writeJsonToFile(settings, Constants.SETTINGS_FILE);
         }
 
