@@ -28,6 +28,9 @@ public class TableBuilder {
     private static String nameAlertTitle = "Input Error";
     private static String nameAlertHeader = "Empty Badge Name";
     private static String nameAlertContent = "Please enter a valid badge name.";
+    private static String alertTitleDeleteBadge = "Confirmation Dialog";
+    private static String alertHeaderDeleteBadge = "Delete Badge";
+    private static String alertContentDeleteBadge = "Are you sure you want to delete this badge?";
 
     public static void initVariables(String fileName, UICallbacks uiCallbacks, FileOperationManager fileOperationManager, ScreenDisplayable screenDisplayable, String addScreenLabel, NameTextFieldUpdatable nameTextFieldUpdatable) {
         TableBuilder.fileName = fileName;
@@ -97,7 +100,10 @@ public class TableBuilder {
         TableColumn<String, Void> deleteColumn = new TableColumn<>("Delete");
         deleteColumn.setCellFactory(param -> new TableCell<>() {
             final Button deleteButton = ButtonFactory.createDeleteButton(e -> {
-                if (uiCallbacks.showConfirmationAlert("Confirmation Dialog", "Delete Badge", "Are you sure you want to delete this badge?")) {
+
+                boolean isConfirmationAlert = Notification.showConfirmationAlert(alertTitleDeleteBadge, alertHeaderDeleteBadge, alertContentDeleteBadge);
+
+                if (isConfirmationAlert) {
                     String badge = getTableView().getItems().get(getIndex());
                     List<String> badges = getTableView().getItems();
                     badges.remove(badge);
@@ -152,7 +158,6 @@ public class TableBuilder {
             screenDisplayable.showScreen(primaryStage);
         });
 
-
         HBox topLayout = uiCallbacks.createTopLayout(backButton, titleAddScreenLabel);
 
         layout.getChildren().addAll(
@@ -185,6 +190,19 @@ public class TableBuilder {
         }
         if (nameAlertContent != null) {
             nameAlertContent = newContentAlert;
+        }
+
+    }
+
+    public static void updateDeleteAlert(String newAlertTitleDeleteBadge, String newAlertHeaderDeleteBadge, String newAlertContentDeleteBadge) {
+        if(alertTitleDeleteBadge != null) {
+            alertTitleDeleteBadge = newAlertTitleDeleteBadge;
+        }
+        if(alertHeaderDeleteBadge != null) {
+            alertHeaderDeleteBadge = newAlertHeaderDeleteBadge;
+        }
+        if(alertContentDeleteBadge != null) {
+            alertContentDeleteBadge = newAlertContentDeleteBadge;
         }
 
     }

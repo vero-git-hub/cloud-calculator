@@ -5,6 +5,7 @@ import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.scan.ScanManager;
+import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -46,6 +47,9 @@ public class ProfileManager implements Localizable {
     private String preText;
     private String startDateText;
     private Label linksTitle = new Label("PDF Links:");
+    String alertTitleDeleteProfile = "Confirmation Dialog";
+    String alertHeaderDeleteProfile = "Delete Profile";
+    String alertContentDeleteProfile = "Are you sure you want to delete this profile?";
 
     public ProfileManager(DataExtractor dataExtractor, ProfileDataManager profileDataManager, UICallbacks uiCallbacks, ScanManager scanManager) {
         this.uiCallbacks = uiCallbacks;
@@ -251,7 +255,6 @@ public class ProfileManager implements Localizable {
         return dtf.format(localDate);
     }
 
-
     public TableColumn<Profile, Profile> createViewingColumn(Stage primaryStage) {
         TableColumn<Profile, Profile> viewingColumn = new TableColumn<>("View");
         viewingColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
@@ -287,7 +290,9 @@ public class ProfileManager implements Localizable {
                 }
 
                 EventHandler<ActionEvent> deleteAction = e -> {
-                    if (uiCallbacks.showConfirmationAlert("Confirmation Dialog", "Delete Profile", "Are you sure you want to delete this profile?")) {
+                    boolean isConfirmationAlert = Notification.showConfirmationAlert(alertTitleDeleteProfile, alertHeaderDeleteProfile, alertContentDeleteProfile);
+
+                    if (isConfirmationAlert) {
                         handleDeleteAction(primaryStage, profile);
                     }
                 };
@@ -317,5 +322,9 @@ public class ProfileManager implements Localizable {
         startDateText = bundle.getString("detailsStartDateText");
 
         linksTitle.setText(bundle.getString("detailsLinksTitle"));
+
+        alertTitleDeleteProfile = bundle.getString("alertTitleDeleteProfile");
+        alertHeaderDeleteProfile = bundle.getString("alertHeaderDeleteProfile");
+        alertContentDeleteProfile = bundle.getString("alertContentDeleteProfile");
     }
 }

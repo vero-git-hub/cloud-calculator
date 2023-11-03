@@ -38,13 +38,7 @@ public class IgnoreScreen implements ScreenDisplayable, Localizable, NameTextFie
         title = bundle.getString("ignoreTitle");
         addIgnoreTitle = bundle.getString("addIgnoreTitle");
 
-        TableBuilder.updateTitle(title);
-        TableBuilder.updateAddScreenTitle(addIgnoreTitle);
-        TableBuilder.updateNotificationAlert(
-                bundle.getString("nameAlertTitle"),
-                bundle.getString("nameAlertHeader"),
-                bundle.getString("nameAlertContent")
-        );
+        this.updateElements(title, addIgnoreTitle, bundle);
 
         updateNameTextFieldPlaceholder(bundle.getString("addScreenNameField"));
     }

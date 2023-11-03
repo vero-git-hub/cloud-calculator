@@ -7,6 +7,7 @@ import com.example.cloudcalc.badge.type.TypeBadgeManager;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
+import com.example.cloudcalc.util.Notification;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -40,6 +41,9 @@ public class PrizeManager implements Localizable {
     private TextField namePrizeField;
     private TextField badgeCountField;
     private ComboBox<String> badgeTypeComboBox;
+    String alertTitleDeletePrize = "Confirmation Dialog";
+    String alertHeaderDeletePrize = "Delete Prize";
+    String alertContentDeletePrize = "Are you sure you want to delete this prize?";
 
     public PrizeManager(UICallbacks uiCallbacks) {
         this.uiCallbacks = uiCallbacks;
@@ -88,7 +92,10 @@ public class PrizeManager implements Localizable {
                 return new TableCell<>() {
                     final EventHandler<ActionEvent> deleteAction = (ActionEvent event) -> {
                         Prize prize = getTableView().getItems().get(getIndex());
-                        if (uiCallbacks.showConfirmationAlert("Confirmation Dialog", "Delete Prize", "Are you sure you want to delete this prize?")) {
+
+                        boolean isConfirmationAlert = Notification.showConfirmationAlert(alertTitleDeletePrize, alertHeaderDeletePrize, alertContentDeletePrize);
+
+                        if (isConfirmationAlert) {
                             deletePrize(prize);
                             showPrizesScreen(primaryStage);
                         }
@@ -159,8 +166,6 @@ public class PrizeManager implements Localizable {
         typeLayout.setAlignment(Pos.CENTER);
 
         List<TypeBadge> typeBadgeList = typeBadgeDataManager.loadTypesBadgeFromFile(Constants.TYPES_BADGE_FILE);
-
-
         typeBadgeList.forEach(typeBadge -> badgeTypeComboBox.getItems().add(typeBadge.getName()));
 
         Button addButton = ButtonFactory.createAddButton(e -> typeBadgeManager.showAddTypeBadgeScreen(primaryStage));
@@ -178,7 +183,6 @@ public class PrizeManager implements Localizable {
         });
 
         Button backButton = ButtonFactory.createBackButton(e -> showPrizesScreen(primaryStage));
-
 
         HBox topLayout = uiCallbacks.createTopLayout(backButton, addPrizeTitle);
 
@@ -285,8 +289,6 @@ public class PrizeManager implements Localizable {
                 .ifPresent(prize -> receivedPrizes.put(Constants.SKILL_FOR_PL, prize));
 
         return receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
-
-
     }
 
     @Override
@@ -296,5 +298,9 @@ public class PrizeManager implements Localizable {
         namePrizeField.setPromptText(bundle.getString("addPrizeNameField"));
         badgeCountField.setPromptText(bundle.getString("addPrizeCountField"));
         badgeTypeComboBox.setPromptText(bundle.getString("addPrizeTypeComboBox"));
+
+        alertTitleDeletePrize = bundle.getString("alertTitleDeletePrize");
+        alertHeaderDeletePrize = bundle.getString("alertHeaderDeletePrize");
+        alertContentDeletePrize = bundle.getString("alertContentDeletePrize");
     }
 }
