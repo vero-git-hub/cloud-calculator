@@ -25,6 +25,9 @@ public class TableBuilder {
     private static Label titleLabel;
     private static Label titleAddScreenLabel;
     static NameTextFieldUpdatable nameTextFieldUpdatable;
+    private static String nameAlertTitle = "Input Error";
+    private static String nameAlertHeader = "Empty Badge Name";
+    private static String nameAlertContent = "Please enter a valid badge name.";
 
     public static void initVariables(String fileName, UICallbacks uiCallbacks, FileOperationManager fileOperationManager, ScreenDisplayable screenDisplayable, String addScreenLabel, NameTextFieldUpdatable nameTextFieldUpdatable) {
         TableBuilder.fileName = fileName;
@@ -138,7 +141,7 @@ public class TableBuilder {
 
             String badgeName = nameField.getText().trim();
             if (badgeName.isEmpty()) {
-                Notification.showAlert("Input Error", "Empty Badge Name", "Please enter a valid badge name.");
+                Notification.showAlert(nameAlertTitle, nameAlertHeader, nameAlertContent);
                 return;
             }
 
@@ -171,6 +174,19 @@ public class TableBuilder {
         if (titleAddScreenLabel != null) {
             titleAddScreenLabel.setText(newAddScreenTitle);
         }
+    }
+
+    public static void updateNotificationAlert(String newTitleAlert, String newHeaderAlert, String newContentAlert) {
+        if (nameAlertTitle != null) {
+            nameAlertTitle = newTitleAlert;
+        }
+        if (nameAlertHeader != null) {
+            nameAlertHeader = newHeaderAlert;
+        }
+        if (nameAlertContent != null) {
+            nameAlertContent = newContentAlert;
+        }
+
     }
 
 }

@@ -37,6 +37,11 @@ public class ArcadeScreen implements ScreenDisplayable, Localizable, NameTextFie
 
         TableBuilder.updateTitle(title);
         TableBuilder.updateAddScreenTitle(addArcadeTitle);
+        TableBuilder.updateNotificationAlert(
+                bundle.getString("nameAlertTitle"),
+                bundle.getString("nameAlertHeader"),
+                bundle.getString("nameAlertContent")
+        );
 
         updateNameTextFieldPlaceholder(bundle.getString("addScreenNameField"));
     }
