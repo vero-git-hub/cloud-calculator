@@ -1,4 +1,4 @@
-package com.example.cloudcalc.profile;
+package com.example.cloudcalc.entity;
 
 import java.util.List;
 import java.util.Objects;

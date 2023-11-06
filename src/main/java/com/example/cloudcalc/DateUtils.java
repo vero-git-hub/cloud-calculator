@@ -24,4 +24,10 @@ public class DateUtils {
         throw new IllegalArgumentException("Invalid date format in string: " + value);
     }
 
+    public static String getCurrentDate() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        LocalDate localDate = LocalDate.now();
+        return dtf.format(localDate);
+    }
+
 }

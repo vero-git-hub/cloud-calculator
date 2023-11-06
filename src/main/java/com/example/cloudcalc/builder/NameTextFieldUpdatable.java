@@ -1,4 +1,4 @@
-package com.example.cloudcalc.table;
+package com.example.cloudcalc.builder;
 
 import javafx.scene.control.TextField;
 

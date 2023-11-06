@@ -1,6 +1,9 @@
-package com.example.cloudcalc.profile;
+package com.example.cloudcalc.model;
 
-import com.example.cloudcalc.Constants;
+import com.example.cloudcalc.constant.FileName;
+import com.example.cloudcalc.controller.MainController;
+import com.example.cloudcalc.entity.Profile;
+import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +15,17 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProfileDataManager {
+public class ProfileModel {
+
+    public ProfileModel() {}
+
+    public void handleDeleteAction(Stage primaryStage, Profile profile, MainController mainController) {
+        List<Profile> profiles = loadProfilesFromFile(FileName.PROFILES_FILE);
+        profiles.remove(profile);
+        saveProfilesToFile(profiles, FileName.PROFILES_FILE);
+
+        mainController.showMainScreen(primaryStage);
+    }
 
     public void saveProfileToFile(Profile profile, String fileName) {
         JSONArray profilesArray = new JSONArray();
@@ -107,9 +120,9 @@ public class ProfileDataManager {
     }
 
     public void updateProfile(Profile profileToUpdate) {
-        JSONArray profilesArray = new JSONArray(loadProfilesFromFile(Constants.PROFILES_FILE));
+        JSONArray profilesArray = new JSONArray(loadProfilesFromFile(FileName.PROFILES_FILE));
         updateProfileFile(profileToUpdate, profilesArray);
-        saveJSONArrayToFile(profilesArray, Constants.PROFILES_FILE);
+        saveJSONArrayToFile(profilesArray, FileName.PROFILES_FILE);
     }
 
     private void saveJSONArrayToFile(JSONArray jsonArray, String fileName) {
@@ -132,6 +145,27 @@ public class ProfileDataManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void handleProfileSave(
+//            Stage primaryStage, Profile profile, String name, String startDate, String profileLink
+    ) {
+//        if(name != null && !name.isEmpty() &&
+//                startDate != null && !startDate.isEmpty() &&
+//                profileLink != null && !profileLink.isEmpty()) {
+//
+//            profile.setName(name);
+//            profile.setStartDate(startDate);
+//            profile.setProfileLink(profileLink);
+//
+//            if(profile.getPdfFilePath() != null) {
+//                List<String> extractedLinks = dataExtractor.extractHiddenLinksFromPdf(profile.getPdfFilePath());
+//                List<String> h1Contents = dataExtractor.extractH1FromLinks(extractedLinks);
+//                profile.setPdfLinks(h1Contents);
+//            }
+//            profileModel.saveProfileToFile(profile, FileName.PROFILES_FILE);
+//            uiCallbacks.showMainScreen(primaryStage);
+//        }
     }
 
 }

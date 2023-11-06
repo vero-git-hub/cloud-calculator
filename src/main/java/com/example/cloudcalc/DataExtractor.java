@@ -3,7 +3,7 @@ package com.example.cloudcalc;
 import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import com.example.cloudcalc.profile.Profile;
+import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.util.Notification;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;

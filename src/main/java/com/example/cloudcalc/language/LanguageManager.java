@@ -1,7 +1,7 @@
 package com.example.cloudcalc.language;
 
-import com.example.cloudcalc.Constants;
 import com.example.cloudcalc.FileManager;
+import com.example.cloudcalc.constant.FileName;
 import javafx.scene.control.ComboBox;
 import org.json.JSONObject;
 
@@ -35,7 +35,7 @@ public class LanguageManager {
             );
         }
 
-        JSONObject settings = FileManager.readJsonObjectFromFile(Constants.SETTINGS_FILE);
+        JSONObject settings = FileManager.readJsonObjectFromFile(FileName.SETTINGS_FILE);
 
         String savedLanguageCode = settings.optString("language", "en");
 
@@ -61,10 +61,10 @@ public class LanguageManager {
         Language selectedLanguage = languageComboBox.getValue();
         if (selectedLanguage != null) {
             String languageCode = selectedLanguage.getCode();
-            JSONObject settings = FileManager.readJsonObjectFromFile(Constants.SETTINGS_FILE);
+            JSONObject settings = FileManager.readJsonObjectFromFile(FileName.SETTINGS_FILE);
 
             settings.put("language", languageCode);
-            FileManager.writeJsonToFile(settings, Constants.SETTINGS_FILE);
+            FileManager.writeJsonToFile(settings, FileName.SETTINGS_FILE);
         }
 
     }

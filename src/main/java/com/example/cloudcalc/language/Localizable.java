@@ -1,6 +1,6 @@
 package com.example.cloudcalc.language;
 
-import com.example.cloudcalc.table.TableBuilder;
+import com.example.cloudcalc.builder.TableBuilder;
 
 import java.util.ResourceBundle;
 
