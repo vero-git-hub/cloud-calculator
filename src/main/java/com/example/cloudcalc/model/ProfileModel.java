@@ -2,6 +2,7 @@ package com.example.cloudcalc.model;
 
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.MainController;
+import com.example.cloudcalc.controller.ProfileController;
 import com.example.cloudcalc.entity.Profile;
 import javafx.stage.Stage;
 import org.json.JSONArray;
@@ -17,7 +18,11 @@ import java.util.List;
 
 public class ProfileModel {
 
-    public ProfileModel() {}
+    private final ProfileController profileController;
+    public ProfileModel(ProfileController profileController) {
+        this.profileController = profileController;
+    }
+
 
     public void handleDeleteAction(Stage primaryStage, Profile profile, MainController mainController) {
         List<Profile> profiles = loadProfilesFromFile(FileName.PROFILES_FILE);
@@ -148,24 +153,24 @@ public class ProfileModel {
     }
 
     public void handleProfileSave(
-//            Stage primaryStage, Profile profile, String name, String startDate, String profileLink
+            Stage primaryStage, Profile profile, String name, String startDate, String profileLink
     ) {
-//        if(name != null && !name.isEmpty() &&
-//                startDate != null && !startDate.isEmpty() &&
-//                profileLink != null && !profileLink.isEmpty()) {
-//
-//            profile.setName(name);
-//            profile.setStartDate(startDate);
-//            profile.setProfileLink(profileLink);
-//
-//            if(profile.getPdfFilePath() != null) {
-//                List<String> extractedLinks = dataExtractor.extractHiddenLinksFromPdf(profile.getPdfFilePath());
-//                List<String> h1Contents = dataExtractor.extractH1FromLinks(extractedLinks);
-//                profile.setPdfLinks(h1Contents);
-//            }
-//            profileModel.saveProfileToFile(profile, FileName.PROFILES_FILE);
-//            uiCallbacks.showMainScreen(primaryStage);
-//        }
+        if(name != null && !name.isEmpty() &&
+                startDate != null && !startDate.isEmpty() &&
+                profileLink != null && !profileLink.isEmpty()) {
+
+            profile.setName(name);
+            profile.setStartDate(startDate);
+            profile.setProfileLink(profileLink);
+
+            if(profile.getPdfFilePath() != null) {
+                List<String> extractedLinks = profileController.extractHiddenLinksFromPdf(profile.getPdfFilePath());
+                List<String> h1Contents = profileController.extractH1FromLinks(extractedLinks);
+                profile.setPdfLinks(h1Contents);
+            }
+            saveProfileToFile(profile, FileName.PROFILES_FILE);
+            profileController.showMainScreen(primaryStage);
+        }
     }
 
 }

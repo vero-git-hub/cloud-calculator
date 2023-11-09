@@ -1,14 +1,18 @@
 package com.example.cloudcalc.view;
 
-import com.example.cloudcalc.builder.TableBuilder;
+import com.example.cloudcalc.button.ButtonFactory;
+import com.example.cloudcalc.constant.FieldNames;
 import com.example.cloudcalc.controller.ProfileController;
-import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.entity.Profile;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import com.example.cloudcalc.language.Localizable;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.awt.*;
+import java.io.File;
 import java.util.ResourceBundle;
 
 public class ProfileView implements Localizable {
@@ -28,17 +32,25 @@ public class ProfileView implements Localizable {
 
     public ProfileView(ProfileController profileController) {
         this.profileController = profileController;
+        this.titleLabel = new Label("CREATE PROFILE");
 
-//        titleLabel = uiCallbacks.createLabel("Create Profile");
-//
-//        nameField = uiCallbacks.createTextField("Name");
-//        dateField = uiCallbacks.createTextField("Start Date (e.g., 26.09.2023)");
-//        linkField = uiCallbacks.createTextField("Profile Link");
-//
+        nameField = new TextField();
+        nameField.setPromptText(FieldNames.NAME.getLabel());
+
+        dateField = new TextField();
+        dateField.setPromptText(FieldNames.START_DATE.getLabel());
+
+        linkField = new TextField();
+        linkField.setPromptText(FieldNames.PROFILE_LINK.getLabel());
+
 //        preText = "DETAILS for";
 //        startDateText = "Start Date:";
 //
 //        LanguageManager.registerLocalizable(this);
+    }
+
+    public Label getTitleLabel() {
+        return titleLabel;
     }
 
     public void showProfileScreen(Stage primaryStage, Profile profile) {
@@ -74,34 +86,29 @@ public class ProfileView implements Localizable {
     }
 
     public void showCreateProfileScreen(Stage primaryStage) {
-//        VBox layout = new VBox(10);
-//        Profile profile = new Profile();
-//
-//        Button uploadPdfButton = ButtonFactory.createUploadPdfButton(e -> {
-//            FileChooser fileChooser = new FileChooser();
-//            File selectedFile = fileChooser.showOpenDialog(primaryStage);
-//            if (selectedFile != null) {
-//                profile.setPdfFilePath(selectedFile.getAbsolutePath());
-//            }
-//        });
-//
-//        Button saveButton = ButtonFactory.createSaveButton(e -> handleProfileSave(primaryStage, profile, nameField.getText(), dateField.getText(), linkField.getText()));
-//
-//        Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
-//
-//
-//        HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel);
-//
-//        layout.getChildren().addAll(
-//                topLayout,
-//                nameField,
-//                dateField,
-//                linkField,
-//                uploadPdfButton,
-//                saveButton
-//        );
-//
-//        uiCallbacks.createScene(layout, primaryStage);
+        VBox layout = new VBox(10);
+        Profile profile = new Profile();
+
+        Button uploadPdfButton = ButtonFactory.createUploadPdfButton(e -> {
+            FileChooser fileChooser = new FileChooser();
+            File selectedFile = fileChooser.showOpenDialog(primaryStage);
+            if (selectedFile != null) {
+                profile.setPdfFilePath(selectedFile.getAbsolutePath());
+            }
+        });
+
+        Button saveButton = ButtonFactory.createSaveButton(e -> profileController.handleProfileSave(primaryStage, profile, nameField.getText(), dateField.getText(), linkField.getText()));
+
+        layout.getChildren().addAll(
+                profileController.createTopLayout(primaryStage),
+                nameField,
+                dateField,
+                linkField,
+                uploadPdfButton,
+                saveButton
+        );
+
+        profileController.createScene(layout, primaryStage);
     }
 
 //    public TableColumn<Profile, String> createNameColumn() {

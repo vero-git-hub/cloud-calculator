@@ -41,7 +41,7 @@ public class StatsView implements Localizable {
         prizeTable = statsController.createCountPrizeTableForStats(profiles, prizeTable);
 
         layout.getChildren().addAll(
-                statsController.createTopLayoutForStats(primaryStage),
+                statsController.createTopLayout(primaryStage),
                 prizeTable,
                 statsController.createSubtitleLabelForStats(),
                 statsController.createMainTableForStats(mainTable, prizeTable)

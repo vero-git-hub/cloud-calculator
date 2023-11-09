@@ -6,6 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -25,11 +26,6 @@ public class ElementsBuilder {
 //        return new TextFlow(bold, normal);
 //    }
 //
-//    public TextField createTextField(String promptText) {
-//        TextField textField = new TextField();
-//        textField.setPromptText(promptText);
-//        return textField;
-//    }
 
     public HBox createTopLayoutWithBackAndText(Button backButton, TextFlow textFlow) {
         HBox topLayout = new HBox(10);

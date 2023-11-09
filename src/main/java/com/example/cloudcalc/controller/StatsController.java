@@ -8,8 +8,6 @@ import com.example.cloudcalc.builder.SceneBuilder;
 import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
-import com.example.cloudcalc.language.LanguageManager;
-import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.prize.PrizeController;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.model.ProfileModel;
@@ -69,7 +67,7 @@ public class StatsController {
         return tableBuilder.createCountPrizeTableForStats(profiles, prizeTable, prizeController);
     }
 
-     public HBox createTopLayoutForStats(Stage primaryStage){
+     public HBox createTopLayout(Stage primaryStage){
          Button backButton = ButtonFactory.createBackButton(e -> mainController.showMainScreen(primaryStage));
          return elementsBuilder.createTopLayout(backButton, statsView.getTitleLabel());
      }

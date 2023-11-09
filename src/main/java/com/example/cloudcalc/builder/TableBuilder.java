@@ -190,11 +190,9 @@ public class TableBuilder {
     }
 
     public TableView<Map.Entry<String, Long>> createCountPrizeTableForStats(List<Profile> profiles, TableView<Map.Entry<String, Long>> prizeTable, PrizeController prizeController) {
-        System.out.println("TB");
         prizeTable = new TableView<>();
 
         Map<String, Long> prizeCounts = getPrizeCountsForStats(profiles, prizeController);
-        System.out.println(prizeCounts);
 
         List<Prize> availablePrizes = prizeController.loadPrizesFromFile(FileName.PRIZES_FILE);
 
@@ -499,7 +497,7 @@ public class TableBuilder {
                     }
 
                     EventHandler<ActionEvent> viewAction = e -> {
-                        profileController.showProfileScreen(primaryStage, profile);
+                        profileController.showProfileDetailsScreen(primaryStage, profile);
                     };
                     Button viewButton = ButtonFactory.createViewButton(viewAction);
                     setGraphic(viewButton);

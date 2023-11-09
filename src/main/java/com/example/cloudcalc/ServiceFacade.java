@@ -29,12 +29,13 @@ public class ServiceFacade {
     private MainController mainController = new MainController(this);
 
     private ServiceFacade() {
-        this.profileModel = new ProfileModel();
+
         dataExtractor = new DataExtractor();
         prizeController = new PrizeController();
         fileOperationManager = new FileOperationManager();
         scanManager = createScanManager();
         profileController = createProfileController();
+        this.profileModel = new ProfileModel(profileController);
         ignoreController = new IgnoreController();
         badgeManager = createBadgeManager();
         statsController = new StatsController(this);
