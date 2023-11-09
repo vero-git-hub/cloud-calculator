@@ -5,9 +5,9 @@ import com.example.cloudcalc.PdfLinkItem;
 import com.example.cloudcalc.badge.BadgeCounts;
 import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.badge.FileOperationManager;
-import com.example.cloudcalc.badge.ScreenDisplayable;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
+import com.example.cloudcalc.controller.ArcadeController;
 import com.example.cloudcalc.controller.MainController;
 import com.example.cloudcalc.prize.Prize;
 import com.example.cloudcalc.prize.PrizeController;
@@ -33,31 +33,30 @@ import java.util.stream.Collectors;
 
 public class TableBuilder {
 
-    private static String fileName;
-    private static FileOperationManager fileOperationManager;
-    private static ScreenDisplayable screenDisplayable;
-    private static String addScreenLabel;
-    private static TableView<String> table;
-    private static Label titleLabel;
-    private static Label titleAddScreenLabel;
-    static NameTextFieldUpdatable nameTextFieldUpdatable;
+    private String fileName;
+    private FileOperationManager fileOperationManager;
+    //private ScreenDisplayable screenDisplayable;
+    private String addScreenLabel;
+    private TableView<String> table;
+    private Label titleLabel;
+    private Label titleAddScreenLabel;
+    //static NameTextFieldUpdatable nameTextFieldUpdatable;
 
 
-//    public static void initVariables(String fileName, UICallbacks uiCallbacks, FileOperationManager fileOperationManager, ScreenDisplayable screenDisplayable, String addScreenLabel, NameTextFieldUpdatable nameTextFieldUpdatable) {
-//        TableBuilder.fileName = fileName;
-//        TableBuilder.uiCallbacks = uiCallbacks;
-//        TableBuilder.fileOperationManager = fileOperationManager;
+    public void initVariablesForTable(String fileName, FileOperationManager fileOperationManager, String addScreenLabel) {
+        this.fileName = fileName;
+        this.fileOperationManager = fileOperationManager;
 //        TableBuilder.screenDisplayable = screenDisplayable;
-//        TableBuilder.addScreenLabel = addScreenLabel;
-//        TableBuilder.nameTextFieldUpdatable = nameTextFieldUpdatable;
-//    }
+        this.addScreenLabel = addScreenLabel;
+//        this.nameTextFieldUpdatable = nameTextFieldUpdatable;
+    }
 
-    private TableView<String> createBadgeTable(Stage primaryStage) {
+    public TableView<String> createBadgeTable(Stage primaryStage, ArcadeController arcadeController) {
         table = new TableView<>();
 
         TableColumn<String, Integer> indexColumn = createIndexColumn(table);
         TableColumn<String, String> nameColumn = createNameColumnForBadge();
-        TableColumn<String, Void> deleteColumn = createDeleteColumn(primaryStage, table);
+        TableColumn<String, Void> deleteColumn = createDeleteColumn(primaryStage, table, arcadeController);
 
         table.getColumns().addAll(indexColumn, nameColumn, deleteColumn);
 
@@ -337,7 +336,7 @@ public class TableBuilder {
         return mainTable;
     }
 
-    private TableColumn<String, Void> createDeleteColumn(Stage primaryStage, TableView<String> table) {
+    private TableColumn<String, Void> createDeleteColumn(Stage primaryStage, TableView<String> table, ArcadeController arcadeController) {
         TableColumn<String, Void> deleteColumn = new TableColumn<>("Delete");
         deleteColumn.setCellFactory(param -> new TableCell<>() {
             final Button deleteButton = ButtonFactory.createDeleteButton(e -> {
@@ -349,7 +348,7 @@ public class TableBuilder {
                     List<String> badges = getTableView().getItems();
                     badges.remove(badge);
                     fileOperationManager.saveBadgesToFile(badges, fileName);
-                    screenDisplayable.showScreen(primaryStage);
+                    arcadeController.showScreen(primaryStage);
                 }
             });
 
@@ -402,13 +401,13 @@ public class TableBuilder {
         prizeTable.getColumns().get(3).prefWidthProperty().bind(prizeTable.widthProperty().multiply(countColumnPercentage));
     }
 
-    public static void updateTitle(String newTitle) {
+    public void updateTitle(String newTitle) {
         if (titleLabel != null) {
             titleLabel.setText(newTitle);
         }
     }
 
-    public static void updateAddScreenTitle(String newAddScreenTitle) {
+    public void updateAddScreenTitle(String newAddScreenTitle) {
         if (titleAddScreenLabel != null) {
             titleAddScreenLabel.setText(newAddScreenTitle);
         }

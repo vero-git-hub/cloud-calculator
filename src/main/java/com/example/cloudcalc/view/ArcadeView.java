@@ -1,9 +1,11 @@
-package com.example.cloudcalc.badge.arcade;
+package com.example.cloudcalc.view;
 
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.badge.ScreenDisplayable;
 import com.example.cloudcalc.builder.NameTextFieldUpdatable;
 import com.example.cloudcalc.builder.TableBuilder;
+import com.example.cloudcalc.controller.ArcadeController;
+import com.example.cloudcalc.controller.StatsController;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
 import javafx.scene.control.TextField;
@@ -12,12 +14,24 @@ import javafx.stage.Stage;
 import java.util.ResourceBundle;
 
 //public class ArcadeView implements ScreenDisplayable, Localizable, NameTextFieldUpdatable {
-//
+public class ArcadeView {
+    private final ArcadeController arcadeController;
+    private String title = "ARCADE";
+
+    public ArcadeView(ArcadeController arcadeController) {
+        this.arcadeController = arcadeController;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    //
 //    private ServiceFacade serviceFacade;
 //    private final ArcadeManager controller;
 //
 //
-//    private String title = "ARCADE";
+//
 //    private String addArcadeTitle = "ADD ARCADE BADGE";
 //
 //    private TextField nameTextField = new TextField();
@@ -33,21 +47,11 @@ import java.util.ResourceBundle;
 //        return new ArcadeManager(serviceFacade);
 //    }
 //
-//    public void showArcadeScreen(Stage primaryStage) {
-////        TableBuilder.initVariables(FileName.ARCADE_FILE, controller.getUiCallbacks(), controller.getFileOperationManager(), this, addArcadeTitle, this);
-//
-//        TableBuilder.fileName = fileName;
-//        TableBuilder.uiCallbacks = uiCallbacks;
-//        TableBuilder.fileOperationManager = fileOperationManager;
-//        TableBuilder.screenDisplayable = screenDisplayable;
-//        TableBuilder.addScreenLabel = addScreenLabel;
-//        TableBuilder.nameTextFieldUpdatable = nameTextFieldUpdatable;
-//
-//
-//
-//        TableBuilder.buildScreen(primaryStage, title);
-//    }
-//
+    public void showArcadeScreen(Stage primaryStage) {
+        arcadeController.initVariablesForTable();
+        arcadeController.buildScreen(primaryStage);
+    }
+
 //    @Override
 //    public void updateLocalization(ResourceBundle bundle) {
 //        title = bundle.getString("arcadeTitle");
@@ -74,4 +78,5 @@ import java.util.ResourceBundle;
 //        }
 //        return nameTextField;
 //    }
-//}
+
+}

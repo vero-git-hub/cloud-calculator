@@ -1,6 +1,8 @@
 package com.example.cloudcalc.builder;
 
 import com.example.cloudcalc.button.ButtonFactory;
+import com.example.cloudcalc.controller.ArcadeController;
+import com.example.cloudcalc.controller.MainController;
 import com.example.cloudcalc.util.AlertGuardian;
 import com.example.cloudcalc.util.Notification;
 import javafx.scene.Parent;
@@ -27,28 +29,28 @@ public class SceneBuilder {
 //        return instance;
 //    }
 
-//    public  void buildScreen(Stage primaryStage, String title) {
+    public void buildScreen(Stage primaryStage, String title, ElementsBuilder elementsBuilder, TableBuilder tableBuilder, ArcadeController arcadeController, MainController mainController) {
+        VBox layout = new VBox(10);
+        HBox topLayout = elementsBuilder.createTopLayout(primaryStage, title, mainController, arcadeController);
+
+        TableView<String> table = tableBuilder.createBadgeTable(primaryStage, arcadeController);
+
+        layout.getChildren().addAll(topLayout, table);
+
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(layout);
+
+        VBox.setVgrow(table, Priority.ALWAYS);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+
+        createScene(scrollPane, primaryStage);
+    }
+
+//    public void buildAnArcadeAddScreen(Stage primaryStage, Button backButton) {
 //        VBox layout = new VBox(10);
-//        HBox topLayout = createTopLayout(primaryStage, title);
 //
-//        TableView<String> table = createBadgeTable(primaryStage);
-//
-//        layout.getChildren().addAll(topLayout, table);
-//
-//        ScrollPane scrollPane = new ScrollPane();
-//        scrollPane.setContent(layout);
-//
-//        VBox.setVgrow(table, Priority.ALWAYS);
-//        scrollPane.setFitToWidth(true);
-//        scrollPane.setFitToHeight(true);
-//
-//        uiCallbacks.createScene(scrollPane, primaryStage);
-//    }
-//
-//    private  void buildAddScreen(Stage primaryStage) {
-//        VBox layout = new VBox(10);
-//
-//        Button backButton = ButtonFactory.createBackButton(e -> screenDisplayable.showScreen(primaryStage));
+////        Button backButton = ButtonFactory.createBackButton(e -> screenDisplayable.showScreen(primaryStage));
 //        titleAddScreenLabel = uiCallbacks.createLabel(addScreenLabel);
 //
 //        Button saveButton = ButtonFactory.createSaveButton(event -> {

@@ -1,12 +1,12 @@
 package com.example.cloudcalc.builder;
 
 import com.example.cloudcalc.button.ButtonFactory;
+import com.example.cloudcalc.controller.ArcadeController;
 import com.example.cloudcalc.controller.MainController;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -90,13 +90,13 @@ public class ElementsBuilder {
         return topLayout;
     }
 //
-//    private static HBox createTopLayout(Stage primaryStage, String title) {
-//        Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
-//        titleLabel = uiCallbacks.createLabel(title);
-//        Button addButton = ButtonFactory.createAddButton(e -> buildAddScreen(primaryStage));
-//
-//        return uiCallbacks.createTopLayout(backButton, titleLabel, addButton);
-//    }
+    public HBox createTopLayout(Stage primaryStage, String title, MainController mainController, ArcadeController arcadeController) {
+        Button backButton = ButtonFactory.createBackButton(e -> mainController.showMainScreen(primaryStage));
+        Label titleLabel = new Label(title);
+        Button addButton = ButtonFactory.createAddButton(e -> arcadeController.showAnArcadeAddScreen(primaryStage));
+
+        return createTopLayout(backButton, titleLabel, addButton);
+    }
 //
 //    public static VBox createProfileInfoForProfile(Profile profile, UICallbacks uiCallbacks, String startDateText) {
 //        VBox profileInfoBox = new VBox(10);

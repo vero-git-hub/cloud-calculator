@@ -2,7 +2,7 @@ package com.example.cloudcalc;
 
 import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.badge.FileOperationManager;
-import com.example.cloudcalc.badge.arcade.ArcadeController;
+import com.example.cloudcalc.controller.ArcadeController;
 
 import com.example.cloudcalc.badge.ignored.IgnoreController;
 import com.example.cloudcalc.controller.MainController;
@@ -39,7 +39,7 @@ public class ServiceFacade {
         ignoreController = new IgnoreController();
         badgeManager = createBadgeManager();
         statsController = new StatsController(this);
-        arcadeController = new ArcadeController();
+        arcadeController = new ArcadeController(this);
     }
 
     public static synchronized ServiceFacade getInstance() {
@@ -119,7 +119,7 @@ public class ServiceFacade {
     }
 
     public void showArcadeScreen(Stage primaryStage) {
-        arcadeController.showArcadeScreen(primaryStage);
+        arcadeController.showScreen(primaryStage);
     }
 
 }
