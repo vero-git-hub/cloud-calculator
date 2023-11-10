@@ -3,16 +3,21 @@ package com.example.cloudcalc.controller;
 //import com.example.cloudcalc.badge.type.TypeBadgeManager;
 
 import com.example.cloudcalc.ServiceFacade;
+import com.example.cloudcalc.badge.type.TypeBadge;
+import com.example.cloudcalc.badge.type.TypeBadgeDataManager;
+import com.example.cloudcalc.view.TypeBadgeView;
 import com.example.cloudcalc.builder.ElementsBuilder;
 import com.example.cloudcalc.builder.SceneBuilder;
 import com.example.cloudcalc.builder.TableBuilder;
         import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.model.PrizeModel;
 import com.example.cloudcalc.util.Notification;
+import com.example.cloudcalc.view.prize.AddPrizeView;
 import com.example.cloudcalc.view.prize.PrizeView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -30,41 +35,48 @@ public class PrizeController {
     private final SceneBuilder sceneBuilder = new SceneBuilder();
     private final ElementsBuilder elementsBuilder = new ElementsBuilder();
     private final MainController mainController;
+    private final AddPrizeView addPrizeView = new AddPrizeView(this);
 
 //    private final MainManager mainManager;
-//    private final TypeBadgeDataManager typeBadgeDataManager;
-//    private final TypeBadgeManager typeBadgeManager;
+    private final TypeBadgeDataManager typeBadgeDataManager = new TypeBadgeDataManager();
+    private final ServiceFacade serviceFacade;
 //
 //    private final Map<String, Prize> receivedPrizes = new HashMap<>();
 //    private Label titleLabel;
 //    private Label addPrizeTitle;
-//    private TextField namePrizeField;
-//    private TextField badgeCountField;
-//    private ComboBox<String> badgeTypeComboBox;
+    private TextField namePrizeField;
+    private TextField badgeCountField;
+
     String alertTitleDeletePrize = "Confirmation Dialog";
     String alertHeaderDeletePrize = "Delete Prize";
     String alertContentDeletePrize = "Are you sure you want to delete this prize?";
 
     public PrizeController(ServiceFacade serviceFacade) {
         this.mainController = serviceFacade.getMainController();
+        this.serviceFacade = serviceFacade;
+
+        namePrizeField = new TextField();
+        namePrizeField.setPromptText("Enter name prize");
+
+        badgeCountField = new TextField();
+        badgeCountField.setPromptText("Enter badge count");
     }
 
-//    public PrizeManager() {
+    public TextField getNamePrizeField() {
+        return namePrizeField;
+    }
+
+    public TextField getBadgeCountField() {
+        return badgeCountField;
+    }
+
+    //    public PrizeManager() {
 //        this.mainManager = mainManager;
 //        this.typeBadgeDataManager = new TypeBadgeDataManager();
 //        this.typeBadgeManager = new TypeBadgeManager(mainManager, typeBadgeDataManager, this);
 //
 //        titleLabel = TableBuilder.createLabel("PRIZES");
 //        addPrizeTitle = TableBuilder.createLabel("Add Prize");
-//
-//        namePrizeField = new TextField();
-//        namePrizeField.setPromptText("Enter name prize");
-//
-//        badgeCountField = new TextField();
-//        badgeCountField.setPromptText("Enter badge count");
-//
-//        badgeTypeComboBox = new ComboBox<>();
-//        badgeTypeComboBox.setPromptText("Select badge type");
 //
 //        LanguageManager.registerLocalizable(this);
 //    }
@@ -85,67 +97,18 @@ public class PrizeController {
         return tableBuilder.createTableForPrize(stage, prizes, this);
     }
 
-    public void showAddPrizesScreen(Stage primaryStage) {
-//        VBox layout = new VBox(10);
-//
-//        HBox typeLayout = new HBox();
-//        typeLayout.setAlignment(Pos.CENTER);
-//
-//        List<TypeBadge> typeBadgeList = typeBadgeDataManager.loadTypesBadgeFromFile(FileName.TYPES_BADGE_FILE);
-//        typeBadgeList.forEach(typeBadge -> badgeTypeComboBox.getItems().add(typeBadge.getName()));
-//
-//        Button addButton = ButtonFactory.createAddButton(e -> typeBadgeManager.showAddTypeBadgeScreen(primaryStage));
-//
-//        Pane leftSpacer = new Pane();
-//        Pane rightSpacer = new Pane();
-//
-//        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
-//        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
-//        typeLayout.getChildren().addAll(badgeTypeComboBox, addButton, rightSpacer);
-//
-//        Button saveButton = ButtonFactory.createSaveButton(e -> {
-//            savePrize(namePrizeField.getText(), badgeCountField.getText(), badgeTypeComboBox.getValue());
-//            showPrizesScreen(primaryStage);
-//        });
-//
-//        Button backButton = ButtonFactory.createBackButton(e -> showPrizesScreen(primaryStage));
-//
-//        HBox topLayout = TableBuilder.createTopLayout(backButton, addPrizeTitle);
-//
-//        layout.getChildren().addAll(
-//                topLayout,
-//                namePrizeField,
-//                badgeCountField,
-//                typeLayout,
-//                saveButton
-//        );
-//
-//        TableBuilder.createScene(layout, primaryStage);
+    public void showAddPrizesScreen(Stage stage) {
+        addPrizeView.showScreen(stage);
     }
 
-    private void savePrize(String namePrize, String badgeCount, String badgeType) {
-//        if (namePrize != null && badgeCount != null && !badgeCount.isEmpty() && badgeType != null) {
-//            Prize newPrize = new Prize();
-//            newPrize.setName(namePrize);
-//            newPrize.setType(badgeType);
-//
-//            try {
-//                newPrize.setCount(Integer.parseInt(badgeCount));
-//            } catch (NumberFormatException e) {
-//                return;
-//            }
-//
-//            List<Prize> existingPrizes = loadPrizesFromFile(FileName.PRIZES_FILE);
-//            existingPrizes.add(newPrize);
-//
-//            JSONArray jsonArray = convertPrizesToJSONArray(existingPrizes);
-//
-//            try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(FileName.PRIZES_FILE), StandardCharsets.UTF_8)) {
-//                writer.write(jsonArray.toString());
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
+    public void savePrize(Stage stage, String badgeType) {
+        String namePrize = namePrizeField.getText();
+        String badgeCount = badgeCountField.getText();
+        if (namePrize != null && badgeCount != null && !badgeCount.isEmpty() && badgeType != null) {
+            prizeModel.savePrize(namePrize, badgeCount, badgeType);
+            showScreen(stage);
+        }
+
     }
 
     public void deleteAction(Stage stage, Prize prize) {
@@ -166,9 +129,22 @@ public class PrizeController {
         return elementsBuilder.createTopLayout(backButton, titleLabel, createButton);
     }
 
+    public HBox createTopLayoutForAddScreen(Button backButton, Label titleLabel) {
+        return elementsBuilder.createTopLayout(backButton, titleLabel);
+    }
+
     public void showMainScreen(Stage stage) {
         mainController.showMainScreen(stage);
     }
+
+    public List<TypeBadge> loadTypesBadgeFromFile() {
+        return typeBadgeDataManager.loadTypesBadgeFromFile();
+    }
+
+    public void showAddTypeBadgeScreen(Stage stage) {
+        serviceFacade.showTypeBadgeScreen(stage);
+    }
+
 
 //    public List<String> determinePrizesForBadgeCount(int prizePDF, int prizeSkill, int prizeActivity, int prizeTypeBadge) {
 //        List<Prize> prizes = loadPrizesFromFile(FileName.PRIZES_FILE);

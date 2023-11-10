@@ -2,15 +2,11 @@ package com.example.cloudcalc;
 
 import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.badge.FileOperationManager;
-import com.example.cloudcalc.controller.ArcadeController;
+import com.example.cloudcalc.controller.*;
 
 import com.example.cloudcalc.badge.ignored.IgnoreController;
-import com.example.cloudcalc.controller.MainController;
-import com.example.cloudcalc.controller.PrizeController;
 import com.example.cloudcalc.model.ProfileModel;
-import com.example.cloudcalc.controller.ProfileController;
 import com.example.cloudcalc.scan.ScanManager;
-import com.example.cloudcalc.controller.StatsController;
 import javafx.stage.Stage;
 
 public class ServiceFacade {
@@ -26,10 +22,10 @@ public class ServiceFacade {
     private BadgeManager badgeManager;
     private StatsController statsController;
     private ArcadeController arcadeController;
+    private TypeBadgeController typeBadgeController = new TypeBadgeController(this);
     private MainController mainController = new MainController(this);
 
     private ServiceFacade() {
-
         dataExtractor = new DataExtractor();
         prizeController = new PrizeController(this);
         fileOperationManager = new FileOperationManager();
@@ -98,6 +94,10 @@ public class ServiceFacade {
         return arcadeController;
     }
 
+    public TypeBadgeController getTypeBadgeController() {
+        return typeBadgeController;
+    }
+
     public MainController getMainController() {
         return mainController;
     }
@@ -120,6 +120,10 @@ public class ServiceFacade {
 
     public void showArcadeScreen(Stage primaryStage) {
         arcadeController.showScreen(primaryStage);
+    }
+
+    public void showTypeBadgeScreen(Stage stage) {
+        typeBadgeController.showScreen(stage);
     }
 
 }

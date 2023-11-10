@@ -8,6 +8,10 @@ import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,5 +73,28 @@ public class PrizeModel {
             jsonArray.put(jsonObject);
         }
         return jsonArray;
+    }
+
+    public void savePrize(String namePrize, String badgeCount, String badgeType) {
+            Prize newPrize = new Prize();
+            newPrize.setName(namePrize);
+            newPrize.setType(badgeType);
+
+            try {
+                newPrize.setCount(Integer.parseInt(badgeCount));
+            } catch (NumberFormatException e) {
+                return;
+            }
+
+            List<Prize> existingPrizes = loadPrizesFromFile();
+            existingPrizes.add(newPrize);
+
+            JSONArray jsonArray = convertPrizesToJSONArray(existingPrizes);
+
+            try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(FileName.PRIZES_FILE), StandardCharsets.UTF_8)) {
+                writer.write(jsonArray.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
     }
 }
