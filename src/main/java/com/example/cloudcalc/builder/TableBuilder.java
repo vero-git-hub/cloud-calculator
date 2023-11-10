@@ -9,8 +9,8 @@ import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.ArcadeController;
 import com.example.cloudcalc.controller.MainController;
-import com.example.cloudcalc.prize.Prize;
-import com.example.cloudcalc.prize.PrizeController;
+import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.controller.PrizeController;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.controller.ProfileController;
@@ -25,6 +25,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -35,20 +36,15 @@ public class TableBuilder {
 
     private String fileName;
     private FileOperationManager fileOperationManager;
-    //private ScreenDisplayable screenDisplayable;
     private String addScreenLabel;
     private TableView<String> table;
     private Label titleLabel;
     private Label titleAddScreenLabel;
-    //static NameTextFieldUpdatable nameTextFieldUpdatable;
-
 
     public void initVariablesForTable(String fileName, FileOperationManager fileOperationManager, String addScreenLabel) {
         this.fileName = fileName;
         this.fileOperationManager = fileOperationManager;
-//        TableBuilder.screenDisplayable = screenDisplayable;
         this.addScreenLabel = addScreenLabel;
-//        this.nameTextFieldUpdatable = nameTextFieldUpdatable;
     }
 
     public TableView<String> createBadgeTable(Stage primaryStage, ArcadeController arcadeController) {
@@ -193,7 +189,7 @@ public class TableBuilder {
 
         Map<String, Long> prizeCounts = getPrizeCountsForStats(profiles, prizeController);
 
-        List<Prize> availablePrizes = prizeController.loadPrizesFromFile(FileName.PRIZES_FILE);
+        List<Prize> availablePrizes = prizeController.loadPrizesFromFile();
 
         prizeTable.getColumns().addAll(
                 createNumberColumnForCountTableForStats(prizeTable),
@@ -234,7 +230,7 @@ public class TableBuilder {
     }
 
     public Map<String, Long> getPrizeCountsForStats(List<Profile> profiles, PrizeController prizeController) {
-        List<Prize> availablePrizes = prizeController.loadPrizesFromFile(FileName.PRIZES_FILE);
+        List<Prize> availablePrizes = prizeController.loadPrizesFromFile();
         List<String> allAvailablePrizeNames = availablePrizes.stream().map(Prize::getName).collect(Collectors.toList());
 
         List<String> allProfilePrizes = profiles.stream()
@@ -457,7 +453,103 @@ public class TableBuilder {
         return mainTable;
     }
 
-    public static TableColumn<Profile, Profile> createActionColumnForProfile(Stage primaryStage, ProfileController profileController, MainController mainController) {
+    public TableView<Prize> createTableForPrize(Stage stage, List<Prize> prizes, PrizeController prizeController) {
+        TableView<Prize> table = new TableView<>();
+
+        TableColumn<Prize, Integer> idxColumn = createNumberColumnForPrize(table);
+        TableColumn<Prize, String> nameColumn = createNameColumnForPrize();
+        TableColumn<Prize, String> typeColumn = createTypeColumnForPrize();
+        TableColumn<Prize, Integer> countColumn = createCountColumnForPrize();
+        TableColumn<Prize, Void> deleteColumn = createDeleteColumnForPrize(stage, prizeController);
+
+        table.getColumns().addAll(idxColumn, nameColumn, typeColumn, countColumn, deleteColumn);
+        table.getItems().addAll(prizes);
+
+        configureTableColumnsWidthForPrize(table);
+
+        return table;
+    }
+
+    public TableColumn<Prize, Integer> createNumberColumnForPrize(TableView<Prize> mainTable) {
+        TableColumn<Prize, Integer> numberColumn = new TableColumn<>("№");
+        numberColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(mainTable.getItems().indexOf(cellData.getValue()) + 1));
+        return numberColumn;
+    }
+
+    private TableColumn<Prize, Void> createDeleteColumnForPrize(Stage stage, PrizeController prizeController) {
+        TableColumn<Prize, Void> deleteColumn = new TableColumn<>("Actions");
+
+        Callback<TableColumn<Prize, Void>, TableCell<Prize, Void>> cellFactory = new Callback<>() {
+            @Override
+            public TableCell<Prize, Void> call(final TableColumn<Prize, Void> param) {
+                return new TableCell<>() {
+                    final EventHandler<ActionEvent> deleteAction = (ActionEvent event) -> {
+                        Prize prize = getTableView().getItems().get(getIndex());
+                        prizeController.deleteAction(stage, prize);
+                    };
+
+                    final Button deleteButton = ButtonFactory.createDeleteButton(deleteAction);
+
+                    @Override
+                    public void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            setGraphic(deleteButton);
+                        }
+                    }
+                };
+            }
+        };
+
+        deleteColumn.setCellFactory(cellFactory);
+
+        return deleteColumn;
+    }
+
+
+    public void configureTableColumnsWidthForPrize(TableView<Prize> table) {
+        TableColumn<Prize, ?> numberColumn = table.getColumns().get(0);
+        TableColumn<Prize, ?> nameColumn = table.getColumns().get(1);
+        TableColumn<Prize, ?> typeColumn = table.getColumns().get(2);
+        TableColumn<Prize, ?> countColumn = table.getColumns().get(3);
+        TableColumn<Prize, ?> deleteColumn = table.getColumns().get(4);
+
+        double numberColumnPercentage = 0.05;
+        double countColumnPercentage = 0.1;
+        double deleteColumnPercentage = 0.1;
+
+        double remained = 1.0 - (numberColumnPercentage + countColumnPercentage + deleteColumnPercentage);
+        double lastSpace = remained / 2;
+        double nameColumnPercentage = lastSpace;
+        double typeColumnPercentage = lastSpace;
+
+        numberColumn.prefWidthProperty().bind(table.widthProperty().multiply(numberColumnPercentage));
+        nameColumn.prefWidthProperty().bind(table.widthProperty().multiply(nameColumnPercentage));
+        typeColumn.prefWidthProperty().bind(table.widthProperty().multiply(typeColumnPercentage));
+        countColumn.prefWidthProperty().bind(table.widthProperty().multiply(countColumnPercentage));
+        deleteColumn.prefWidthProperty().bind(table.widthProperty().multiply(deleteColumnPercentage));
+    }
+
+    public TableColumn<Prize, Integer> createCountColumnForPrize() {
+        TableColumn<Prize, Integer> countColumn = new TableColumn<>("Count");
+        countColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
+        return countColumn;
+    }
+    public TableColumn<Prize, String> createTypeColumnForPrize() {
+        TableColumn<Prize, String> typeColumn = new TableColumn<>("Type");
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+        return typeColumn;
+    }
+
+    public TableColumn<Prize, String> createNameColumnForPrize() {
+        TableColumn<Prize, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        return nameColumn;
+    }
+
+    public TableColumn<Profile, Profile> createActionColumnForProfile(Stage primaryStage, ProfileController profileController, MainController mainController) {
         TableColumn<Profile, Profile> actionColumn = new TableColumn<>("Delete");
         actionColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
         actionColumn.setCellFactory(param -> new TableCell<Profile, Profile>() {
@@ -534,5 +626,7 @@ public class TableBuilder {
         });
         return badgesColumn;
     }
+
+
 
 }

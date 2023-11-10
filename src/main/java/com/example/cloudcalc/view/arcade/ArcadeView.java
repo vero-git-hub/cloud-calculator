@@ -1,4 +1,4 @@
-package com.example.cloudcalc.view;
+package com.example.cloudcalc.view.arcade;
 
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.badge.ScreenDisplayable;

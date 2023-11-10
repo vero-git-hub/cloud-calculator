@@ -1,4 +1,4 @@
-package com.example.cloudcalc.view;
+package com.example.cloudcalc.view.arcade;
 
 import com.example.cloudcalc.builder.TextFieldManager;
 import com.example.cloudcalc.button.ButtonFactory;

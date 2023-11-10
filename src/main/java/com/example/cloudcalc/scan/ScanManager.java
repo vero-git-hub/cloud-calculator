@@ -5,7 +5,7 @@ import com.example.cloudcalc.badge.BadgeCounts;
 import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import com.example.cloudcalc.prize.Prize;
+import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.model.ProfileModel;
 import javafx.beans.property.ReadOnlyObjectWrapper;

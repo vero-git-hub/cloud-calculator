@@ -6,7 +6,7 @@ import com.example.cloudcalc.controller.ArcadeController;
 
 import com.example.cloudcalc.badge.ignored.IgnoreController;
 import com.example.cloudcalc.controller.MainController;
-import com.example.cloudcalc.prize.PrizeController;
+import com.example.cloudcalc.controller.PrizeController;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.controller.ProfileController;
 import com.example.cloudcalc.scan.ScanManager;
@@ -31,7 +31,7 @@ public class ServiceFacade {
     private ServiceFacade() {
 
         dataExtractor = new DataExtractor();
-        prizeController = new PrizeController();
+        prizeController = new PrizeController(this);
         fileOperationManager = new FileOperationManager();
         scanManager = createScanManager();
         profileController = createProfileController();
@@ -115,7 +115,7 @@ public class ServiceFacade {
     }
 
     public void showPrizesScreen(Stage primaryStage) {
-        prizeController.showPrizesScreen(primaryStage);
+        prizeController.showScreen(primaryStage);
     }
 
     public void showArcadeScreen(Stage primaryStage) {

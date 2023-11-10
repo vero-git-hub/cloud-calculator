@@ -1,4 +1,4 @@
-package com.example.cloudcalc.prize;
+package com.example.cloudcalc.entity;
 
 public class PrizeCount {
     private final String name;

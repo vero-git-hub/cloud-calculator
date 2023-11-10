@@ -1,4 +1,4 @@
-package com.example.cloudcalc.prize;
+package com.example.cloudcalc.entity;
 
 import java.util.Objects;
 
