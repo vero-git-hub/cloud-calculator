@@ -4,7 +4,7 @@ import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.badge.FileOperationManager;
 import com.example.cloudcalc.controller.*;
 
-import com.example.cloudcalc.badge.ignored.IgnoreController;
+import com.example.cloudcalc.controller.IgnoreController;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.scan.ScanManager;
 import javafx.stage.Stage;
@@ -32,7 +32,7 @@ public class ServiceFacade {
         scanManager = createScanManager();
         profileController = createProfileController();
         this.profileModel = new ProfileModel(profileController);
-        ignoreController = new IgnoreController();
+        ignoreController = new IgnoreController(this);
         badgeManager = createBadgeManager();
         statsController = new StatsController(this);
         arcadeController = new ArcadeController(this);
@@ -111,7 +111,7 @@ public class ServiceFacade {
     }
 
     public void showIgnoreScreen(Stage primaryStage) {
-        ignoreController.showIgnoreScreen(primaryStage);
+        ignoreController.showScreen(primaryStage);
     }
 
     public void showPrizesScreen(Stage primaryStage) {

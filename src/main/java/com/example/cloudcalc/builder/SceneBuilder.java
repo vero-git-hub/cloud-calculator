@@ -1,22 +1,15 @@
 package com.example.cloudcalc.builder;
 
-import com.example.cloudcalc.button.ButtonFactory;
-import com.example.cloudcalc.controller.ArcadeController;
+import com.example.cloudcalc.controller.IScreenController;
 import com.example.cloudcalc.controller.MainController;
-import com.example.cloudcalc.util.AlertGuardian;
-import com.example.cloudcalc.util.Notification;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import java.util.List;
 
 public class SceneBuilder {
 
@@ -29,11 +22,11 @@ public class SceneBuilder {
 //        return instance;
 //    }
 
-    public void buildScreen(Stage primaryStage, String title, ElementsBuilder elementsBuilder, TableBuilder tableBuilder, ArcadeController arcadeController, MainController mainController) {
+    public void buildScreen(Stage primaryStage, String title, ElementsBuilder elementsBuilder, TableBuilder tableBuilder, IScreenController screenController, MainController mainController) {
         VBox layout = new VBox(10);
-        HBox topLayout = elementsBuilder.createTopLayout(primaryStage, title, mainController, arcadeController);
+        HBox topLayout = elementsBuilder.createTopLayout(primaryStage, title, mainController, screenController);
 
-        TableView<String> table = tableBuilder.createBadgeTable(primaryStage, arcadeController);
+        TableView<String> table = tableBuilder.createBadgeTable(primaryStage, screenController);
 
         layout.getChildren().addAll(topLayout, table);
 
@@ -46,6 +39,8 @@ public class SceneBuilder {
 
         createScene(scrollPane, primaryStage);
     }
+
+
 
 //    public void buildAnArcadeAddScreen(Stage primaryStage, Button backButton) {
 //        VBox layout = new VBox(10);

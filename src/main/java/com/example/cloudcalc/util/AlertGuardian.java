@@ -7,7 +7,8 @@ public class AlertGuardian {
     public static String alertTitleDeleteBadge = "Confirmation Dialog";
     public static String alertHeaderDeleteBadge = "Delete Badge";
     public static String alertContentDeleteBadge = "Are you sure you want to delete this badge?";
-    public static String alertTitleDeleteProfile;
-    public static String alertHeaderDeleteProfile;
-    public static String alertContentDeleteProfile;
+    public static String alertTitleDeleteProfile = "Confirmation Dialog";
+    public static String alertHeaderDeleteProfile = "Delete Profile";
+    public static String alertContentDeleteProfile = "Are you sure you want to delete this profile?";
+
 }

@@ -26,9 +26,7 @@ public class ProfileView implements Localizable {
     private String preText;
     private String startDateText;
     private Label linksTitle = new Label("PDF Links:");
-    String alertTitleDeleteProfile = "Confirmation Dialog";
-    String alertHeaderDeleteProfile = "Delete Profile";
-    String alertContentDeleteProfile = "Are you sure you want to delete this profile?";
+
 
     public ProfileView(ProfileController profileController) {
         this.profileController = profileController;

@@ -7,13 +7,10 @@ import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.badge.FileOperationManager;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
-import com.example.cloudcalc.controller.ArcadeController;
-import com.example.cloudcalc.controller.MainController;
+import com.example.cloudcalc.controller.*;
 import com.example.cloudcalc.entity.Prize;
-import com.example.cloudcalc.controller.PrizeController;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.model.ProfileModel;
-import com.example.cloudcalc.controller.ProfileController;
 import com.example.cloudcalc.util.AlertGuardian;
 import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -47,12 +44,12 @@ public class TableBuilder {
         this.addScreenLabel = addScreenLabel;
     }
 
-    public TableView<String> createBadgeTable(Stage primaryStage, ArcadeController arcadeController) {
+    public TableView<String> createBadgeTable(Stage primaryStage, IScreenController screenController) {
         table = new TableView<>();
 
         TableColumn<String, Integer> indexColumn = createIndexColumn(table);
         TableColumn<String, String> nameColumn = createNameColumnForBadge();
-        TableColumn<String, Void> deleteColumn = createDeleteColumn(primaryStage, table, arcadeController);
+        TableColumn<String, Void> deleteColumn = createDeleteColumn(primaryStage, table, screenController);
 
         table.getColumns().addAll(indexColumn, nameColumn, deleteColumn);
 
@@ -332,7 +329,7 @@ public class TableBuilder {
         return mainTable;
     }
 
-    private TableColumn<String, Void> createDeleteColumn(Stage primaryStage, TableView<String> table, ArcadeController arcadeController) {
+    private TableColumn<String, Void> createDeleteColumn(Stage primaryStage, TableView<String> table, IScreenController screenController) {
         TableColumn<String, Void> deleteColumn = new TableColumn<>("Delete");
         deleteColumn.setCellFactory(param -> new TableCell<>() {
             final Button deleteButton = ButtonFactory.createDeleteButton(e -> {
@@ -344,7 +341,7 @@ public class TableBuilder {
                     List<String> badges = getTableView().getItems();
                     badges.remove(badge);
                     fileOperationManager.saveBadgesToFile(badges, fileName);
-                    arcadeController.showScreen(primaryStage);
+                    screenController.showScreen(primaryStage);
                 }
             });
 

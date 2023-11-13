@@ -2,6 +2,7 @@ package com.example.cloudcalc.builder;
 
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.ArcadeController;
+import com.example.cloudcalc.controller.IScreenController;
 import com.example.cloudcalc.controller.MainController;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -89,11 +90,11 @@ public class ElementsBuilder {
         topLayout.setMinWidth(560);
         return topLayout;
     }
-//
-    public HBox createTopLayout(Stage primaryStage, String title, MainController mainController, ArcadeController arcadeController) {
+
+    public HBox createTopLayout(Stage primaryStage, String title, MainController mainController, IScreenController screenController) {
         Button backButton = ButtonFactory.createBackButton(e -> mainController.showMainScreen(primaryStage));
         Label titleLabel = new Label(title);
-        Button addButton = ButtonFactory.createAddButton(e -> arcadeController.showAnArcadeAddScreen(primaryStage));
+        Button addButton = ButtonFactory.createAddButton(e -> screenController.showAddScreen(primaryStage));
 
         return createTopLayout(backButton, titleLabel, addButton);
     }

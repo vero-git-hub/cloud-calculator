@@ -16,12 +16,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class ArcadeController {
+public class ArcadeController implements IScreenController{
 
-    private ServiceFacade serviceFacade;
-    private ArcadeView arcadeView = new ArcadeView(this);
-    private TableBuilder tableBuilder = new TableBuilder();
-    private FileOperationManager fileOperationManager;
+    private final ArcadeView arcadeView = new ArcadeView(this);
+    private final TableBuilder tableBuilder = new TableBuilder();
+    private final FileOperationManager fileOperationManager;
     private final SceneBuilder sceneBuilder = new SceneBuilder();
     private final ElementsBuilder elementsBuilder = new ElementsBuilder();
     private final MainController mainController;
@@ -31,7 +30,6 @@ public class ArcadeController {
 
 
     public ArcadeController(ServiceFacade serviceFacade) {
-        this.serviceFacade = serviceFacade;
         this.fileOperationManager = serviceFacade.getFileOperationManager();
         this.mainController = serviceFacade.getMainController();
     }
@@ -52,6 +50,8 @@ public class ArcadeController {
 //        return fileOperationManager;
 //    }
 //
+
+    @Override
     public void showScreen(Stage stage) {
         arcadeView.showArcadeScreen(stage);
     }
@@ -64,7 +64,8 @@ public class ArcadeController {
         sceneBuilder.buildScreen(stage, arcadeView.getTitle(), elementsBuilder, tableBuilder, this, mainController);
     }
 
-    public void showAnArcadeAddScreen(Stage stage) {
+    @Override
+    public void showAddScreen(Stage stage) {
         addArcadeView.showScreen(stage, textFieldManager);
     }
 

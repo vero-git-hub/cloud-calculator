@@ -27,11 +27,7 @@
 //        LanguageManager.registerLocalizable(this);
 //    }
 //
-//    @Override
-//    public void showScreen(Stage primaryStage) {
-//        TableBuilder.initVariables(FileName.IGNORE_FILE, ignoreManager.getUiCallbacks(), ignoreManager.getFileOperationManager(), this, addIgnoreTitle, this);
-//        TableBuilder.buildScreen(primaryStage, title);
-//    }
+
 //
 //
 //
