@@ -155,21 +155,21 @@ public class ProfileModel {
     public void handleProfileSave(
             Stage primaryStage, Profile profile, String name, String startDate, String profileLink
     ) {
-        if(name != null && !name.isEmpty() &&
-                startDate != null && !startDate.isEmpty() &&
-                profileLink != null && !profileLink.isEmpty()) {
-
             profile.setName(name);
             profile.setStartDate(startDate);
             profile.setProfileLink(profileLink);
 
-            if(profile.getPdfFilePath() != null) {
-                List<String> extractedLinks = profileController.extractHiddenLinksFromPdf(profile.getPdfFilePath());
-                List<String> h1Contents = profileController.extractH1FromLinks(extractedLinks);
-                profile.setPdfLinks(h1Contents);
-            }
+            saveFromPdfFile(profile);
+
             saveProfileToFile(profile, FileName.PROFILES_FILE);
             profileController.showMainScreen(primaryStage);
+    }
+
+    private void saveFromPdfFile(Profile profile) {
+        if(profile.getPdfFilePath() != null) {
+            List<String> extractedLinks = profileController.extractHiddenLinksFromPdf(profile.getPdfFilePath());
+            List<String> h1Contents = profileController.extractH1FromLinks(extractedLinks);
+            profile.setPdfLinks(h1Contents);
         }
     }
 

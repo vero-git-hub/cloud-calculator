@@ -76,7 +76,12 @@ public class ProfileController {
     }
 
     public void handleProfileSave(Stage primaryStage, Profile profile, String name, String startDate, String profileLink){
-        profileModel.handleProfileSave(primaryStage, profile, name, startDate, profileLink);
+        if(name != null && !name.isEmpty() &&
+                startDate != null && !startDate.isEmpty() &&
+                profileLink != null && !profileLink.isEmpty()) {
+            profileModel.handleProfileSave(primaryStage, profile, name, startDate, profileLink);
+        }
+
     }
 
     public List<String> extractHiddenLinksFromPdf(String pdfFilePath) {

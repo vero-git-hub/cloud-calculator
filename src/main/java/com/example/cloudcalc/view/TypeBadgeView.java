@@ -1,11 +1,24 @@
 package com.example.cloudcalc.view;
 
+import com.example.cloudcalc.button.ButtonFactory;
+import com.example.cloudcalc.constant.FieldNames;
 import com.example.cloudcalc.controller.TypeBadgeController;
+import com.example.cloudcalc.entity.TypeBadge;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class TypeBadgeView {
 
     private TypeBadgeController typeBadgeController;
+
+    TextField nameField = new TextField();
+    TextField dateField = new TextField();
+
+    Label titleLabel = new Label("CREATE BADGE TYPE");
 
 //    private final UICallbacks uiCallbacks;
 //    private final TypeBadgeDataManager typeBadgeDataManager;
@@ -17,50 +30,33 @@ public class TypeBadgeView {
 //        this.prizeManager = prizeManager;
 //    }
 
-
     public TypeBadgeView(TypeBadgeController typeBadgeController) {
         this.typeBadgeController = typeBadgeController;
-    }
 
-    public void showAddTypeBadgeScreen(Stage primaryStage) {
-//        VBox layout = new VBox(10);
-//        TypeBadge typeBadge = new TypeBadge();
-//
-//        TextField nameField = TableBuilder.createTextField("Name");
-//        TextField dateField = uiCallbacks.createTextField("Start Date (e.g., 26.09.2023)");
-//
-//        Button saveButton = ButtonFactory.createSaveButton(e -> {
-//            handleTypeBadgeSave(primaryStage, typeBadge, nameField.getText(), dateField.getText());
-//        });
-//
-//        Button backButton = ButtonFactory.createBackButton(e -> prizeManager.showAddPrizesScreen(primaryStage));
-//        Label titleLabel = uiCallbacks.createLabel("Create Badge Type");
-//
-//        HBox topLayout = uiCallbacks.createTopLayout(backButton, titleLabel);
-//
-//        layout.getChildren().addAll(
-//                topLayout,
-//                nameField,
-//                dateField,
-//                saveButton
-//        );
-//
-//        uiCallbacks.createScene(layout, primaryStage);
+        nameField.setPromptText(FieldNames.NAME.getLabel());
+        dateField.setPromptText(FieldNames.START_DATE.getLabel());
     }
 
     public void showScreen(Stage stage) {
-        System.out.println("show screen in TypeBadgeView");
+        VBox layout = new VBox(10);
+
+        Button saveButton = ButtonFactory.createSaveButton(e -> {
+            typeBadgeController.handleTypeBadgeSave(stage, nameField.getText(), dateField.getText());
+        });
+
+        Button backButton = ButtonFactory.createBackButton(e -> typeBadgeController.showAddPrizesScreen(stage));
+
+        HBox topLayout = typeBadgeController.createTopLayout(backButton, titleLabel);
+
+        layout.getChildren().addAll(
+                topLayout,
+                nameField,
+                dateField,
+                saveButton
+        );
+
+        typeBadgeController.createScene(layout, stage);
     }
 
-//    private void handleTypeBadgeSave(Stage primaryStage, TypeBadge typeBadge, String name, String startDate) {
-//        if(name != null && !name.isEmpty() &&
-//                startDate != null && !startDate.isEmpty()) {
-//
-//            typeBadge.setName(name);
-//            typeBadge.setStartDate(startDate);
-//
-//            typeBadgeDataManager.saveTypeBadgeToFile(typeBadge, FileName.TYPES_BADGE_FILE);
-//            prizeManager.showAddPrizesScreen(primaryStage);
-//        }
-//    }
+
 }

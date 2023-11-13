@@ -1,15 +1,11 @@
 package com.example.cloudcalc.controller;
 
-//import com.example.cloudcalc.badge.type.TypeBadgeManager;
-
 import com.example.cloudcalc.ServiceFacade;
-import com.example.cloudcalc.badge.type.TypeBadge;
-import com.example.cloudcalc.badge.type.TypeBadgeDataManager;
-import com.example.cloudcalc.view.TypeBadgeView;
 import com.example.cloudcalc.builder.ElementsBuilder;
 import com.example.cloudcalc.builder.SceneBuilder;
 import com.example.cloudcalc.builder.TableBuilder;
-        import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.entity.TypeBadge;
 import com.example.cloudcalc.model.PrizeModel;
 import com.example.cloudcalc.util.Notification;
 import com.example.cloudcalc.view.prize.AddPrizeView;
@@ -22,8 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-        import java.util.List;
-//import com.example.cloudcalc.badge.type.TypeBadgeManager;
+import java.util.List;
 
 
 public class PrizeController {
@@ -38,7 +33,7 @@ public class PrizeController {
     private final AddPrizeView addPrizeView = new AddPrizeView(this);
 
 //    private final MainManager mainManager;
-    private final TypeBadgeDataManager typeBadgeDataManager = new TypeBadgeDataManager();
+
     private final ServiceFacade serviceFacade;
 //
 //    private final Map<String, Prize> receivedPrizes = new HashMap<>();
@@ -138,7 +133,7 @@ public class PrizeController {
     }
 
     public List<TypeBadge> loadTypesBadgeFromFile() {
-        return typeBadgeDataManager.loadTypesBadgeFromFile();
+        return serviceFacade.getTypeBadgeController().getTypeBadgeModel().loadTypesBadgeFromFile();
     }
 
     public void showAddTypeBadgeScreen(Stage stage) {
