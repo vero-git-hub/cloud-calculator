@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 public class AddArcadeView {
 
     private final ArcadeController arcadeController;
-    private String title = "ARCADE";
+    private String title = "ADD ARCADE";
 
     public AddArcadeView(ArcadeController arcadeController) {
         this.arcadeController = arcadeController;
@@ -35,7 +35,6 @@ public class AddArcadeView {
                 textFieldManager.getNameTextField(),
                 saveButton
         );
-
 
         arcadeController.createScene(layout, primaryStage);
     }

@@ -1,4 +1,4 @@
-package com.example.cloudcalc.badge;
+package com.example.cloudcalc.entity.badge;
 
 public class BadgeCategory {
     private final String category;

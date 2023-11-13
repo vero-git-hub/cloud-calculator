@@ -30,4 +30,6 @@ module com.example.cloudcalc {
     opens com.example.cloudcalc.view.arcade to javafx.fxml;
     exports com.example.cloudcalc.view.prize;
     opens com.example.cloudcalc.view.prize to javafx.fxml;
+    opens com.example.cloudcalc.entity.badge to javafx.fxml;
+    exports com.example.cloudcalc.entity.badge;
 }

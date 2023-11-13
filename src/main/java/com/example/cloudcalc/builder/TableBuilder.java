@@ -2,7 +2,7 @@ package com.example.cloudcalc.builder;
 
 import com.example.cloudcalc.DataExtractor;
 import com.example.cloudcalc.PdfLinkItem;
-import com.example.cloudcalc.badge.BadgeCounts;
+import com.example.cloudcalc.entity.badge.BadgeCounts;
 import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.badge.FileOperationManager;
 import com.example.cloudcalc.button.ButtonFactory;

@@ -5,7 +5,7 @@ import com.example.cloudcalc.builder.ElementsBuilder;
 import com.example.cloudcalc.builder.SceneBuilder;
 import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.entity.Prize;
-import com.example.cloudcalc.entity.TypeBadge;
+import com.example.cloudcalc.entity.badge.TypeBadge;
 import com.example.cloudcalc.model.PrizeModel;
 import com.example.cloudcalc.util.Notification;
 import com.example.cloudcalc.view.prize.AddPrizeView;

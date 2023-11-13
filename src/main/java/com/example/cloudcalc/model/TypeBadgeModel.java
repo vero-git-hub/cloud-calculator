@@ -2,7 +2,7 @@ package com.example.cloudcalc.model;
 
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.TypeBadgeController;
-import com.example.cloudcalc.entity.TypeBadge;
+import com.example.cloudcalc.entity.badge.TypeBadge;
 import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONException;

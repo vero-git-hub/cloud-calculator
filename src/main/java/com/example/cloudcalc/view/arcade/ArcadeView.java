@@ -13,7 +13,6 @@ import javafx.stage.Stage;
 
 import java.util.ResourceBundle;
 
-//public class ArcadeView implements ScreenDisplayable, Localizable, NameTextFieldUpdatable {
 public class ArcadeView {
     private final ArcadeController arcadeController;
     private String title = "ARCADE";
@@ -26,16 +25,7 @@ public class ArcadeView {
         return title;
     }
 
-    //
-//    private ServiceFacade serviceFacade;
-//    private final ArcadeManager controller;
-//
-//
-//
-//    private String addArcadeTitle = "ADD ARCADE BADGE";
-//
-//    private TextField nameTextField = new TextField();
-//
+
 //    public ArcadeView() {
 //        this.serviceFacade = ServiceFacade.getInstance();
 //        this.controller = createController();

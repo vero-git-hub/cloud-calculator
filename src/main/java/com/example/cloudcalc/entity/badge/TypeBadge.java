@@ -1,4 +1,4 @@
-package com.example.cloudcalc.entity;
+package com.example.cloudcalc.entity.badge;
 
 import java.util.Objects;
 

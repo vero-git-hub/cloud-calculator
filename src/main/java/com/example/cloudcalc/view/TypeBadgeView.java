@@ -3,7 +3,6 @@ package com.example.cloudcalc.view;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FieldNames;
 import com.example.cloudcalc.controller.TypeBadgeController;
-import com.example.cloudcalc.entity.TypeBadge;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;

@@ -3,6 +3,7 @@ package com.example.cloudcalc.badge;
 import com.example.cloudcalc.DataExtractor;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.PrizeController;
+import com.example.cloudcalc.entity.badge.BadgeCounts;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.model.ProfileModel;
 

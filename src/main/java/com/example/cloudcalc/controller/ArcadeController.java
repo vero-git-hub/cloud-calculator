@@ -28,28 +28,10 @@ public class ArcadeController implements IScreenController{
     private final ArcadeModel arcadeModel = new ArcadeModel(this);
     private final TextFieldManager textFieldManager = new TextFieldManager();
 
-
     public ArcadeController(ServiceFacade serviceFacade) {
         this.fileOperationManager = serviceFacade.getFileOperationManager();
         this.mainController = serviceFacade.getMainController();
     }
-
-    //    private final ArcadeView arcadeView;
-//    private final FileOperationManager fileOperationManager;
-//
-//    public ArcadeManager() {
-//        this.arcadeView = new ArcadeView(this);
-//        this.fileOperationManager = fileOperationManager;
-//    }
-//
-//    public ArcadeView getArcadeScreen() {
-//        return arcadeView;
-//    }
-//
-//    public FileOperationManager getFileOperationManager() {
-//        return fileOperationManager;
-//    }
-//
 
     @Override
     public void showScreen(Stage stage) {
@@ -69,15 +51,9 @@ public class ArcadeController implements IScreenController{
         addArcadeView.showScreen(stage, textFieldManager);
     }
 
-//    public void showAnArcadeAddScreen(Stage primaryStage) {
-//        Button backButton = ButtonFactory.createBackButton(e -> showArcadeScreen(primaryStage));
-//        sceneBuilder.buildAnArcadeAddScreen(primaryStage, backButton);
-//    }
-
     public void handleSave(Stage stage) {
         arcadeModel.handleSave(stage, fileOperationManager, FileName.ARCADE_FILE, textFieldManager);
     }
-
 
     public HBox createTopLayoutForAddScreen(Button backButton, Label titleAddScreenLabel) {
         return elementsBuilder.createTopLayout(backButton, titleAddScreenLabel);

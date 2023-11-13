@@ -1,6 +1,6 @@
 package com.example.cloudcalc.view.prize;
 
-import com.example.cloudcalc.entity.TypeBadge;
+import com.example.cloudcalc.entity.badge.TypeBadge;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.PrizeController;
 import javafx.geometry.Pos;
