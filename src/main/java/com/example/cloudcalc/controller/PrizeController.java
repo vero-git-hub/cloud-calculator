@@ -4,8 +4,11 @@ import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.builder.ElementsBuilder;
 import com.example.cloudcalc.builder.SceneBuilder;
 import com.example.cloudcalc.builder.TableBuilder;
+import com.example.cloudcalc.constant.FileName;
+import com.example.cloudcalc.constant.IBadgeCategory;
 import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.entity.badge.TypeBadge;
+import com.example.cloudcalc.entity.badge.BadgeCategory;
 import com.example.cloudcalc.model.PrizeModel;
 import com.example.cloudcalc.util.Notification;
 import com.example.cloudcalc.view.prize.AddPrizeView;
@@ -18,7 +21,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class PrizeController {
@@ -36,7 +43,7 @@ public class PrizeController {
 
     private final ServiceFacade serviceFacade;
 //
-//    private final Map<String, Prize> receivedPrizes = new HashMap<>();
+    private final Map<String, Prize> receivedPrizes = new HashMap<>();
 //    private Label titleLabel;
 //    private Label addPrizeTitle;
     private TextField namePrizeField;
@@ -76,9 +83,9 @@ public class PrizeController {
 //        LanguageManager.registerLocalizable(this);
 //    }
 //
-//    public Map<String, Prize> getReceivedPrizes() {
-//        return receivedPrizes;
-//    }
+    public Map<String, Prize> getReceivedPrizes() {
+        return receivedPrizes;
+    }
 
     public void showScreen(Stage stage) {
         prizeView.showScreen(stage);
@@ -103,7 +110,6 @@ public class PrizeController {
             prizeModel.savePrize(namePrize, badgeCount, badgeType);
             showScreen(stage);
         }
-
     }
 
     public void deleteAction(Stage stage, Prize prize) {
@@ -141,42 +147,42 @@ public class PrizeController {
     }
 
 
-//    public List<String> determinePrizesForBadgeCount(int prizePDF, int prizeSkill, int prizeActivity, int prizeTypeBadge) {
-//        List<Prize> prizes = loadPrizesFromFile(FileName.PRIZES_FILE);
-//
-//        receivedPrizes.clear();
-//
-//        prizes.stream()
-//                .filter(prize -> "pdf".equals(prize.getType()))
-//                .filter(prize -> prizePDF >= prize.getCount())
-//                .findFirst()
-//                .ifPresent(prize -> receivedPrizes.put(BadgeCategory.PDF_FOR_PRIZE, prize));
-//
-//        prizes.stream()
-//                .filter(prize -> "skill".equals(prize.getType()))
-//                .sorted(Comparator.comparing(Prize::getCount).reversed())
-//                .filter(prize -> prizeSkill >= prize.getCount())
-//                .findFirst()
-//                .ifPresent(prize -> receivedPrizes.put(BadgeCategory.SKILL_FOR_PRIZE, prize));
-//
-//        if (prizeActivity >= 30) {
-//            prizes.stream()
-//                    .filter(prize -> "activity".equals(prize.getType()))
-//                    .sorted(Comparator.comparing(Prize::getCount).reversed())
-//                    .filter(prize -> prizeActivity >= prize.getCount())
-//                    .findFirst()
-//                    .ifPresent(prize -> receivedPrizes.put(BadgeCategory.SKILL_FOR_ACTIVITY, prize));
-//        }
-//
-//        prizes.stream()
-//                .filter(prize -> "pl-02.10.2023".equals(prize.getType()))
-//                .sorted(Comparator.comparing(Prize::getCount).reversed())
-//                .filter(prize ->  prizeTypeBadge >= prize.getCount())
-//                .findFirst()
-//                .ifPresent(prize -> receivedPrizes.put(BadgeCategory.SKILL_FOR_PL, prize));
-//
-//        return receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
-//    }
+    public List<String> determinePrizesForBadgeCount(int prizePDF, int prizeSkill, int prizeActivity, int prizeTypeBadge) {
+        List<Prize> prizes = loadPrizesFromFile();
+
+        receivedPrizes.clear();
+
+        prizes.stream()
+                .filter(prize -> "pdf".equals(prize.getType()))
+                .filter(prize -> prizePDF >= prize.getCount())
+                .findFirst()
+                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.PDF_FOR_PRIZE, prize));
+
+        prizes.stream()
+                .filter(prize -> "skill".equals(prize.getType()))
+                .sorted(Comparator.comparing(Prize::getCount).reversed())
+                .filter(prize -> prizeSkill >= prize.getCount())
+                .findFirst()
+                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_PRIZE, prize));
+
+        if (prizeActivity >= 30) {
+            prizes.stream()
+                    .filter(prize -> "activity".equals(prize.getType()))
+                    .sorted(Comparator.comparing(Prize::getCount).reversed())
+                    .filter(prize -> prizeActivity >= prize.getCount())
+                    .findFirst()
+                    .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_ACTIVITY, prize));
+        }
+
+        prizes.stream()
+                .filter(prize -> "pl-02.10.2023".equals(prize.getType()))
+                .sorted(Comparator.comparing(Prize::getCount).reversed())
+                .filter(prize ->  prizeTypeBadge >= prize.getCount())
+                .findFirst()
+                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_PL, prize));
+
+        return receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
+    }
 
 //    @Override
 //    public void updateLocalization(ResourceBundle bundle) {

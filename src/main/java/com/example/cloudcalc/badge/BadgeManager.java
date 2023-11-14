@@ -1,6 +1,7 @@
 package com.example.cloudcalc.badge;
 
 import com.example.cloudcalc.DataExtractor;
+import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.PrizeController;
 import com.example.cloudcalc.entity.badge.BadgeCounts;
@@ -22,11 +23,11 @@ public class BadgeManager {
     int countIgnoreBadge;
     int countArcadeBadge;
 
-    public BadgeManager(DataExtractor dataExtractor, PrizeController prizeController, ProfileModel profileModel, FileOperationManager fileOperationManager) {
-        this.dataExtractor = dataExtractor;
-        this.prizeController = prizeController;
-        this.fileOperationManager = fileOperationManager;
-        this.profileModel = profileModel;
+    public BadgeManager(ServiceFacade serviceFacade) {
+        this.dataExtractor = serviceFacade.getDataExtractor();
+        this.prizeController = serviceFacade.getPrizeController();
+        this.fileOperationManager = serviceFacade.getFileOperationManager();
+        this.profileModel = serviceFacade.getProfileController().getProfileModel();
     }
 
     public PrizeController getPrizeManager() {
@@ -35,37 +36,37 @@ public class BadgeManager {
 
     public BadgeCounts calculateBadgeCounts(Profile profile, ArrayList<String> receivedBadges) {
         BadgeCounts badgeCounts = new BadgeCounts();
-//        int total = receivedBadges.size();
-//
-//        List<String> skillBadges = filterSkillBadges(receivedBadges, false);
-//        int skill = skillBadges.size();
-//
-//        List<String> pdfBadges = getPDFBadges(profile, skillBadges);
-//        int totalPDF = pdfBadges.size();
-//        int prizePDF = calculatePDFPrizeBadgeCount(totalPDF);
-//
-//        int prizeSkill = calculatePrizeNoPDF(skill, prizePDF);
-//
-//        int prizeActivity = skill;
-//
-//        List<String> typesList = dataExtractor.typeBadgeExtractedData;
-//        typesList = filterSkillBadges(typesList, true);
-//
-//        int prizeTypeBadge = typesList.size();
-//
-//        prizeManager.determinePrizesForBadgeCount(prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
-//
-//        countArcadeBadge = countArcadeBadge + (skill / 3);
-//
-//        badgeCounts.setTotal(total);
-//        badgeCounts.setIgnore(countIgnoreBadge);
-//        badgeCounts.setArcade(countArcadeBadge);
-//        badgeCounts.setSkill(skill);
-//        badgeCounts.setPdf(totalPDF);
-//        badgeCounts.setPrizePDF(prizePDF);
-//        badgeCounts.setPrizeSkill(prizeSkill);
-//        badgeCounts.setPrizeActivity(prizeActivity);
-//        badgeCounts.setPrizePL(prizeTypeBadge);
+        int total = receivedBadges.size();
+
+        List<String> skillBadges = filterSkillBadges(receivedBadges, false);
+        int skill = skillBadges.size();
+
+        List<String> pdfBadges = getPDFBadges(profile, skillBadges);
+        int totalPDF = pdfBadges.size();
+        int prizePDF = calculatePDFPrizeBadgeCount(totalPDF);
+
+        int prizeSkill = calculatePrizeNoPDF(skill, prizePDF);
+
+        int prizeActivity = skill;
+
+        List<String> typesList = dataExtractor.typeBadgeExtractedData;
+        typesList = filterSkillBadges(typesList, true);
+
+        int prizeTypeBadge = typesList.size();
+
+        prizeController.determinePrizesForBadgeCount(prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
+
+        countArcadeBadge = countArcadeBadge + (skill / 3);
+
+        badgeCounts.setTotal(total);
+        badgeCounts.setIgnore(countIgnoreBadge);
+        badgeCounts.setArcade(countArcadeBadge);
+        badgeCounts.setSkill(skill);
+        badgeCounts.setPdf(totalPDF);
+        badgeCounts.setPrizePDF(prizePDF);
+        badgeCounts.setPrizeSkill(prizeSkill);
+        badgeCounts.setPrizeActivity(prizeActivity);
+        badgeCounts.setPrizePL(prizeTypeBadge);
 
         return badgeCounts;
     }

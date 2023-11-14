@@ -32,7 +32,7 @@ public class StatsController {
     private final MainController mainController;
 
     public StatsController(ServiceFacade serviceFacade) {
-        this.profileController = serviceFacade.getProfileManager();
+        this.profileController = serviceFacade.getProfileController();
         this.profileModel = serviceFacade.getProfileDataManager();
         this.dataExtractor = serviceFacade.getDataExtractor();
         this.badgeManager = serviceFacade.getBadgeManager();

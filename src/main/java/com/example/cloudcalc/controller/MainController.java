@@ -38,7 +38,7 @@ public class MainController {
     }
 
     public TableView<Profile> getTable(Stage primaryStage) {
-        return tableBuilder.createTableForMain(primaryStage, serviceFacade.getProfileManager(), this);
+        return tableBuilder.createTableForMain(primaryStage, serviceFacade.getProfileController(), this, serviceFacade.getScanController());
     }
 
     public void getScene(ScrollPane scrollPane, Stage primaryStage) {

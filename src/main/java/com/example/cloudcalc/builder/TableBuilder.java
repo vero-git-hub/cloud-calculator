@@ -432,12 +432,12 @@ public class TableBuilder {
 
     }
 
-    public TableView<Profile> createTableForMain(Stage primaryStage, ProfileController profileController, MainController mainController) {
+    public TableView<Profile> createTableForMain(Stage primaryStage, ProfileController profileController, MainController mainController, ScanController scanController) {
         TableView<Profile> mainTable = new TableView<>();
 
         TableColumn<Profile, Void> numberColumn = createNumberingColumn();
         TableColumn<Profile, String> nameColumn = createNameColumn();
-        TableColumn<Profile, Void> badgesColumn = createBadgesColumnForMain(primaryStage, profileController);
+        TableColumn<Profile, Void> badgesColumn = createScanColumn(primaryStage, scanController);
         TableColumn<Profile, Profile> viewingColumn = createViewingColumnForProfile(primaryStage, profileController);
         TableColumn<Profile, Profile> actionColumn = createActionColumnForProfile(primaryStage, profileController, mainController);
 
@@ -594,7 +594,7 @@ public class TableBuilder {
         return viewingColumn;
     }
 
-    public static TableColumn<Profile, Void> createBadgesColumnForMain(Stage primaryStage, ProfileController profileController) {
+    public static TableColumn<Profile, Void> createScanColumn(Stage primaryStage, ScanController scanController) {
         TableColumn<Profile, Void> badgesColumn = new TableColumn<>("Scan");
         badgesColumn.setCellValueFactory(param -> null);
         badgesColumn.setCellFactory(col -> {
@@ -608,12 +608,7 @@ public class TableBuilder {
                     } else {
                         Profile profile = getTableView().getItems().get(getIndex());
                         EventHandler<ActionEvent> scanAction = e -> {
-                            profileController.scanAndUpdateProfile(primaryStage, profile);
-//                            ArrayList<String> siteLinks = dataExtractor.performScan(profile);
-//                            profile.setLastScannedDate(DateUtils.getCurrentDate());
-//                            profileModel.updateProfile(profile);
-//
-//                            scanManager.showScanScreen(primaryStage, profile, siteLinks);
+                            scanController.showScreen(primaryStage, profile);
                         };
                         Button scanButton = ButtonFactory.createScanButton(scanAction);
                         setGraphic(scanButton);
@@ -623,7 +618,5 @@ public class TableBuilder {
         });
         return badgesColumn;
     }
-
-
 
 }

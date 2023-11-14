@@ -6,7 +6,6 @@ import com.example.cloudcalc.controller.*;
 
 import com.example.cloudcalc.controller.IgnoreController;
 import com.example.cloudcalc.model.ProfileModel;
-import com.example.cloudcalc.scan.ScanManager;
 import javafx.stage.Stage;
 
 public class ServiceFacade {
@@ -16,7 +15,7 @@ public class ServiceFacade {
     private DataExtractor dataExtractor;
     private PrizeController prizeController;
     private FileOperationManager fileOperationManager;
-    private ScanManager scanManager;
+    //private ScanView scanView;
     private ProfileController profileController;
     private IgnoreController ignoreController;
     private BadgeManager badgeManager;
@@ -24,12 +23,13 @@ public class ServiceFacade {
     private ArcadeController arcadeController;
     private TypeBadgeController typeBadgeController = new TypeBadgeController(this);
     private MainController mainController = new MainController(this);
+    private ScanController scanController = new ScanController(this);
 
     private ServiceFacade() {
         dataExtractor = new DataExtractor();
         prizeController = new PrizeController(this);
         fileOperationManager = new FileOperationManager();
-        scanManager = createScanManager();
+        //scanView = createScanManager();
         profileController = createProfileController();
         this.profileModel = new ProfileModel(profileController);
         ignoreController = new IgnoreController(this);
@@ -46,17 +46,17 @@ public class ServiceFacade {
     }
 
     private BadgeManager createBadgeManager() {
-        return new BadgeManager(dataExtractor, prizeController, profileModel, fileOperationManager);
+        return new BadgeManager(this);
     }
 
     private ProfileController createProfileController() {
         return new ProfileController(this);
     }
 
-    private ScanManager createScanManager() {
-        BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeController, profileModel, fileOperationManager);
-        return new ScanManager(badgeManager, profileModel);
-    }
+    //private ScanView createScanManager() {
+        //BadgeManager badgeManager = new BadgeManager(dataExtractor, prizeController, profileModel, fileOperationManager);
+        //return new ScanView(getScanController());
+    //}
 
     public ProfileModel getProfileDataManager() {
         return profileModel;
@@ -74,11 +74,11 @@ public class ServiceFacade {
         return fileOperationManager;
     }
 
-    public ScanManager getScanManager() {
-        return scanManager;
-    }
+    //public ScanView getScanManager() {
+        //return scanView;
+    //}
 
-    public ProfileController getProfileManager() {
+    public ProfileController getProfileController() {
         return profileController;
     }
 
@@ -100,6 +100,10 @@ public class ServiceFacade {
 
     public MainController getMainController() {
         return mainController;
+    }
+
+    public ScanController getScanController() {
+        return scanController;
     }
 
     public void showCreateProfileScreen(Stage primaryStage) {
@@ -125,5 +129,6 @@ public class ServiceFacade {
     public void showTypeBadgeScreen(Stage stage) {
         typeBadgeController.showScreen(stage);
     }
+
 
 }

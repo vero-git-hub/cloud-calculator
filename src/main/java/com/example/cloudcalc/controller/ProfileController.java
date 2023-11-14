@@ -10,10 +10,8 @@ import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.model.ProfileModel;
-import com.example.cloudcalc.scan.ScanManager;
+import com.example.cloudcalc.scan.ScanView;
 import com.example.cloudcalc.view.ProfileView;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -31,7 +29,7 @@ public class ProfileController {
     private final ProfileView profileView;
     private final ProfileModel profileModel;
     private final DataExtractor dataExtractor;
-    private final ScanManager scanManager;
+    //private final ScanView scanView;
     private final MainController mainController;
     private final ElementsBuilder elementsBuilder;
     private final SceneBuilder sceneBuilder;
@@ -42,7 +40,7 @@ public class ProfileController {
         this.profileView = new ProfileView(this);
         this.profileModel = new ProfileModel(this);
         this.dataExtractor = serviceFacade.getDataExtractor();
-        this.scanManager = serviceFacade.getScanManager();
+        //this.scanView = serviceFacade.getScanManager();
         this.mainController = serviceFacade.getMainController();
         this.elementsBuilder = new ElementsBuilder();
         this.sceneBuilder = new SceneBuilder();
@@ -50,6 +48,10 @@ public class ProfileController {
 
     public MainController getMainController() {
         return mainController;
+    }
+
+    public ProfileModel getProfileModel() {
+        return profileModel;
     }
 
     public void handleDeleteAction(Stage primaryStage, Profile profile, MainController mainController) {
@@ -69,7 +71,7 @@ public class ProfileController {
         profile.setLastScannedDate(DateUtils.getCurrentDate());
         profileModel.updateProfile(profile);
 
-        scanManager.showScanScreen(primaryStage, profile, siteLinks);
+        //scanView.showScreen(primaryStage, profile, siteLinks);
     }
 
     public void showProfileDetailsScreen(Stage stage, Profile profile) {
@@ -122,4 +124,7 @@ public class ProfileController {
         mainController.showMainScreen(primaryStage);
     }
 
+//    public void scanAction(Stage stage, Profile profile) {
+
+//    }
 }
