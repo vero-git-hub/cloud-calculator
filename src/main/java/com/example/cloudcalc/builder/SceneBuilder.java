@@ -13,15 +13,6 @@ import javafx.stage.Stage;
 
 public class SceneBuilder {
 
-//    private static SceneBuilder instance;
-//
-//    public static synchronized SceneBuilder getInstance() {
-//        if (instance == null) {
-//            instance = new SceneBuilder();
-//        }
-//        return instance;
-//    }
-
     public void buildScreen(Stage primaryStage, String title, ElementsBuilder elementsBuilder, TableBuilder tableBuilder, IScreenController screenController, MainController mainController) {
         VBox layout = new VBox(10);
         HBox topLayout = elementsBuilder.createTopLayout(primaryStage, title, mainController, screenController);
@@ -39,8 +30,6 @@ public class SceneBuilder {
 
         createScene(scrollPane, primaryStage);
     }
-
-
 
 //    public void buildAnArcadeAddScreen(Stage primaryStage, Button backButton) {
 //        VBox layout = new VBox(10);
@@ -76,7 +65,7 @@ public class SceneBuilder {
 //        uiCallbacks.createScene(layout, primaryStage);
 //    }
 
-    public  void createScene(Parent layout, Stage primaryStage) {
+    public  void createScene(Parent layout, Stage stage) {
         layout.setStyle("-fx-font-size: 18;-fx-padding: 10px;");
 
         int WIDTH_SCENE = 820;
@@ -84,7 +73,29 @@ public class SceneBuilder {
         Scene mainScene = new Scene(layout, WIDTH_SCENE, HEIGHT_SCENE);
         mainScene.getStylesheets().add(TableBuilder.class.getResource("/styles.css").toExternalForm());
 
-        primaryStage.setScene(mainScene);
+        stage.setScene(mainScene);
     }
+
+//    public void createScene(Stage stage, ScrollPane scrollPane) {
+//        scrollPane.setStyle("-fx-font-size: 18;-fx-padding: 10px;");
+//
+//        int WIDTH_SCENE = 820;
+//        int HEIGHT_SCENE = 620;
+//        Scene mainScene = new Scene(scrollPane, WIDTH_SCENE, HEIGHT_SCENE);
+//        mainScene.getStylesheets().add(TableBuilder.class.getResource("/styles.css").toExternalForm());
+//
+//        stage.setScene(mainScene);
+//    }
+//
+//    public  void createScene(Parent layout, Stage stage) {
+//        layout.setStyle("-fx-font-size: 18;-fx-padding: 10px;");
+//
+//        int WIDTH_SCENE = 820;
+//        int HEIGHT_SCENE = 620;
+//        Scene mainScene = new Scene(layout, WIDTH_SCENE, HEIGHT_SCENE);
+//        mainScene.getStylesheets().add(TableBuilder.class.getResource("/styles.css").toExternalForm());
+//
+//        stage.setScene(mainScene);
+//    }
 
 }

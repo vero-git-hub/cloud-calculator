@@ -107,7 +107,7 @@ public class TableBuilder {
 
         TableView<PdfLinkItem> table = new TableView<>();
 
-        TableColumn<PdfLinkItem, Integer> indexColumn = new TableColumn<>("No.");
+        TableColumn<PdfLinkItem, Integer> indexColumn = new TableColumn<>("№");
         indexColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
 
         TableColumn<PdfLinkItem, String> linkColumn = new TableColumn<>("Link");

@@ -1,30 +1,39 @@
 package com.example.cloudcalc.view;
 
+import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FieldNames;
 import com.example.cloudcalc.controller.ProfileController;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.language.Localizable;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ResourceBundle;
 
 public class ProfileView implements Localizable {
 
     private final ProfileController profileController;
-
     private Label titleLabel;
     TextField nameField;
     TextField dateField;
     TextField linkField;
-    private String preText;
-    private String startDateText;
+    private String preText = "DETAILS for";
+    private String startDateText = "Start Date: ";
     private Label linksTitle = new Label("PDF Links:");
 
 
@@ -41,9 +50,6 @@ public class ProfileView implements Localizable {
         linkField = new TextField();
         linkField.setPromptText(FieldNames.PROFILE_LINK.getLabel());
 
-//        preText = "DETAILS for";
-//        startDateText = "Start Date:";
-//
 //        LanguageManager.registerLocalizable(this);
     }
 
@@ -51,36 +57,36 @@ public class ProfileView implements Localizable {
         return titleLabel;
     }
 
-    public void showProfileScreen(Stage primaryStage, Profile profile) {
-//        VBox layout = new VBox(10);
-//
-//        Button backButton = ButtonFactory.createBackButton(e -> uiCallbacks.showMainScreen(primaryStage));
-//
-//        Text preTextLabel = new Text(preText);
-//        Hyperlink nameLink = new Hyperlink(profile.getName());
-//        nameLink.setOnAction(e -> {
-//            try {
-//                Desktop.getDesktop().browse(new URI(profile.getProfileLink()));
-//            } catch (IOException | URISyntaxException ex) {
-//                ex.printStackTrace();
-//            }
-//        });
-//
-//        TextFlow textFlow = new TextFlow(preTextLabel, nameLink);
-//        HBox topLayout = uiCallbacks.createTopLayoutWithBackAndText(backButton, textFlow);
-//
-//        layout.getChildren().addAll(
-//                topLayout,
-//                TableBuilder.createProfileInfoForProfile(profile, uiCallbacks, startDateText),
-//                TableBuilder.createPdfLinksSectionForProfile(profile, linksTitle)
-//        );
-//
-//        javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane();
-//        scrollPane.setFitToWidth(true);
-//        scrollPane.setFitToHeight(true);
-//        scrollPane.setContent(layout);
-//
-//        uiCallbacks.createScene(scrollPane, primaryStage);
+    public void showProfileScreen(Stage stage, Profile profile) {
+        VBox layout = new VBox(10);
+
+        Button backButton = ButtonFactory.createBackButton(e -> profileController.getMainController().showMainScreen(stage));
+
+        Text preTextLabel = new Text(preText);
+        Hyperlink nameLink = new Hyperlink(profile.getName());
+        nameLink.setOnAction(e -> {
+            try {
+                Desktop.getDesktop().browse(new URI(profile.getProfileLink()));
+            } catch (IOException | URISyntaxException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        TextFlow textFlow = new TextFlow(preTextLabel, nameLink);
+        HBox topLayout = profileController.createTopLayoutWithBackAndText(backButton, textFlow);
+
+        layout.getChildren().addAll(
+                topLayout,
+                profileController.createProfileInfoForProfile(profile, startDateText),
+                profileController.createPdfLinksSectionForProfile(profile, linksTitle)
+        );
+
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setContent(layout);
+
+        profileController.createScene(stage, scrollPane);
     }
 
     public void showCreateProfileScreen(Stage primaryStage) {
@@ -106,20 +112,8 @@ public class ProfileView implements Localizable {
                 saveButton
         );
 
-        profileController.createScene(layout, primaryStage);
+        profileController.createScene(primaryStage, layout);
     }
-
-//    public TableColumn<Profile, String> createNameColumn() {
-//        return TableBuilder.createNameColumn();
-//    }
-
-//    public TableColumn<Profile, Void> createNumberingColumn() {
-//        return TableBuilder.createNumberingColumn();
-//    }
-//
-//    public void configureTableColumnsWidthForMain(TableView<Profile> mainTable) {
-//        TableBuilder.configureTableColumnsWidthForMain(mainTable);
-//    }
 
     @Override
     public void updateLocalization(ResourceBundle bundle) {

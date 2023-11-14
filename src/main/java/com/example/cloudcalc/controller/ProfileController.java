@@ -5,15 +5,21 @@ import com.example.cloudcalc.DateUtils;
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.builder.ElementsBuilder;
 import com.example.cloudcalc.builder.SceneBuilder;
+import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.scan.ScanManager;
 import com.example.cloudcalc.view.ProfileView;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -22,13 +28,14 @@ import java.util.List;
 public class ProfileController {
 
     private ServiceFacade serviceFacade;
-    private ProfileView profileView;
+    private final ProfileView profileView;
     private final ProfileModel profileModel;
     private final DataExtractor dataExtractor;
     private final ScanManager scanManager;
     private final MainController mainController;
     private final ElementsBuilder elementsBuilder;
     private final SceneBuilder sceneBuilder;
+    private final TableBuilder tableBuilder = new TableBuilder();
 
     public ProfileController(ServiceFacade serviceFacade) {
         this.serviceFacade = serviceFacade;
@@ -39,6 +46,10 @@ public class ProfileController {
         this.mainController = serviceFacade.getMainController();
         this.elementsBuilder = new ElementsBuilder();
         this.sceneBuilder = new SceneBuilder();
+    }
+
+    public MainController getMainController() {
+        return mainController;
     }
 
     public void handleDeleteAction(Stage primaryStage, Profile profile, MainController mainController) {
@@ -53,7 +64,6 @@ public class ProfileController {
         return profileModel.loadProfilesFromFile(FileName.PROFILES_FILE);
     }
 
-
     public void scanAndUpdateProfile(Stage primaryStage, Profile profile) {
         ArrayList<String> siteLinks = dataExtractor.performScan(profile);
         profile.setLastScannedDate(DateUtils.getCurrentDate());
@@ -62,8 +72,20 @@ public class ProfileController {
         scanManager.showScanScreen(primaryStage, profile, siteLinks);
     }
 
-    public void showProfileDetailsScreen(Stage primaryStage, Profile profile) {
+    public void showProfileDetailsScreen(Stage stage, Profile profile) {
+        profileView.showProfileScreen(stage, profile);
+    }
 
+    public VBox createProfileInfoForProfile(Profile profile, String startDateText) {
+        return elementsBuilder.createProfileInfoForProfile(profile, startDateText);
+    }
+
+    public VBox createPdfLinksSectionForProfile(Profile profile, Label linksTitle) {
+        return tableBuilder.createPdfLinksSectionForProfile(profile, linksTitle);
+    }
+
+    public HBox createTopLayoutWithBackAndText(Button backButton, TextFlow textFlow) {
+        return elementsBuilder.createTopLayoutWithBackAndText(backButton, textFlow);
     }
 
     public HBox createTopLayout(Stage primaryStage){
@@ -71,8 +93,12 @@ public class ProfileController {
         return elementsBuilder.createTopLayout(backButton, profileView.getTitleLabel());
     }
 
-    public void createScene(VBox layout, Stage primaryStage) {
-        sceneBuilder.createScene(layout, primaryStage);
+    public void createScene(Stage stage, VBox layout) {
+        sceneBuilder.createScene(layout, stage);
+    }
+
+    public void createScene(Stage stage, ScrollPane scrollPane) {
+        sceneBuilder.createScene(scrollPane, stage);
     }
 
     public void handleProfileSave(Stage primaryStage, Profile profile, String name, String startDate, String profileLink){
