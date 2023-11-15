@@ -56,11 +56,14 @@ public class BadgeManager {
 
         prizeController.determinePrizesForBadgeCount(prizePDF, prizeSkill, prizeActivity, prizeTypeBadge);
 
-        countArcadeBadge = countArcadeBadge + (skill / 3);
+        int countSkillBadgesForArcade = skill / 3;
+        int countTotalArcadeBadge = countArcadeBadge + countSkillBadgesForArcade;
 
         badgeCounts.setTotal(total);
         badgeCounts.setIgnore(countIgnoreBadge);
+        badgeCounts.setTotalArcade(countTotalArcadeBadge);
         badgeCounts.setArcade(countArcadeBadge);
+        badgeCounts.setSkillForArcade(countSkillBadgesForArcade);
         badgeCounts.setSkill(skill);
         badgeCounts.setPdf(totalPDF);
         badgeCounts.setPrizePDF(prizePDF);

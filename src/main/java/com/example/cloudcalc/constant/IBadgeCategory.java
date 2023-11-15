@@ -4,7 +4,9 @@ public interface IBadgeCategory {
 
     String TOTAL = "Total";
     String IGNORE = "Ignore";
-    String ARCADE = "Arcade";
+    String TOTAL_ARCADE = "Arcade:";
+    String ARCADE = "- only arcade";
+    String SKILL_ARCADE = "- skills for arcade";
     String SKILL = "Skill:";
     String PDF_TOTAL = "- pdf";
 

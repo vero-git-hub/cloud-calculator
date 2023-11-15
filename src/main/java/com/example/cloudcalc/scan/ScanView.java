@@ -81,7 +81,9 @@ public class ScanView {
         List<BadgeCategory> categories = new ArrayList<>();
         categories.add(new BadgeCategory(IBadgeCategory.TOTAL, String.valueOf(badgeCounts.getTotal())));
         categories.add(new BadgeCategory(IBadgeCategory.IGNORE, String.valueOf(badgeCounts.getIgnore())));
+        categories.add(new BadgeCategory(IBadgeCategory.TOTAL_ARCADE, String.valueOf(badgeCounts.getTotalArcade())));
         categories.add(new BadgeCategory(IBadgeCategory.ARCADE, String.valueOf(badgeCounts.getArcade())));
+        categories.add(new BadgeCategory(IBadgeCategory.SKILL_ARCADE, String.valueOf(badgeCounts.getSkillForArcade())));
         categories.add(new BadgeCategory(IBadgeCategory.SKILL, String.valueOf(badgeCounts.getSkill())));
         categories.add(new BadgeCategory(IBadgeCategory.PDF_TOTAL, String.valueOf(badgeCounts.getPdf())));
         return categories;
@@ -114,16 +116,16 @@ public class ScanView {
         }
     }
 
-    private List<com.example.cloudcalc.entity.badge.BadgeCategory> createBadgeCategoriesList(BadgeCounts badgeCounts) {
-        List<com.example.cloudcalc.entity.badge.BadgeCategory> categories = new ArrayList<>();
-        categories.add(new com.example.cloudcalc.entity.badge.BadgeCategory(IBadgeCategory.PDF_FOR_PRIZE, String.valueOf(badgeCounts.getPrizePDF())));
-        categories.add(new com.example.cloudcalc.entity.badge.BadgeCategory(IBadgeCategory.SKILL_FOR_PRIZE, String.valueOf(badgeCounts.getPrizeSkill())));
-        categories.add(new com.example.cloudcalc.entity.badge.BadgeCategory(IBadgeCategory.SKILL_FOR_ACTIVITY, String.valueOf(badgeCounts.getPrizeActivity())));
-        categories.add(new com.example.cloudcalc.entity.badge.BadgeCategory(IBadgeCategory.SKILL_FOR_PL, String.valueOf(badgeCounts.getPrizePL())));
+    private List<BadgeCategory> createBadgeCategoriesList(BadgeCounts badgeCounts) {
+        List<BadgeCategory> categories = new ArrayList<>();
+        categories.add(new BadgeCategory(IBadgeCategory.PDF_FOR_PRIZE, String.valueOf(badgeCounts.getPrizePDF())));
+        categories.add(new BadgeCategory(IBadgeCategory.SKILL_FOR_PRIZE, String.valueOf(badgeCounts.getPrizeSkill())));
+        categories.add(new BadgeCategory(IBadgeCategory.SKILL_FOR_ACTIVITY, String.valueOf(badgeCounts.getPrizeActivity())));
+        categories.add(new BadgeCategory(IBadgeCategory.SKILL_FOR_PL, String.valueOf(badgeCounts.getPrizePL())));
         return categories;
     }
 
-    private void setupTableColumns(TableView<com.example.cloudcalc.entity.badge.BadgeCategory> table, Map<String, Prize> receivedPrizes) {
+    private void setupTableColumns(TableView<BadgeCategory> table, Map<String, Prize> receivedPrizes) {
         table.getColumns().addAll(
                 createIndexColumn(table),
                 createCategoryColumn(table, 0.30),
@@ -132,7 +134,7 @@ public class ScanView {
         );
     }
 
-    private TableColumn<com.example.cloudcalc.entity.badge.BadgeCategory, Integer> createIndexColumn(TableView<com.example.cloudcalc.entity.badge.BadgeCategory> table) {
+    private TableColumn<BadgeCategory, Integer> createIndexColumn(TableView<BadgeCategory> table) {
         TableColumn<com.example.cloudcalc.entity.badge.BadgeCategory, Integer> indexColumn = new TableColumn<>("№");
         indexColumn.setCellValueFactory(column -> {
             return new ReadOnlyObjectWrapper<>(table.getItems().indexOf(column.getValue()) + 1);

@@ -4,7 +4,9 @@ public class BadgeCounts {
 
     private int total;
     private int ignore;
+    private int totalArcade;
     private int arcade;
+    private int skillForArcade;
     private int skill;
     private int pdf;
     private int prizePDF;
@@ -28,12 +30,28 @@ public class BadgeCounts {
         this.ignore = ignore;
     }
 
+    public int getTotalArcade() {
+        return totalArcade;
+    }
+
+    public void setTotalArcade(int totalArcade) {
+        this.totalArcade = totalArcade;
+    }
+
     public int getArcade() {
         return arcade;
     }
 
     public void setArcade(int arcade) {
         this.arcade = arcade;
+    }
+
+    public int getSkillForArcade() {
+        return skillForArcade;
+    }
+
+    public void setSkillForArcade(int skillForArcade) {
+        this.skillForArcade = skillForArcade;
     }
 
     public int getSkill() {
