@@ -65,9 +65,10 @@ public class DataExtractor implements Localizable {
             if (isURLAccessible(link)) {
                 try {
                     Document doc = Jsoup.connect(link).timeout(30 * 1000).get();
-                    Elements h1Elements = doc.select("h1[class=\"ql-headline-1\"]");
+                    Elements h1Elements = doc.select("h1[class=\"ql-display-small\"]");
                     for (int i = 0; i < h1Elements.size(); i++) {
                         String str = h1Elements.get(i).text();
+                        System.out.println();
                         h1Contents.add(str);
                     }
                 } catch (IOException e) {

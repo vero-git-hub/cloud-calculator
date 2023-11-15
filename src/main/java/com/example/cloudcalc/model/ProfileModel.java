@@ -4,6 +4,10 @@ import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.MainController;
 import com.example.cloudcalc.controller.ProfileController;
 import com.example.cloudcalc.entity.Profile;
+import com.example.cloudcalc.exception.PDFIsEmpty;
+import com.example.cloudcalc.exception.PageStructureFromPDFChangedException;
+import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
+import com.example.cloudcalc.util.Notification;
 import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -159,17 +163,38 @@ public class ProfileModel {
             profile.setStartDate(startDate);
             profile.setProfileLink(profileLink);
 
-            saveFromPdfFile(profile);
+            try {
+                saveFromPdfFile(profile);
+                saveProfileToFile(profile, FileName.PROFILES_FILE);
 
-            saveProfileToFile(profile, FileName.PROFILES_FILE);
-            profileController.showMainScreen(primaryStage);
+                profileController.showMainScreen(primaryStage);
+            } catch (PageStructureFromPDFChangedException ex) {
+                Notification.showErrorMessage("Page Structure From PDF Changed",
+                        "Call the developer, need to check the HTML tags.");
+            } catch (PDFIsEmpty ex) {
+                Notification.showAlert("Stop, pay attention!",
+                        "Your PDF section is empty.", "Please, select the PDF file.");
+            }
     }
 
-    private void saveFromPdfFile(Profile profile) {
+    private void saveFromPdfFile (Profile profile) throws PageStructureFromPDFChangedException, PDFIsEmpty {
         if(profile.getPdfFilePath() != null) {
+
             List<String> extractedLinks = profileController.extractHiddenLinksFromPdf(profile.getPdfFilePath());
-            List<String> h1Contents = profileController.extractH1FromLinks(extractedLinks);
-            profile.setPdfLinks(h1Contents);
+            if(!extractedLinks.isEmpty()) {
+                List<String> h1Contents = profileController.extractH1FromLinks(extractedLinks);
+
+                if(!h1Contents.isEmpty()) {
+                    profile.setPdfLinks(h1Contents);
+                } else {
+                    throw new PageStructureFromPDFChangedException();
+                }
+            } else {
+                throw new PageStructureFromPDFChangedException();
+            }
+
+        } else {
+            throw new PDFIsEmpty();
         }
     }
 

@@ -109,7 +109,6 @@ public class ProfileController {
                 profileLink != null && !profileLink.isEmpty()) {
             profileModel.handleProfileSave(primaryStage, profile, name, startDate, profileLink);
         }
-
     }
 
     public List<String> extractHiddenLinksFromPdf(String pdfFilePath) {
@@ -124,7 +123,4 @@ public class ProfileController {
         mainController.showMainScreen(primaryStage);
     }
 
-//    public void scanAction(Stage stage, Profile profile) {
-
-//    }
 }

@@ -1,4 +1,4 @@
-package com.example.cloudcalc;
+package com.example.cloudcalc.entity;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -18,5 +18,13 @@ public class PdfLinkItem {
 
     public String getLink() {
         return link.get();
+    }
+
+    @Override
+    public String toString() {
+        return "PdfLinkItem{" +
+                "index=" + index +
+                ", link=" + link +
+                '}';
     }
 }
