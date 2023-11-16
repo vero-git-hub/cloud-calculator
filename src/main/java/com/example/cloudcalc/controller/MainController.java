@@ -29,6 +29,10 @@ public class MainController {
         this.sceneBuilder = new SceneBuilder();
     }
 
+    public MainView getMainView() {
+        return mainView;
+    }
+
     public void showMainScreen(Stage primaryStage) {
         mainView.showMainScreen(primaryStage);
     }

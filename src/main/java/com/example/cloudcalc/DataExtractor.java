@@ -68,7 +68,6 @@ public class DataExtractor implements Localizable {
                     Elements h1Elements = doc.select("h1[class=\"ql-display-small\"]");
                     for (int i = 0; i < h1Elements.size(); i++) {
                         String str = h1Elements.get(i).text();
-                        System.out.println();
                         h1Contents.add(str);
                     }
                 } catch (IOException e) {

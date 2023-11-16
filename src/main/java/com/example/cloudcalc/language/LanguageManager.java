@@ -1,6 +1,7 @@
 package com.example.cloudcalc.language;
 
 import com.example.cloudcalc.FileManager;
+import com.example.cloudcalc.builder.TextFieldManager;
 import com.example.cloudcalc.constant.FileName;
 import javafx.scene.control.ComboBox;
 import org.json.JSONObject;
@@ -14,6 +15,16 @@ public class LanguageManager {
 
     public static ComboBox<Language> languageComboBox;
     private static List<Localizable> localizables = new ArrayList<>();
+
+    private static TextFieldManager textFieldManager;
+
+    public static void setTextFieldManager(TextFieldManager manager) {
+        textFieldManager = manager;
+    }
+
+    public static TextFieldManager getTextFieldManager() {
+        return textFieldManager;
+    }
 
     public static void registerLocalizable(Localizable localizable) {
         localizables.add(localizable);

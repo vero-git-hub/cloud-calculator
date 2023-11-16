@@ -2,7 +2,9 @@ package com.example.cloudcalc.model;
 
 import com.example.cloudcalc.badge.FileOperationManager;
 import com.example.cloudcalc.builder.TextFieldManager;
+import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.IgnoreController;
+import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.util.AlertGuardian;
 import com.example.cloudcalc.util.Notification;
 import javafx.scene.control.TextField;
@@ -18,7 +20,10 @@ public class IgnoreModel {
         this.ignoreController = ignoreController;
     }
 
-    public void handleSave(Stage primaryStage, FileOperationManager fileOperationManager, String fileName, TextFieldManager textFieldManager) {
+    public void handleSave(Stage primaryStage, FileOperationManager fileOperationManager) {
+        TextFieldManager textFieldManager = LanguageManager.getTextFieldManager();
+        String fileName = FileName.IGNORE_FILE;
+
         List<String> badges = fileOperationManager.loadBadgesFromFile(fileName);
         TextField nameField = textFieldManager.getNameTextField();
 

@@ -20,6 +20,7 @@ public class MainView implements Localizable {
 
     private final MainController controller;
     private Label titleLabel;
+    Label profilesLabel = new Label("PROFILES");
 
     public MainView(MainController controller) {
         this.controller = controller;
@@ -31,7 +32,6 @@ public class MainView implements Localizable {
 
     public void showMainScreen(Stage primaryStage) {
         VBox layout = new VBox(10);
-        //layout.getChildren().add(createTopBarWithLanguageSelector(primaryStage));
 
         layout.getChildren().add(initializeTopLayout(primaryStage));
         layout.getChildren().add(createHeaderWithAddButton(primaryStage));
@@ -61,7 +61,7 @@ public class MainView implements Localizable {
     private HBox createHeaderWithAddButton(Stage primaryStage) {
         HBox labelAndButton = new HBox(5);
         labelAndButton.setAlignment(Pos.CENTER_LEFT);
-        Label label = new Label("PROFILES");
+
         Button addButton = ButtonFactory.createAddButton(e -> controller.getCreateProfileScreen(primaryStage));
 
         Region spacer = new Region();
@@ -69,7 +69,7 @@ public class MainView implements Localizable {
 
         ComboBox<Language> languageComboBox = createLanguageComboBox();
 
-        labelAndButton.getChildren().addAll(label, addButton, spacer, languageComboBox);
+        labelAndButton.getChildren().addAll(profilesLabel, addButton, spacer, languageComboBox);
         return labelAndButton;
     }
 
@@ -83,6 +83,8 @@ public class MainView implements Localizable {
 
     @Override
     public void updateLocalization(ResourceBundle bundle) {
-        titleLabel.setText(bundle.getString("profilesLabel"));
+        titleLabel.setText(bundle.getString("mainTitle"));
+        profilesLabel.setText(bundle.getString("profilesLabel"));
+
     }
 }

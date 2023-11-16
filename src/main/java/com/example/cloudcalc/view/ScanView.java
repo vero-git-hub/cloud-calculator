@@ -1,4 +1,4 @@
-package com.example.cloudcalc.scan;
+package com.example.cloudcalc.view;
 
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.IBadgeCategory;

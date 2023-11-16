@@ -25,7 +25,6 @@ public class IgnoreController implements IScreenController {
     private final SceneBuilder sceneBuilder = new SceneBuilder();
     private final ElementsBuilder elementsBuilder = new ElementsBuilder();
     private final AddIgnoreView addIgnoreView = new AddIgnoreView(this);
-    private final TextFieldManager textFieldManager = new TextFieldManager();
     private final IgnoreModel ignoreModel = new IgnoreModel(this);
 
     public IgnoreController(ServiceFacade serviceFacade) {
@@ -40,7 +39,7 @@ public class IgnoreController implements IScreenController {
 
     @Override
     public void showAddScreen(Stage stage) {
-        addIgnoreView.showScreen(stage, textFieldManager);
+        addIgnoreView.showScreen(stage);
     }
 
     public void initVariablesForTable() {
@@ -52,7 +51,7 @@ public class IgnoreController implements IScreenController {
     }
 
     public void handleSave(Stage stage) {
-        ignoreModel.handleSave(stage, fileOperationManager, FileName.IGNORE_FILE, textFieldManager);
+        ignoreModel.handleSave(stage, fileOperationManager);
     }
 
     public HBox createTopLayoutForAddScreen(Button backButton, Label titleAddScreenLabel) {

@@ -10,7 +10,6 @@ import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.model.ProfileModel;
-import com.example.cloudcalc.scan.ScanView;
 import com.example.cloudcalc.view.ProfileView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;

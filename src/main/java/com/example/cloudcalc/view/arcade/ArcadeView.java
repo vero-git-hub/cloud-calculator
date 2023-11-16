@@ -13,60 +13,30 @@ import javafx.stage.Stage;
 
 import java.util.ResourceBundle;
 
-public class ArcadeView {
+public class ArcadeView implements Localizable {
     private final ArcadeController arcadeController;
     private String title = "ARCADE";
 
     public ArcadeView(ArcadeController arcadeController) {
         this.arcadeController = arcadeController;
+
+        LanguageManager.registerLocalizable(this);
     }
 
     public String getTitle() {
         return title;
     }
 
-
-//    public ArcadeView() {
-//        this.serviceFacade = ServiceFacade.getInstance();
-//        this.controller = createController();
-//
-//        LanguageManager.registerLocalizable(this);
-//    }
-//
-//    private ArcadeManager createController() {
-//        return new ArcadeManager(serviceFacade);
-//    }
-//
     public void showArcadeScreen(Stage primaryStage) {
         arcadeController.initVariablesForTable();
         arcadeController.buildScreen(primaryStage);
     }
 
-//    @Override
-//    public void updateLocalization(ResourceBundle bundle) {
-//        title = bundle.getString("arcadeTitle");
-//        addArcadeTitle = bundle.getString("addArcadeTitle");
-//
-//        this.updateElements(title, addArcadeTitle, bundle);
-//
-//        updateNameTextFieldPlaceholder(bundle.getString("addScreenNameField"));
-//    }
-//
-//    @Override
-//    public void updateNameTextFieldPlaceholder(String placeholder) {
-//        if (nameTextField != null) {
-//            nameTextField.setPromptText(placeholder);
-//        }
-//    }
-//
-//    @Override
-//    public TextField getNameTextField() {
-//        if (nameTextField == null) {
-//            nameTextField = new TextField();
-//            nameTextField.setPromptText("Lab name");
-//            nameTextField.setId("nameField");
-//        }
-//        return nameTextField;
-//    }
+    @Override
+    public void updateLocalization(ResourceBundle bundle) {
+        title = bundle.getString("arcadeTitle");
+
+        //this.updateElements(title, addArcadeTitle, bundle);
+    }
 
 }

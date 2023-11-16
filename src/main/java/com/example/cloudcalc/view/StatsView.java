@@ -1,6 +1,7 @@
 package com.example.cloudcalc.view;
 
 import com.example.cloudcalc.controller.StatsController;
+import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.entity.Profile;
 import javafx.scene.control.Label;
@@ -16,14 +17,14 @@ public class StatsView implements Localizable {
 
     private final StatsController statsController;
     private TableView<Map.Entry<String, Long>> prizeTable;
-    private Label subtitleLabel;
-    private Label titleLabel;
+    private Label titleLabel = new Label("STATISTICS");
+    private Label subtitleLabel = new Label("To get up-to-date results, click the \"Update\" button.");
     TableView<Profile> mainTable;
 
     public StatsView(StatsController statsController) {
         this.statsController = statsController;
-        this.titleLabel = new Label("STATISTICS");
-        this.subtitleLabel = new Label("To get up-to-date results, click the \"Update\" button.");
+
+        LanguageManager.registerLocalizable(this);
     }
 
     public Label getSubtitleLabel() {
@@ -52,7 +53,8 @@ public class StatsView implements Localizable {
 
     @Override
     public void updateLocalization(ResourceBundle bundle) {
-
+        titleLabel.setText(bundle.getString("statsTitle"));
+        subtitleLabel.setText(bundle.getString("statsSubtitle"));
     }
 
     @Override

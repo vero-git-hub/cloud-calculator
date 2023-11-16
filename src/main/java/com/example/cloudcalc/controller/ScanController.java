@@ -1,6 +1,5 @@
 package com.example.cloudcalc.controller;
 
-import com.example.cloudcalc.DataExtractor;
 import com.example.cloudcalc.DateUtils;
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.builder.ElementsBuilder;
@@ -8,9 +7,8 @@ import com.example.cloudcalc.builder.SceneBuilder;
 import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.entity.badge.BadgeCounts;
-import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.model.ScanModel;
-import com.example.cloudcalc.scan.ScanView;
+import com.example.cloudcalc.view.ScanView;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
