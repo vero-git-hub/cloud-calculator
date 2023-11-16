@@ -1,6 +1,8 @@
 package com.example.cloudcalc;
 
-import com.example.cloudcalc.builder.TextFieldManager;
+import com.example.cloudcalc.builder.text.fields.BadgeFieldManager;
+import com.example.cloudcalc.builder.text.fields.PrizeFieldManager;
+import com.example.cloudcalc.builder.text.fields.TypeBadgeFieldsManager;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.MainController;
 import com.example.cloudcalc.language.LanguageManager;
@@ -20,18 +22,27 @@ public class Main extends Application {
 
         mainController.showMainScreen(stage);
 
+        initializeLocalization();
+
+        stage.setTitle("Cloud Calculator");
+        stage.setOnCloseRequest(event -> LanguageManager.saveLanguagePreference());
+        stage.show();
+    }
+
+    private void initializeLocalization() {
         String savedLanguageCode = FileManager.readJsonObjectFromFile(FileName.SETTINGS_FILE).optString("language", "en");
         Locale locale = new Locale(savedLanguageCode);
         ResourceBundle bundle = ResourceBundle.getBundle("messages", locale);
         LanguageManager.updateLocalizableComponents(bundle);
 
-        TextFieldManager textFieldManager = new TextFieldManager(bundle);
+        BadgeFieldManager textFieldManager = new BadgeFieldManager(bundle);
         LanguageManager.setTextFieldManager(textFieldManager);
 
+        PrizeFieldManager prizeTextFieldManager = new PrizeFieldManager(bundle);
+        LanguageManager.setTextFieldPrizeManager(prizeTextFieldManager);
 
-        stage.setTitle("Cloud Calculator");
-        stage.setOnCloseRequest(event -> LanguageManager.saveLanguagePreference());
-        stage.show();
+        TypeBadgeFieldsManager typeBadgeFieldsManager = new TypeBadgeFieldsManager(bundle);
+        LanguageManager.setTypeBadgeTextFieldsManager(typeBadgeFieldsManager);
     }
 
     public static void main(String[] args) {

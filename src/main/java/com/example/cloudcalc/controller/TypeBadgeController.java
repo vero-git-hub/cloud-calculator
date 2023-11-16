@@ -4,7 +4,7 @@ import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.builder.ElementsBuilder;
 import com.example.cloudcalc.builder.SceneBuilder;
 import com.example.cloudcalc.model.TypeBadgeModel;
-import com.example.cloudcalc.view.TypeBadgeView;
+import com.example.cloudcalc.view.AddTypeBadgeView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 
 public class TypeBadgeController {
 
-    private TypeBadgeView typeBadgeView = new TypeBadgeView(this);
+    private AddTypeBadgeView addTypeBadgeView = new AddTypeBadgeView(this);
     private TypeBadgeModel typeBadgeModel = new TypeBadgeModel(this);
     private ServiceFacade serviceFacade;
     private final ElementsBuilder elementsBuilder = new ElementsBuilder();
@@ -28,7 +28,7 @@ public class TypeBadgeController {
     }
 
     public void showScreen(Stage stage) {
-        typeBadgeView.showScreen(stage);
+        addTypeBadgeView.showScreen(stage);
     }
 
     public void handleTypeBadgeSave(Stage primaryStage, String

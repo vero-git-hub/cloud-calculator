@@ -32,4 +32,6 @@ module com.example.cloudcalc {
     opens com.example.cloudcalc.view.prize to javafx.fxml;
     opens com.example.cloudcalc.entity.badge to javafx.fxml;
     exports com.example.cloudcalc.entity.badge;
+    exports com.example.cloudcalc.builder.text.fields;
+    opens com.example.cloudcalc.builder.text.fields to javafx.fxml;
 }

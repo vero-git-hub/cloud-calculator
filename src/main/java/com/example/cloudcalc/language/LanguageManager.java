@@ -1,7 +1,9 @@
 package com.example.cloudcalc.language;
 
 import com.example.cloudcalc.FileManager;
-import com.example.cloudcalc.builder.TextFieldManager;
+import com.example.cloudcalc.builder.text.fields.BadgeFieldManager;
+import com.example.cloudcalc.builder.text.fields.PrizeFieldManager;
+import com.example.cloudcalc.builder.text.fields.TypeBadgeFieldsManager;
 import com.example.cloudcalc.constant.FileName;
 import javafx.scene.control.ComboBox;
 import org.json.JSONObject;
@@ -16,14 +18,32 @@ public class LanguageManager {
     public static ComboBox<Language> languageComboBox;
     private static List<Localizable> localizables = new ArrayList<>();
 
-    private static TextFieldManager textFieldManager;
+    private static BadgeFieldManager textFieldManager;
+    private static PrizeFieldManager prizeTextFieldManager;
+    private static TypeBadgeFieldsManager typeBadgeFieldsManager;
 
-    public static void setTextFieldManager(TextFieldManager manager) {
+    public static void setTextFieldManager(BadgeFieldManager manager) {
         textFieldManager = manager;
     }
 
-    public static TextFieldManager getTextFieldManager() {
+    public static BadgeFieldManager getTextFieldManager() {
         return textFieldManager;
+    }
+
+    public static PrizeFieldManager getTextFieldPrizeManager() {
+        return prizeTextFieldManager;
+    }
+
+    public static void setTextFieldPrizeManager(PrizeFieldManager prizeTextFieldManager) {
+        LanguageManager.prizeTextFieldManager = prizeTextFieldManager;
+    }
+
+    public static TypeBadgeFieldsManager getTypeBadgeTextFieldsManager() {
+        return typeBadgeFieldsManager;
+    }
+
+    public static void setTypeBadgeTextFieldsManager(TypeBadgeFieldsManager typeBadgeFieldsManager) {
+        LanguageManager.typeBadgeFieldsManager = typeBadgeFieldsManager;
     }
 
     public static void registerLocalizable(Localizable localizable) {

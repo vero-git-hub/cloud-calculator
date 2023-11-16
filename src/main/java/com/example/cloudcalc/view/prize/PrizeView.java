@@ -3,6 +3,8 @@ package com.example.cloudcalc.view.prize;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.PrizeController;
 import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.language.LanguageManager;
+import com.example.cloudcalc.language.Localizable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
@@ -11,14 +13,16 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
-public class PrizeView {
+public class PrizeView implements Localizable {
 
     private final PrizeController prizeController;
     private String title = "PRIZES";
 
     public PrizeView(PrizeController prizeController) {
         this.prizeController = prizeController;
+        LanguageManager.registerLocalizable(this);
     }
 
     public void showScreen(Stage stage) {
@@ -40,5 +44,10 @@ public class PrizeView {
         );
 
         prizeController.createScene(layout, stage);
+    }
+
+    @Override
+    public void updateLocalization(ResourceBundle bundle) {
+        title = bundle.getString("prizeTitle");
     }
 }

@@ -1,6 +1,6 @@
 package com.example.cloudcalc.view.ignore;
 
-import com.example.cloudcalc.builder.TextFieldManager;
+import com.example.cloudcalc.builder.text.fields.BadgeFieldManager;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.IgnoreController;
 import com.example.cloudcalc.language.LanguageManager;
@@ -33,12 +33,12 @@ public class AddIgnoreView {
 
         HBox topLayout = ignoreController.createTopLayoutForAddScreen(backButton, titleAddScreenLabel);
 
-        TextFieldManager textFieldManager = LanguageManager.getTextFieldManager();
-        nameTextField = textFieldManager.getNameTextField();
+        BadgeFieldManager textFieldManager = LanguageManager.getTextFieldManager();
+        nameTextField = textFieldManager.getNameField();
 
         layout.getChildren().addAll(
                 topLayout,
-                textFieldManager.getNameTextField(),
+                textFieldManager.getNameField(),
                 saveButton
         );
 

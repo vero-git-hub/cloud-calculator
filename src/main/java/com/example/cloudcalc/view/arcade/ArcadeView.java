@@ -1,14 +1,8 @@
 package com.example.cloudcalc.view.arcade;
 
-import com.example.cloudcalc.ServiceFacade;
-import com.example.cloudcalc.badge.ScreenDisplayable;
-import com.example.cloudcalc.builder.NameTextFieldUpdatable;
-import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.controller.ArcadeController;
-import com.example.cloudcalc.controller.StatsController;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.util.ResourceBundle;

@@ -5,7 +5,6 @@ import com.example.cloudcalc.badge.FileOperationManager;
 import com.example.cloudcalc.builder.ElementsBuilder;
 import com.example.cloudcalc.builder.SceneBuilder;
 import com.example.cloudcalc.builder.TableBuilder;
-import com.example.cloudcalc.builder.TextFieldManager;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.model.ArcadeModel;
 import com.example.cloudcalc.view.arcade.AddArcadeView;

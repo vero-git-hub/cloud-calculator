@@ -1,7 +1,7 @@
 package com.example.cloudcalc.view.arcade;
 
-import com.example.cloudcalc.builder.NameTextFieldUpdatable;
-import com.example.cloudcalc.builder.TextFieldManager;
+import com.example.cloudcalc.builder.text.fields.BadgeNameFieldUpdatable;
+import com.example.cloudcalc.builder.text.fields.BadgeFieldManager;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.ArcadeController;
 import com.example.cloudcalc.language.LanguageManager;
@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 
 import java.util.ResourceBundle;
 
-public class AddArcadeView implements Localizable, NameTextFieldUpdatable {
+public class AddArcadeView implements Localizable, BadgeNameFieldUpdatable {
 
     private final ArcadeController arcadeController;
     private String title = "ADD ARCADE";
@@ -39,8 +39,8 @@ public class AddArcadeView implements Localizable, NameTextFieldUpdatable {
 
         HBox topLayout = arcadeController.createTopLayoutForAddScreen(backButton, titleAddScreenLabel);
 
-        TextFieldManager textFieldManager = LanguageManager.getTextFieldManager();
-        nameTextField = textFieldManager.getNameTextField();
+        BadgeFieldManager textFieldManager = LanguageManager.getTextFieldManager();
+        nameTextField = textFieldManager.getNameField();
 
         layout.getChildren().addAll(
                 topLayout,
@@ -55,18 +55,18 @@ public class AddArcadeView implements Localizable, NameTextFieldUpdatable {
     public void updateLocalization(ResourceBundle bundle) {
         title = bundle.getString("addArcadeTitle");
 
-        updateNameTextFieldPlaceholder(bundle.getString("addScreenNameField"));
+        updateNameFieldPlaceholder(bundle.getString("addScreenNameField"));
     }
 
     @Override
-    public void updateNameTextFieldPlaceholder(String placeholder) {
+    public void updateNameFieldPlaceholder(String placeholder) {
         if (nameTextField != null) {
             nameTextField.setPromptText(placeholder);
         }
     }
 
     @Override
-    public TextField getNameTextField() {
+    public TextField getNameField() {
         if (nameTextField == null) {
             nameTextField = new TextField();
             nameTextField.setPromptText("Lab name");

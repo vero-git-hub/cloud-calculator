@@ -1,7 +1,7 @@
 package com.example.cloudcalc.model;
 
 import com.example.cloudcalc.badge.FileOperationManager;
-import com.example.cloudcalc.builder.TextFieldManager;
+import com.example.cloudcalc.builder.text.fields.BadgeFieldManager;
 import com.example.cloudcalc.controller.ArcadeController;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.util.AlertGuardian;
@@ -20,10 +20,10 @@ public class ArcadeModel {
     }
 
     public void handleSave(Stage primaryStage, FileOperationManager fileOperationManager, String fileName) {
-        TextFieldManager textFieldManager = LanguageManager.getTextFieldManager();
+        BadgeFieldManager textFieldManager = LanguageManager.getTextFieldManager();
 
         List<String> badges = fileOperationManager.loadBadgesFromFile(fileName);
-        TextField nameField = textFieldManager.getNameTextField();
+        TextField nameField = textFieldManager.getNameField();
 
         String badgeName = nameField.getText().trim();
         if (badgeName.isEmpty()) {

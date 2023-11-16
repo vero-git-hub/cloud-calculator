@@ -46,8 +46,7 @@ public class PrizeController {
     private final Map<String, Prize> receivedPrizes = new HashMap<>();
 //    private Label titleLabel;
 //    private Label addPrizeTitle;
-    private TextField namePrizeField;
-    private TextField badgeCountField;
+
 
     String alertTitleDeletePrize = "Confirmation Dialog";
     String alertHeaderDeletePrize = "Delete Prize";
@@ -56,33 +55,8 @@ public class PrizeController {
     public PrizeController(ServiceFacade serviceFacade) {
         this.mainController = serviceFacade.getMainController();
         this.serviceFacade = serviceFacade;
-
-        namePrizeField = new TextField();
-        namePrizeField.setPromptText("Enter name prize");
-
-        badgeCountField = new TextField();
-        badgeCountField.setPromptText("Enter badge count");
     }
 
-    public TextField getNamePrizeField() {
-        return namePrizeField;
-    }
-
-    public TextField getBadgeCountField() {
-        return badgeCountField;
-    }
-
-    //    public PrizeManager() {
-//        this.mainManager = mainManager;
-//        this.typeBadgeDataManager = new TypeBadgeDataManager();
-//        this.typeBadgeManager = new TypeBadgeManager(mainManager, typeBadgeDataManager, this);
-//
-//        titleLabel = TableBuilder.createLabel("PRIZES");
-//        addPrizeTitle = TableBuilder.createLabel("Add Prize");
-//
-//        LanguageManager.registerLocalizable(this);
-//    }
-//
     public Map<String, Prize> getReceivedPrizes() {
         return receivedPrizes;
     }
@@ -103,7 +77,7 @@ public class PrizeController {
         addPrizeView.showScreen(stage);
     }
 
-    public void savePrize(Stage stage, String badgeType) {
+    public void savePrize(Stage stage, String badgeType, TextField namePrizeField, TextField badgeCountField) {
         String namePrize = namePrizeField.getText();
         String badgeCount = badgeCountField.getText();
         if (namePrize != null && badgeCount != null && !badgeCount.isEmpty() && badgeType != null) {
@@ -184,16 +158,4 @@ public class PrizeController {
         return receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
     }
 
-//    @Override
-//    public void updateLocalization(ResourceBundle bundle) {
-//        titleLabel.setText(bundle.getString("prizeTitle"));
-//        addPrizeTitle.setText(bundle.getString("addPrizeTitle"));
-//        namePrizeField.setPromptText(bundle.getString("addPrizeNameField"));
-//        badgeCountField.setPromptText(bundle.getString("addPrizeCountField"));
-//        badgeTypeComboBox.setPromptText(bundle.getString("addPrizeTypeComboBox"));
-//
-//        alertTitleDeletePrize = bundle.getString("alertTitleDeletePrize");
-//        alertHeaderDeletePrize = bundle.getString("alertHeaderDeletePrize");
-//        alertContentDeletePrize = bundle.getString("alertContentDeletePrize");
-//    }
 }

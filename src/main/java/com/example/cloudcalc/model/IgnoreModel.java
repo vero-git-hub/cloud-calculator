@@ -1,7 +1,7 @@
 package com.example.cloudcalc.model;
 
 import com.example.cloudcalc.badge.FileOperationManager;
-import com.example.cloudcalc.builder.TextFieldManager;
+import com.example.cloudcalc.builder.text.fields.BadgeFieldManager;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.IgnoreController;
 import com.example.cloudcalc.language.LanguageManager;
@@ -21,11 +21,11 @@ public class IgnoreModel {
     }
 
     public void handleSave(Stage primaryStage, FileOperationManager fileOperationManager) {
-        TextFieldManager textFieldManager = LanguageManager.getTextFieldManager();
+        BadgeFieldManager textFieldManager = LanguageManager.getTextFieldManager();
         String fileName = FileName.IGNORE_FILE;
 
         List<String> badges = fileOperationManager.loadBadgesFromFile(fileName);
-        TextField nameField = textFieldManager.getNameTextField();
+        TextField nameField = textFieldManager.getNameField();
 
         String badgeName = nameField.getText().trim();
         if (badgeName.isEmpty()) {
