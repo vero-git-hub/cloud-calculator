@@ -7,6 +7,8 @@ import com.example.cloudcalc.entity.badge.BadgeCategory;
 import com.example.cloudcalc.entity.badge.BadgeCounts;
 import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.entity.Profile;
+import com.example.cloudcalc.language.LanguageManager;
+import com.example.cloudcalc.language.Localizable;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Button;
@@ -26,19 +28,20 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class ScanView {
+public class ScanView implements Localizable {
 
     private final ScanController scanController;
     private Label subtitleLabel = new Label("Labs with the same names are counted as one");
-    private String preText = "SCAN for ";
+    private String titlePreText = "SCAN for ";
 
     public ScanView(ScanController scanController) {
         this.scanController = scanController;
 
         subtitleLabel.setStyle("-fx-font-style: italic;");
-        //LanguageManager.registerLocalizable(this);
+        LanguageManager.registerLocalizable(this);
     }
 
     public void showScreen(Stage primaryStage, Profile profile, ArrayList<String> siteLinks) {
@@ -46,7 +49,7 @@ public class ScanView {
 
         Button backButton = ButtonFactory.createBackButton(e -> scanController.showMainScreen(primaryStage));
 
-        Text preTextLabel = new Text(preText);
+        Text preTextLabel = new Text(titlePreText);
         Hyperlink nameLink = new Hyperlink(profile.getName());
         nameLink.setOnAction(e -> {
             try {
@@ -89,14 +92,14 @@ public class ScanView {
         return categories;
     }
 
-    private TableView<com.example.cloudcalc.entity.badge.BadgeCategory> createPrizeCategoriesTable(Profile profile, BadgeCounts badgeCounts) {
+    private TableView<BadgeCategory> createPrizeCategoriesTable(Profile profile, BadgeCounts badgeCounts) {
         Map<String, Prize> receivedPrizes = getReceivedPrizes();
 
         List<String> prizeNames = receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
         profile.setPrizes(prizeNames);
         scanController.updateProfile(profile);
 
-        TableView<com.example.cloudcalc.entity.badge.BadgeCategory> table = new TableView<>();
+        TableView<BadgeCategory> table = new TableView<>();
         table.getItems().addAll(createBadgeCategoriesList(badgeCounts));
 
         setupTableColumns(table, receivedPrizes);
@@ -175,9 +178,10 @@ public class ScanView {
         return prizesColumn;
     }
 
-//    @Override
-//    public void updateLocalization(ResourceBundle bundle) {
-//        preText = bundle.getString("scanTitle");
-//        subtitleLabel.setText(bundle.getString("scanSubtitle"));
-//    }
+    @Override
+    public void updateLocalization(ResourceBundle bundle) {
+        titlePreText = bundle.getString("scanTitle");
+        subtitleLabel.setText(bundle.getString("scanSubtitle"));
+    }
+
 }
