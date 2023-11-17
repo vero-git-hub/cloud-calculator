@@ -1,6 +1,6 @@
-package com.example.cloudcalc.builder.text.fields;
+package com.example.cloudcalc.builder.fields.prize;
 
-public interface PrizeFieldsUpdatable {
+public interface PrizeFieldUpdatable {
     void updateNameFieldPlaceholder(String placeholder);
     void updateBadgeCountFieldPlaceholder(String placeholder);
 }

@@ -1,10 +1,10 @@
-package com.example.cloudcalc.builder.text.fields;
+package com.example.cloudcalc.builder.fields.prize;
 
 import javafx.scene.control.TextField;
 
 import java.util.ResourceBundle;
 
-public class PrizeFieldManager implements PrizeFieldsUpdatable {
+public class PrizeFieldManager implements PrizeFieldUpdatable {
 
     private TextField nameField;
     private TextField badgeCountField;

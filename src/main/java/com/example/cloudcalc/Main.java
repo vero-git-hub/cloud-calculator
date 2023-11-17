@@ -1,8 +1,9 @@
 package com.example.cloudcalc;
 
-import com.example.cloudcalc.builder.text.fields.BadgeFieldManager;
-import com.example.cloudcalc.builder.text.fields.PrizeFieldManager;
-import com.example.cloudcalc.builder.text.fields.TypeBadgeFieldsManager;
+import com.example.cloudcalc.builder.fields.badge.BadgeFieldManager;
+import com.example.cloudcalc.builder.fields.prize.PrizeFieldManager;
+import com.example.cloudcalc.builder.fields.profile.ProfileFieldManager;
+import com.example.cloudcalc.builder.fields.type.TypeBadgeFieldManager;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.MainController;
 import com.example.cloudcalc.language.LanguageManager;
@@ -41,8 +42,11 @@ public class Main extends Application {
         PrizeFieldManager prizeTextFieldManager = new PrizeFieldManager(bundle);
         LanguageManager.setTextFieldPrizeManager(prizeTextFieldManager);
 
-        TypeBadgeFieldsManager typeBadgeFieldsManager = new TypeBadgeFieldsManager(bundle);
-        LanguageManager.setTypeBadgeTextFieldsManager(typeBadgeFieldsManager);
+        TypeBadgeFieldManager typeBadgeFieldManager = new TypeBadgeFieldManager(bundle);
+        LanguageManager.setTypeBadgeTextFieldsManager(typeBadgeFieldManager);
+
+        ProfileFieldManager profileFieldManager = new ProfileFieldManager(bundle);
+        LanguageManager.setProfileFieldManager(profileFieldManager);
     }
 
     public static void main(String[] args) {

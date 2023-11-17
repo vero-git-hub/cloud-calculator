@@ -1,15 +1,15 @@
-package com.example.cloudcalc.builder.text.fields;
+package com.example.cloudcalc.builder.fields.type;
 
 import javafx.scene.control.TextField;
 
 import java.util.ResourceBundle;
 
-public class TypeBadgeFieldsManager implements TypeBadgeFieldsUpdatable {
+public class TypeBadgeFieldManager implements TypeBadgeFieldUpdatable {
 
     private TextField nameField;
     private TextField dateField;
 
-    public TypeBadgeFieldsManager(ResourceBundle bundle) {
+    public TypeBadgeFieldManager(ResourceBundle bundle) {
         this.nameField = new TextField();
         this.dateField = new TextField();
 

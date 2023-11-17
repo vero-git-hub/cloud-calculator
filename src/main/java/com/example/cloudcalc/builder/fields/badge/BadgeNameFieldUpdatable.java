@@ -1,4 +1,4 @@
-package com.example.cloudcalc.builder.text.fields;
+package com.example.cloudcalc.builder.fields.badge;
 
 import javafx.scene.control.TextField;
 

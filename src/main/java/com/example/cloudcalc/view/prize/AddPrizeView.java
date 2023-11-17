@@ -1,7 +1,7 @@
 package com.example.cloudcalc.view.prize;
 
-import com.example.cloudcalc.builder.text.fields.PrizeFieldManager;
-import com.example.cloudcalc.builder.text.fields.PrizeFieldsUpdatable;
+import com.example.cloudcalc.builder.fields.prize.PrizeFieldManager;
+import com.example.cloudcalc.builder.fields.prize.PrizeFieldUpdatable;
 import com.example.cloudcalc.entity.badge.TypeBadge;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.PrizeController;
@@ -21,7 +21,7 @@ import javafx.stage.Stage;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class AddPrizeView implements Localizable, PrizeFieldsUpdatable {
+public class AddPrizeView implements Localizable, PrizeFieldUpdatable {
     private final PrizeController prizeController;
     private String title = "ADD PRIZE";
     private ComboBox<String> badgeTypeComboBox;
@@ -102,12 +102,4 @@ public class AddPrizeView implements Localizable, PrizeFieldsUpdatable {
         }
     }
 
-//    public TextField getNameTextField() {
-//        if (nameTextField == null) {
-//            nameTextField = new TextField();
-//            nameTextField.setPromptText("Enter name prize");
-//            nameTextField.setId("nameField");
-//        }
-//        return nameTextField;
-//    }
 }

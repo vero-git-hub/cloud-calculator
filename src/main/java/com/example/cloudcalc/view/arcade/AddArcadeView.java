@@ -1,7 +1,7 @@
 package com.example.cloudcalc.view.arcade;
 
-import com.example.cloudcalc.builder.text.fields.BadgeNameFieldUpdatable;
-import com.example.cloudcalc.builder.text.fields.BadgeFieldManager;
+import com.example.cloudcalc.builder.fields.badge.BadgeNameFieldUpdatable;
+import com.example.cloudcalc.builder.fields.badge.BadgeFieldManager;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.ArcadeController;
 import com.example.cloudcalc.language.LanguageManager;

@@ -1,7 +1,7 @@
 package com.example.cloudcalc.view;
 
-import com.example.cloudcalc.builder.text.fields.TypeBadgeFieldsManager;
-import com.example.cloudcalc.builder.text.fields.TypeBadgeFieldsUpdatable;
+import com.example.cloudcalc.builder.fields.type.TypeBadgeFieldManager;
+import com.example.cloudcalc.builder.fields.type.TypeBadgeFieldUpdatable;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.TypeBadgeController;
 import com.example.cloudcalc.language.LanguageManager;
@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 
 import java.util.ResourceBundle;
 
-public class AddTypeBadgeView implements Localizable, TypeBadgeFieldsUpdatable {
+public class AddTypeBadgeView implements Localizable, TypeBadgeFieldUpdatable {
     private TypeBadgeController typeBadgeController;
     private String title = "CREATE BADGE TYPE";
     private TextField nameField;
@@ -30,11 +30,9 @@ public class AddTypeBadgeView implements Localizable, TypeBadgeFieldsUpdatable {
     public void showScreen(Stage stage) {
         VBox layout = new VBox(10);
 
-        TypeBadgeFieldsManager typeBadgeFieldsManager = LanguageManager.getTypeBadgeTextFieldsManager();
-        nameField = typeBadgeFieldsManager.getNameField();
-        dateField = typeBadgeFieldsManager.getDateField();
-//        nameField.setPromptText(FieldNames.NAME.getLabel());
-//        dateField.setPromptText(FieldNames.START_DATE.getLabel());
+        TypeBadgeFieldManager typeBadgeFieldManager = LanguageManager.getTypeBadgeTextFieldsManager();
+        nameField = typeBadgeFieldManager.getNameField();
+        dateField = typeBadgeFieldManager.getDateField();
 
         Button saveButton = ButtonFactory.createSaveButton(e -> {
             typeBadgeController.handleTypeBadgeSave(stage, nameField.getText(), dateField.getText());

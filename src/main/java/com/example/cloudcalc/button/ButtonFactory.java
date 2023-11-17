@@ -27,8 +27,7 @@ public class ButtonFactory {
         return createButton("", action, image);
     }
 
-    public static Button createUploadPdfButton(Consumer<ActionEvent> action) {
-        Button uploadPdfButton = new Button("Upload PDF");
+    public static Button createUploadPdfButton(Button uploadPdfButton, Consumer<ActionEvent> action) {
         uploadPdfButton.setOnAction(e -> action.accept(e));
         return uploadPdfButton;
     }

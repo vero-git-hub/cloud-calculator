@@ -1,6 +1,6 @@
-package com.example.cloudcalc.builder.text.fields;
+package com.example.cloudcalc.builder.fields.type;
 
-public interface TypeBadgeFieldsUpdatable {
+public interface TypeBadgeFieldUpdatable {
     void updateNameFieldPlaceholder(String placeholder);
     void updateDateFieldPlaceholder(String placeholder);
 }

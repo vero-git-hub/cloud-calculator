@@ -1,9 +1,10 @@
 package com.example.cloudcalc.language;
 
 import com.example.cloudcalc.FileManager;
-import com.example.cloudcalc.builder.text.fields.BadgeFieldManager;
-import com.example.cloudcalc.builder.text.fields.PrizeFieldManager;
-import com.example.cloudcalc.builder.text.fields.TypeBadgeFieldsManager;
+import com.example.cloudcalc.builder.fields.badge.BadgeFieldManager;
+import com.example.cloudcalc.builder.fields.prize.PrizeFieldManager;
+import com.example.cloudcalc.builder.fields.profile.ProfileFieldManager;
+import com.example.cloudcalc.builder.fields.type.TypeBadgeFieldManager;
 import com.example.cloudcalc.constant.FileName;
 import javafx.scene.control.ComboBox;
 import org.json.JSONObject;
@@ -17,10 +18,10 @@ public class LanguageManager {
 
     public static ComboBox<Language> languageComboBox;
     private static List<Localizable> localizables = new ArrayList<>();
-
     private static BadgeFieldManager textFieldManager;
     private static PrizeFieldManager prizeTextFieldManager;
-    private static TypeBadgeFieldsManager typeBadgeFieldsManager;
+    private static TypeBadgeFieldManager typeBadgeFieldManager;
+    private static ProfileFieldManager profileFieldManager;
 
     public static void setTextFieldManager(BadgeFieldManager manager) {
         textFieldManager = manager;
@@ -38,12 +39,20 @@ public class LanguageManager {
         LanguageManager.prizeTextFieldManager = prizeTextFieldManager;
     }
 
-    public static TypeBadgeFieldsManager getTypeBadgeTextFieldsManager() {
-        return typeBadgeFieldsManager;
+    public static TypeBadgeFieldManager getTypeBadgeTextFieldsManager() {
+        return typeBadgeFieldManager;
     }
 
-    public static void setTypeBadgeTextFieldsManager(TypeBadgeFieldsManager typeBadgeFieldsManager) {
-        LanguageManager.typeBadgeFieldsManager = typeBadgeFieldsManager;
+    public static void setTypeBadgeTextFieldsManager(TypeBadgeFieldManager typeBadgeFieldManager) {
+        LanguageManager.typeBadgeFieldManager = typeBadgeFieldManager;
+    }
+
+    public static ProfileFieldManager getProfileFieldManager() {
+        return profileFieldManager;
+    }
+
+    public static void setProfileFieldManager(ProfileFieldManager profileFieldManager) {
+        LanguageManager.profileFieldManager = profileFieldManager;
     }
 
     public static void registerLocalizable(Localizable localizable) {

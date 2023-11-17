@@ -1,7 +1,7 @@
 package com.example.cloudcalc.model;
 
 import com.example.cloudcalc.badge.FileOperationManager;
-import com.example.cloudcalc.builder.text.fields.BadgeFieldManager;
+import com.example.cloudcalc.builder.fields.badge.BadgeFieldManager;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.IgnoreController;
 import com.example.cloudcalc.language.LanguageManager;
