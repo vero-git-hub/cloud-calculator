@@ -1,14 +1,10 @@
 package com.example.cloudcalc.controller;
 
 import com.example.cloudcalc.ServiceFacade;
-import com.example.cloudcalc.builder.ElementsBuilder;
-import com.example.cloudcalc.builder.SceneBuilder;
 import com.example.cloudcalc.builder.TableBuilder;
-import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.constant.IBadgeCategory;
 import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.entity.badge.TypeBadge;
-import com.example.cloudcalc.entity.badge.BadgeCategory;
 import com.example.cloudcalc.model.PrizeModel;
 import com.example.cloudcalc.util.Notification;
 import com.example.cloudcalc.view.prize.AddPrizeView;
@@ -27,42 +23,38 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
-public class PrizeController {
-
+public class PrizeController extends BaseController {
     private PrizeView prizeView = new PrizeView(this);
     private PrizeModel prizeModel = new PrizeModel(this);
-
     private TableBuilder tableBuilder = new TableBuilder();
-    private final SceneBuilder sceneBuilder = new SceneBuilder();
-    private final ElementsBuilder elementsBuilder = new ElementsBuilder();
-    private final MainController mainController;
     private final AddPrizeView addPrizeView = new AddPrizeView(this);
-
-//    private final MainManager mainManager;
-
-    private final ServiceFacade serviceFacade;
-//
     private final Map<String, Prize> receivedPrizes = new HashMap<>();
-//    private Label titleLabel;
-//    private Label addPrizeTitle;
-
 
     String alertTitleDeletePrize = "Confirmation Dialog";
     String alertHeaderDeletePrize = "Delete Prize";
     String alertContentDeletePrize = "Are you sure you want to delete this prize?";
 
     public PrizeController(ServiceFacade serviceFacade) {
-        this.mainController = serviceFacade.getMainController();
-        this.serviceFacade = serviceFacade;
+        super(serviceFacade);
     }
 
     public Map<String, Prize> getReceivedPrizes() {
         return receivedPrizes;
     }
 
+    @Override
     public void showScreen(Stage stage) {
         prizeView.showScreen(stage);
+    }
+
+    @Override
+    public void createScene(VBox layout, Stage stage) {
+        sceneBuilder.createScene(layout, stage);
+    }
+
+    @Override
+    public void showAddScreen(Stage stage) {
+        addPrizeView.showScreen(stage);
     }
 
     public List<Prize> loadPrizesFromFile(){
@@ -71,10 +63,6 @@ public class PrizeController {
 
     public TableView<Prize> createTableForPrize(Stage stage, List<Prize> prizes) {
         return tableBuilder.createTableForPrize(stage, prizes, this);
-    }
-
-    public void showAddPrizesScreen(Stage stage) {
-        addPrizeView.showScreen(stage);
     }
 
     public void savePrize(Stage stage, String badgeType, TextField namePrizeField, TextField badgeCountField) {
@@ -94,10 +82,6 @@ public class PrizeController {
         return Notification.showConfirmationAlert(
                 alertTitleDeletePrize, alertHeaderDeletePrize, alertContentDeletePrize
         );
-    }
-
-    public void createScene(VBox layout, Stage stage) {
-        sceneBuilder.createScene(layout, stage);
     }
 
     public HBox createTopLayout(Button backButton, Label titleLabel, Button createButton) {
@@ -157,5 +141,4 @@ public class PrizeController {
 
         return receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
     }
-
 }

@@ -34,7 +34,7 @@ public class PrizeView implements Localizable {
 
         Button backButton = ButtonFactory.createBackButton(e -> prizeController.showMainScreen(stage));
 
-        Button createButton = ButtonFactory.createAddButton(e -> prizeController.showAddPrizesScreen(stage));
+        Button createButton = ButtonFactory.createAddButton(e -> prizeController.showAddScreen(stage));
 
         HBox topLayout = prizeController.createTopLayout(backButton, new Label(title), createButton);
 

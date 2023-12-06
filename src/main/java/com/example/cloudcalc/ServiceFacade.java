@@ -15,7 +15,6 @@ public class ServiceFacade {
     private DataExtractor dataExtractor;
     private PrizeController prizeController;
     private FileOperationManager fileOperationManager;
-    //private ScanView scanView;
     private ProfileController profileController;
     private IgnoreController ignoreController;
     private BadgeManager badgeManager;
@@ -24,6 +23,7 @@ public class ServiceFacade {
     private TypeBadgeController typeBadgeController = new TypeBadgeController(this);
     private MainController mainController = new MainController(this);
     private ScanController scanController = new ScanController(this);
+    private ProgramController programController = new ProgramController(this);
 
     private ServiceFacade() {
         dataExtractor = new DataExtractor();
@@ -130,5 +130,7 @@ public class ServiceFacade {
         typeBadgeController.showScreen(stage);
     }
 
-
+    public void showProgramScreen(Stage stage) {
+        programController.showScreen(stage);
+    }
 }

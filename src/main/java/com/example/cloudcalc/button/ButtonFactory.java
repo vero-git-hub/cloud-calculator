@@ -21,6 +21,7 @@ public class ButtonFactory {
     private static final String SCAN_ICON = "/images/main/combo-chart-48.png";
     private static final String ARCADE_ICON = "/images/main/arcade-64.png";
     private static final String SAVE_ICON = "/images/save-64.png";
+    private static final String BOOK_ICON = "/images/main/book-48.png";
 
     public static Button createSaveButton(EventHandler<ActionEvent> action) {
         Image image = new Image(ButtonFactory.class.getResourceAsStream(SAVE_ICON));
@@ -79,6 +80,11 @@ public class ButtonFactory {
 
     public static Button createArcadeButton(EventHandler<ActionEvent> action) {
         Image image = new Image(ButtonFactory.class.getResourceAsStream(ARCADE_ICON));
+        return createButton("", action, image);
+    }
+
+    public static Button createProgramButton(EventHandler<ActionEvent> action) {
+        Image image = new Image(ButtonFactory.class.getResourceAsStream(BOOK_ICON));
         return createButton("", action, image);
     }
 

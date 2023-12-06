@@ -41,7 +41,7 @@ public class TypeBadgeController {
     };
 
     public void showAddPrizesScreen(Stage stage) {
-        serviceFacade.getPrizeController().showAddPrizesScreen(stage);
+        serviceFacade.getPrizeController().showAddScreen(stage);
     }
 
     public HBox createTopLayout(Button backButton, Label titleLabel) {

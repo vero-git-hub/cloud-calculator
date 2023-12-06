@@ -54,10 +54,12 @@ public class MainController {
         Button ignoreButton = ButtonFactory.createIgnoreButton(e -> serviceFacade.showIgnoreScreen(primaryStage));
         Button prizeButton = ButtonFactory.createPrizeButton(e -> serviceFacade.showPrizesScreen(primaryStage));
         Button arcadeButton = ButtonFactory.createArcadeButton(e -> serviceFacade.showArcadeScreen(primaryStage));
+        Button programButton = ButtonFactory.createProgramButton(e -> serviceFacade.showProgramScreen(primaryStage));
 
         return elementsBuilder.createExtendedTopLayout(
                 Arrays.asList(statsButton, arcadeButton),
                 mainView.getTitleLabel(),
+                programButton,
                 prizeButton,
                 ignoreButton
         );
