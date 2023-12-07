@@ -5,6 +5,9 @@ import com.example.cloudcalc.model.ProgramModel;
 import com.example.cloudcalc.view.ProgramView;
 import com.example.cloudcalc.view.prize.AddPrizeView;
 import com.example.cloudcalc.view.program.AddProgramView;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -30,5 +33,9 @@ public class ProgramController extends BaseController {
     @Override
     public void createScene(VBox layout, Stage stage) {
         sceneBuilder.createScene(layout, stage);
+    }
+
+    public HBox createTopLayoutForAddScreen(Button backButton, Label titleAddScreenLabel) {
+        return elementsBuilder.createTopLayout(backButton, titleAddScreenLabel);
     }
 }
