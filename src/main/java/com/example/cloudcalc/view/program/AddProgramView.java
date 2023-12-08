@@ -1,13 +1,12 @@
 package com.example.cloudcalc.view.program;
 
+import com.example.cloudcalc.builder.GridPaneBuilder;
 import com.example.cloudcalc.builder.fields.program.ProgramFieldUpdatable;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.ProgramController;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import com.example.cloudcalc.util.TranslateUtils;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -21,10 +20,10 @@ import java.util.ResourceBundle;
 
 public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     private final ProgramController programController;
-    private String title = "ADD PROGRAM";
-    private final CheckBox countCheckBox = new CheckBox("Specify badges for counting");
-    private final CheckBox ignoreCheckBox = new CheckBox("Exclude badges");
-    private final CheckBox pdfCheckBox = new CheckBox("Should PDF be taken into account?");
+    private String title;
+    private CheckBox countCheckBox;
+    private CheckBox ignoreCheckBox;
+    private CheckBox pdfCheckBox;
     private VBox layout;
     private HBox countBox;
     private HBox ignoreBox;
@@ -35,6 +34,12 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     String countTooltip;
     String ignoreTooltip;
     String pdfTooltip;
+    GridPane gridPane;
+    Label programNameLabel;
+    TextField programNameField;
+    Label labelDate;
+    DatePicker startDatePicker;
+    Label labelCheckBox;
 
     public AddProgramView(ProgramController programController) {
         this.programController = programController;
@@ -55,55 +60,54 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
 
     private HBox createTopLayout(Stage stage) {
         Button backButton = ButtonFactory.createBackButton(e -> programController.showScreen(stage));
-        Label titleAddScreenLabel = new Label(title);
+        Label titleAddScreenLabel = new Label(TranslateUtils.getTranslate("addProgramTitle"));
         return programController.createTopLayoutForAddScreen(backButton, titleAddScreenLabel);
     }
 
     private GridPane createFormLayout() {
-        GridPane gridPane = new GridPane();
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(10, 10, 10, 10));
+        programNameLabel = new Label(TranslateUtils.getTranslate("programNameLabel"));
+        programNameField = new TextField();
+        programNameField.setPromptText(TranslateUtils.getTranslate("programNameField"));
 
-        Label label = new Label("Program name: ");
-        TextField programNameField = new TextField();
-        programNameField.setPromptText("Enter your name");
+        labelDate = new Label(TranslateUtils.getTranslate("labelDate"));
+        startDatePicker = new DatePicker();
+        startDatePicker.setPromptText(TranslateUtils.getTranslate("startDatePicker"));
 
-        Label labelDate = new Label("Counting start date: ");
-        DatePicker startDatePicker = new DatePicker();
-        startDatePicker.setPromptText("Enter date");
+        gridPane = new GridPane();
+        GridPaneBuilder gridPaneBuilder = new GridPaneBuilder(programNameLabel, labelDate);
+        gridPaneBuilder.setGridPaneSizes();
 
-        gridPane.add(label, 0, 0);
-        gridPane.add(programNameField, 1, 0);
-        gridPane.add(labelDate, 0, 1);
-        gridPane.add(startDatePicker, 1, 1);
+        gridPaneBuilder.settingGridPane(programNameField, startDatePicker);
+        gridPaneBuilder.setHAlignmentGridPane(programNameLabel, labelDate);
 
-        GridPane.setHalignment(label, HPos.LEFT);
-        GridPane.setHalignment(labelDate, HPos.LEFT);
-
-        return gridPane;
+        return gridPaneBuilder.getGridPane();
     }
 
     private VBox createCheckBoxSection() {
-        Label labelCheckBox = new Label("Set up the counting condition: ");
+        labelCheckBox = new Label(TranslateUtils.getTranslate("labelCheckBox"));
         createBox();
         HBox checkBoxes = new HBox(10, countBox, ignoreBox, pdfBox);
         return new VBox(10, labelCheckBox, checkBoxes);
     }
 
     private VBox createButtonsSection() {
-        Button addConditionButton = new Button("Add a counting condition");
+        Button addConditionButton = new Button(TranslateUtils.getTranslate("addConditionButton"));
         addConditionButton.setOnAction(e -> addCountCondition(layout));
 
-        Button saveButton = new Button("Save");
-        Button cancelButton = new Button("Cancel");
+        Button saveButton = new Button(TranslateUtils.getTranslate("saveButton"));
+        Button cancelButton = new Button(TranslateUtils.getTranslate("cancelButton"));
 
         return new VBox(10, addConditionButton, saveButton, cancelButton);
     }
 
     private void createBox() {
+        countCheckBox = new CheckBox(TranslateUtils.getTranslate("countCheckBox"));
         countBox = new HBox(5, countCheckBox, createInfoIcon(countTooltip));
+
+        ignoreCheckBox = new CheckBox(TranslateUtils.getTranslate("ignoreCheckBox"));
         ignoreBox = new HBox(5, ignoreCheckBox, createInfoIcon(ignoreTooltip));
+
+        pdfCheckBox = new CheckBox(TranslateUtils.getTranslate("pdfCheckBox"));
         pdfBox = new HBox(5, pdfCheckBox, createInfoIcon(pdfTooltip));
     }
 

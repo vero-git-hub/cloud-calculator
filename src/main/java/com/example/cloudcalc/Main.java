@@ -3,6 +3,7 @@ package com.example.cloudcalc;
 import com.example.cloudcalc.builder.fields.badge.BadgeFieldManager;
 import com.example.cloudcalc.builder.fields.prize.PrizeFieldManager;
 import com.example.cloudcalc.builder.fields.profile.ProfileFieldManager;
+import com.example.cloudcalc.builder.fields.program.ProgramFieldManager;
 import com.example.cloudcalc.builder.fields.type.TypeBadgeFieldManager;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.MainController;
@@ -14,7 +15,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class Main extends Application {
-
+    public static ResourceBundle bundle;
     @Override
     public void start(Stage stage) {
         ServiceFacade serviceFacade = ServiceFacade.getInstance();
@@ -33,8 +34,9 @@ public class Main extends Application {
     private void initializeLocalization() {
         String savedLanguageCode = FileManager.readJsonObjectFromFile(FileName.SETTINGS_FILE).optString("language", "en");
         Locale locale = new Locale(savedLanguageCode);
-        ResourceBundle bundle = ResourceBundle.getBundle("messages", locale);
+        bundle = ResourceBundle.getBundle("messages", locale);
         LanguageManager.updateLocalizableComponents(bundle);
+        LanguageManager.setBundle(bundle);
 
         BadgeFieldManager textFieldManager = new BadgeFieldManager(bundle);
         LanguageManager.setTextFieldManager(textFieldManager);
@@ -47,6 +49,9 @@ public class Main extends Application {
 
         ProfileFieldManager profileFieldManager = new ProfileFieldManager(bundle);
         LanguageManager.setProfileFieldManager(profileFieldManager);
+
+        ProgramFieldManager programFieldManager = new ProgramFieldManager(bundle);
+        LanguageManager.setProgramFieldManager(programFieldManager);
     }
 
     public static void main(String[] args) {

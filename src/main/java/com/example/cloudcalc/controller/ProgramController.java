@@ -1,6 +1,7 @@
 package com.example.cloudcalc.controller;
 
 import com.example.cloudcalc.ServiceFacade;
+import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.model.ProgramModel;
 import com.example.cloudcalc.view.ProgramView;
 import com.example.cloudcalc.view.prize.AddPrizeView;
@@ -11,13 +12,21 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.util.ResourceBundle;
+
 public class ProgramController extends BaseController {
     private ProgramView programView = new ProgramView(this);
     private ProgramModel programModel = new ProgramModel(this);
     private final AddProgramView addProgramView = new AddProgramView(this);
+    public static ResourceBundle bundle;
 
     public ProgramController(ServiceFacade serviceFacade) {
         super(serviceFacade);
+        bundle = LanguageManager.getBundle();
+    }
+
+    public static ResourceBundle getBundle() {
+        return bundle;
     }
 
     @Override
