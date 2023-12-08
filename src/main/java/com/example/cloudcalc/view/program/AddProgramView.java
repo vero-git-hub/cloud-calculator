@@ -6,7 +6,6 @@ import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.ProgramController;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import com.example.cloudcalc.util.TranslateUtils;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -20,26 +19,29 @@ import java.util.ResourceBundle;
 
 public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     private final ProgramController programController;
-    private String title;
-    private CheckBox countCheckBox;
-    private CheckBox ignoreCheckBox;
-    private CheckBox pdfCheckBox;
+    private CheckBox countCheckBox = new CheckBox();
+    private CheckBox ignoreCheckBox = new CheckBox();
+    private CheckBox pdfCheckBox = new CheckBox();
     private VBox layout;
     private HBox countBox;
     private HBox ignoreBox;
     private HBox pdfBox;
     TextField countField = new TextField();
     TextField ignoreField = new TextField();
-    Button uploadPdfButton;
+    Button uploadPdfButton = new Button();
     String countTooltip;
     String ignoreTooltip;
     String pdfTooltip;
     GridPane gridPane;
-    Label programNameLabel;
-    TextField programNameField;
-    Label labelDate;
-    DatePicker startDatePicker;
-    Label labelCheckBox;
+    Label labelName = new Label();
+    TextField programNameField = new TextField();
+    Label labelDate = new Label();
+    DatePicker startDatePicker = new DatePicker();
+    Label labelCheckBox = new Label();
+    Label titleAddScreenLabel = new Label();
+    Button addConditionButton = new Button();
+    Button saveButton = new Button();
+    Button cancelButton = new Button();
 
     public AddProgramView(ProgramController programController) {
         this.programController = programController;
@@ -60,54 +62,38 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
 
     private HBox createTopLayout(Stage stage) {
         Button backButton = ButtonFactory.createBackButton(e -> programController.showScreen(stage));
-        Label titleAddScreenLabel = new Label(TranslateUtils.getTranslate("addProgramTitle"));
+
         return programController.createTopLayoutForAddScreen(backButton, titleAddScreenLabel);
     }
 
     private GridPane createFormLayout() {
-        programNameLabel = new Label(TranslateUtils.getTranslate("programNameLabel"));
-        programNameField = new TextField();
-        programNameField.setPromptText(TranslateUtils.getTranslate("programNameField"));
-
-        labelDate = new Label(TranslateUtils.getTranslate("labelDate"));
-        startDatePicker = new DatePicker();
-        startDatePicker.setPromptText(TranslateUtils.getTranslate("startDatePicker"));
-
         gridPane = new GridPane();
-        GridPaneBuilder gridPaneBuilder = new GridPaneBuilder(programNameLabel, labelDate);
+        GridPaneBuilder gridPaneBuilder = new GridPaneBuilder(labelName, labelDate);
         gridPaneBuilder.setGridPaneSizes();
 
         gridPaneBuilder.settingGridPane(programNameField, startDatePicker);
-        gridPaneBuilder.setHAlignmentGridPane(programNameLabel, labelDate);
+        gridPaneBuilder.setHAlignmentGridPane(labelName, labelDate);
 
         return gridPaneBuilder.getGridPane();
     }
 
     private VBox createCheckBoxSection() {
-        labelCheckBox = new Label(TranslateUtils.getTranslate("labelCheckBox"));
         createBox();
         HBox checkBoxes = new HBox(10, countBox, ignoreBox, pdfBox);
         return new VBox(10, labelCheckBox, checkBoxes);
     }
 
     private VBox createButtonsSection() {
-        Button addConditionButton = new Button(TranslateUtils.getTranslate("addConditionButton"));
         addConditionButton.setOnAction(e -> addCountCondition(layout));
-
-        Button saveButton = new Button(TranslateUtils.getTranslate("saveButton"));
-        Button cancelButton = new Button(TranslateUtils.getTranslate("cancelButton"));
 
         return new VBox(10, addConditionButton, saveButton, cancelButton);
     }
 
     private void createBox() {
-        countCheckBox = new CheckBox(TranslateUtils.getTranslate("countCheckBox"));
         countBox = new HBox(5, countCheckBox, createInfoIcon(countTooltip));
 
-        ignoreCheckBox = new CheckBox(TranslateUtils.getTranslate("ignoreCheckBox"));
         ignoreBox = new HBox(5, ignoreCheckBox, createInfoIcon(ignoreTooltip));
 
-        pdfCheckBox = new CheckBox(TranslateUtils.getTranslate("pdfCheckBox"));
         pdfBox = new HBox(5, pdfCheckBox, createInfoIcon(pdfTooltip));
     }
 
@@ -143,14 +129,35 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
 
     @Override
     public void updateLocalization(ResourceBundle bundle) {
-        title = bundle.getString("addProgramTitle");
+        titleAddScreenLabel.setText(bundle.getString("addProgramTitle"));
+
+        labelName.setText(bundle.getString("programNameLabel"));
+//        programNameField.setPromptText(TranslateUtils.getTranslate("programNameField"));
+        labelDate.setText(bundle.getString("labelDate"));
+
+//        startDatePicker.setPromptText(TranslateUtils.getTranslate("startDatePicker"));
+        labelCheckBox.setText(bundle.getString("labelCheckBox"));
+
+
+        addConditionButton.setText(bundle.getString("addConditionButton"));
+        countCheckBox.setText(bundle.getString("countCheckBox"));
+        ignoreCheckBox.setText(bundle.getString("ignoreCheckBox"));
+        pdfCheckBox.setText(bundle.getString("pdfCheckBox"));
+
 
         countTooltip = bundle.getString("countTooltip");
         ignoreTooltip = bundle.getString("ignoreTooltip");
         pdfTooltip = bundle.getString("pdfTooltip");
 
+        uploadPdfButton.setText(bundle.getString("pdfCheckBox"));
+
+        saveButton.setText(bundle.getString("saveButton"));
+        cancelButton.setText(bundle.getString("cancelButton"));
+
         updateCountFieldPlaceholder(bundle.getString("countField"));
         updateIgnoreFieldPlaceholder(bundle.getString("ignoreField"));
+        updateProgramNameFieldPlaceholder(bundle.getString("programNameField"));
+        updateDateFieldPlaceholder(bundle.getString("startDatePicker"));
     }
 
     @Override
@@ -164,6 +171,20 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     public void updateIgnoreFieldPlaceholder(String placeholder) {
         if (ignoreField != null) {
             ignoreField.setPromptText(placeholder);
+        }
+    }
+
+    @Override
+    public void updateProgramNameFieldPlaceholder(String placeholder) {
+        if (programNameField != null) {
+            programNameField.setPromptText(placeholder);
+        }
+    }
+
+    @Override
+    public void updateDateFieldPlaceholder(String placeholder) {
+        if (startDatePicker != null) {
+            startDatePicker.setPromptText(placeholder);
         }
     }
 }
