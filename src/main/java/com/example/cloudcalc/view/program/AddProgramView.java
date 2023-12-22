@@ -3,7 +3,9 @@ package com.example.cloudcalc.view.program;
 import com.example.cloudcalc.builder.GridPaneBuilder;
 import com.example.cloudcalc.builder.fields.program.ProgramFieldUpdatable;
 import com.example.cloudcalc.button.ButtonFactory;
+import com.example.cloudcalc.controller.PrizeController;
 import com.example.cloudcalc.controller.ProgramController;
+import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.model.CountConditionModel;
@@ -24,6 +26,7 @@ import javafx.stage.Stage;
 import java.util.ResourceBundle;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
+import javafx.util.Callback;
 
 public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     private final ProgramController programController;
@@ -55,8 +58,10 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     Button modalUploadPdfButton = new Button();
     Button saveConditionButton = new Button();
     Button closeConditionButton = new Button();
-    private Label countLabel = new Label("What to count:");
-    private Label ignoreLabel = new Label("What not to count:");
+    private Label countLabel = new Label("What to count (" +
+            "separated by commas):");
+    private Label ignoreLabel = new Label("What not to count (" +
+            "separated by commas):");
     private Label pdfLabel = new Label("Download PDF:");
     Button createButton = new Button();
 
@@ -220,7 +225,37 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
         TableColumn<CountConditionModel, String> valueColumn = new TableColumn<>("Value");
         valueColumn.setCellValueFactory(new PropertyValueFactory<>("conditionValue"));
 
-        conditionsTable.getColumns().addAll(indexColumn, typeColumn, valueColumn);
+        TableColumn<CountConditionModel, Void> deleteColumn = new TableColumn<>("Delete");
+        deleteColumn.setMinWidth(40);
+
+        Callback<TableColumn<CountConditionModel, Void>, TableCell<CountConditionModel, Void>> cellFactory = new Callback<>() {
+            @Override
+            public TableCell<CountConditionModel, Void> call(final TableColumn<CountConditionModel, Void> param) {
+                final TableCell<CountConditionModel, Void> cell = new TableCell<>() {
+                    private final Button btn = new Button("X");
+
+                    {
+                        btn.setOnAction(event -> {
+                            CountConditionModel data = getTableView().getItems().get(getIndex());
+                            conditionsTable.getItems().remove(data);
+                        });
+                    }
+
+                    @Override
+                    public void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            setGraphic(btn);
+                        }
+                    }
+                };
+                return cell;
+            }
+        };
+        deleteColumn.setCellFactory(cellFactory);
+        conditionsTable.getColumns().addAll(indexColumn, typeColumn, valueColumn, deleteColumn);
     }
 
     @Override
