@@ -47,4 +47,8 @@ public class ProgramController extends BaseController {
     public HBox createTopLayoutForAddScreen(Button backButton, Label titleAddScreenLabel) {
         return elementsBuilder.createTopLayout(backButton, titleAddScreenLabel);
     }
+
+    public void saveProgram() {
+        programModel.saveProgram();
+    }
 }

@@ -23,6 +23,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
@@ -121,7 +122,29 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
         return hbox;
     }
     private HBox createButtonsSection() {
+        saveButton.setOnAction(event -> {
+            String programName = programNameField.getText();
+            LocalDate selectedDate = startDatePicker.getValue();
+            if (programName == null || programName.trim().isEmpty()) {
+                Notification.showAlert("Empty field", "The program name field must not be empty", "Please enter the program name");
+            } else if (selectedDate == null) {
+                Notification.showAlert("Empty field", "No date selected.", "Please select a date.");
+            } else if (isConditionsTableEmpty()) {
+                Notification.showAlert("Empty table", "No conditions.", "Please add a condition.");
+            }
+            else {
+                saveButton.setOnAction(e -> saveProgram());
+            }
+        });
         return new HBox(10, saveButton, cancelButton);
+    }
+
+    private boolean isConditionsTableEmpty() {
+        return conditionsTable.getItems().isEmpty();
+    }
+
+    private void saveProgram() {
+        programController.saveProgram();
     }
 
     private void createBox() {

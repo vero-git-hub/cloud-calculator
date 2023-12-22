@@ -8,4 +8,8 @@ public class ProgramModel {
     public ProgramModel(ProgramController programController) {
         this.programController = programController;
     }
+
+    public void saveProgram() {
+
+    }
 }
