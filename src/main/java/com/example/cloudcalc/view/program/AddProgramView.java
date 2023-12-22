@@ -7,6 +7,7 @@ import com.example.cloudcalc.controller.ProgramController;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.model.CountConditionModel;
+import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,13 +17,13 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.util.ResourceBundle;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
 
 public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     private final ProgramController programController;
@@ -46,7 +47,7 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     DatePicker startDatePicker = new DatePicker();
     Label labelCheckBox = new Label();
     Label titleAddScreenLabel = new Label();
-    Button addConditionButton = new Button();
+    Label labelAddCondition = new Label();
     Button saveButton = new Button();
     Button cancelButton = new Button();
     private TableView<CountConditionModel> conditionsTable;
@@ -57,6 +58,7 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     private Label countLabel = new Label("What to count:");
     private Label ignoreLabel = new Label("What not to count:");
     private Label pdfLabel = new Label("Download PDF:");
+    Button createButton = new Button();
 
     public AddProgramView(ProgramController programController) {
         this.programController = programController;
@@ -70,6 +72,7 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
                 createTopLayout(stage),
                 createFormLayout(),
                 createCheckBoxSection(),
+                createAddConditionButton(),
                 conditionsTable,
                 createButtonsSection()
         );
@@ -80,6 +83,10 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     private HBox createTopLayout(Stage stage) {
         Button backButton = ButtonFactory.createBackButton(e -> programController.showScreen(stage));
         return programController.createTopLayoutForAddScreen(backButton, titleAddScreenLabel);
+    }
+
+    private HBox createForm() {
+        return new HBox(10, labelName, programNameField, labelDate, startDatePicker);
     }
 
     private GridPane createFormLayout() {
@@ -99,9 +106,17 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
         return new VBox(10, labelCheckBox, checkBoxes);
     }
 
-    private VBox createButtonsSection() {
-        addConditionButton.setOnAction(e -> showAddConditionModal());
-        return new VBox(10, addConditionButton, saveButton, cancelButton);
+    private HBox createAddConditionButton() {
+        createButton = ButtonFactory.createAddButton(e -> showAddConditionModal());
+        labelAddCondition.setAlignment(Pos.CENTER);
+        HBox hbox = new HBox(10, labelAddCondition, createButton);
+        hbox.setAlignment(Pos.CENTER_LEFT);
+
+        HBox.setHgrow(labelAddCondition, Priority.ALWAYS);
+        return hbox;
+    }
+    private HBox createButtonsSection() {
+        return new HBox(10, saveButton, cancelButton);
     }
 
     private void createBox() {
@@ -123,57 +138,61 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     }
 
     private void showAddConditionModal() {
-        modalStage = new Stage();
-        modalStage.initModality(Modality.APPLICATION_MODAL);
-        modalStage.setTitle("Add condition");
+        if (countCheckBox.isSelected() || ignoreCheckBox.isSelected() || pdfCheckBox.isSelected()) {
+            modalStage = new Stage();
+            modalStage.initModality(Modality.APPLICATION_MODAL);
+            modalStage.setTitle("Add condition");
 
-        VBox modalLayout = new VBox(10);
-        modalLayout.setPadding(new Insets(10));
+            VBox modalLayout = new VBox(10);
+            modalLayout.setPadding(new Insets(10));
 
-        TextField modalCountField = new TextField();
-        TextField modalIgnoreField = new TextField();
-        modalUploadPdfButton = new Button("Download PDF");
+            TextField modalCountField = new TextField();
+            TextField modalIgnoreField = new TextField();
+            modalUploadPdfButton = new Button("Download PDF");
 
-        if (countCheckBox.isSelected()) {
-            modalLayout.getChildren().add(new HBox(countLabel, modalCountField));
-        }
-        if (ignoreCheckBox.isSelected()) {
-            modalLayout.getChildren().add(new HBox(ignoreLabel, modalIgnoreField));
-        }
-        if (pdfCheckBox.isSelected()) {
-            modalLayout.getChildren().add(new HBox(pdfLabel, modalUploadPdfButton));
-        }
-
-        saveConditionButton.setText("Save");
-        saveConditionButton.setOnAction(e -> {
             if (countCheckBox.isSelected()) {
-                String value = modalCountField.getText();
-                CountConditionModel newCondition = new CountConditionModel("What to count", value);
-                conditionsTable.getItems().add(newCondition);
+                modalLayout.getChildren().add(new HBox(countLabel, modalCountField));
             }
             if (ignoreCheckBox.isSelected()) {
-                String value = modalIgnoreField.getText();
-                CountConditionModel newCondition = new CountConditionModel("What not to count", value);
-                conditionsTable.getItems().add(newCondition);
+                modalLayout.getChildren().add(new HBox(ignoreLabel, modalIgnoreField));
             }
             if (pdfCheckBox.isSelected()) {
-
+                modalLayout.getChildren().add(new HBox(pdfLabel, modalUploadPdfButton));
             }
 
-            modalStage.close();
-        });
+            saveConditionButton.setText("Save");
+            saveConditionButton.setOnAction(e -> {
+                if (countCheckBox.isSelected()) {
+                    String value = modalCountField.getText();
+                    CountConditionModel newCondition = new CountConditionModel("What to count", value);
+                    conditionsTable.getItems().add(newCondition);
+                }
+                if (ignoreCheckBox.isSelected()) {
+                    String value = modalIgnoreField.getText();
+                    CountConditionModel newCondition = new CountConditionModel("What not to count", value);
+                    conditionsTable.getItems().add(newCondition);
+                }
+                if (pdfCheckBox.isSelected()) {
 
-        closeConditionButton.setText("Close");
-        closeConditionButton.setOnAction(e -> modalStage.close());
+                }
 
-        HBox buttonLayout = new HBox(10, saveConditionButton, closeConditionButton);
-        buttonLayout.setAlignment(Pos.CENTER);
+                modalStage.close();
+            });
 
-        modalLayout.getChildren().add(buttonLayout);
+            closeConditionButton.setText("Close");
+            closeConditionButton.setOnAction(e -> modalStage.close());
 
-        Scene modalScene = new Scene(modalLayout, 300, 200);
-        modalStage.setScene(modalScene);
-        modalStage.showAndWait();
+            HBox buttonLayout = new HBox(10, saveConditionButton, closeConditionButton);
+            buttonLayout.setAlignment(Pos.CENTER);
+
+            modalLayout.getChildren().add(buttonLayout);
+
+            Scene modalScene = new Scene(modalLayout, 300, 200);
+            modalStage.setScene(modalScene);
+            modalStage.showAndWait();
+        } else {
+            Notification.showAlert("Info", "Counting condition not selected", "Please select counting condition");
+        }
     }
 
     private void initializeConditionsTable() {
@@ -212,7 +231,7 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
         labelDate.setText(bundle.getString("labelDate"));
         labelCheckBox.setText(bundle.getString("labelCheckBox"));
 
-        addConditionButton.setText(bundle.getString("addConditionButton"));
+        labelAddCondition.setText(bundle.getString("addConditionButton"));
         countCheckBox.setText(bundle.getString("countCheckBox"));
         ignoreCheckBox.setText(bundle.getString("ignoreCheckBox"));
         pdfCheckBox.setText(bundle.getString("pdfCheckBox"));
