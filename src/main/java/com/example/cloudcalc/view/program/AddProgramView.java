@@ -3,9 +3,8 @@ package com.example.cloudcalc.view.program;
 import com.example.cloudcalc.builder.GridPaneBuilder;
 import com.example.cloudcalc.builder.fields.program.ProgramFieldUpdatable;
 import com.example.cloudcalc.button.ButtonFactory;
-import com.example.cloudcalc.controller.PrizeController;
 import com.example.cloudcalc.controller.ProgramController;
-import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.model.CountConditionModel;
@@ -19,15 +18,18 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
-import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
-import javafx.util.Callback;
 
 public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     private final ProgramController programController;
@@ -73,6 +75,7 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     }
 
     public void showScreen(Stage stage) {
+        resetForm();
         layout = new VBox(10);
         layout.getChildren().addAll(
                 createTopLayout(stage),
@@ -84,6 +87,15 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
         );
 
         programController.createScene(layout, stage);
+    }
+
+    private void resetForm() {
+        programNameField.clear();
+        startDatePicker.setValue(null);
+        conditionsTable.getItems().clear();
+        countCheckBox.setSelected(false);
+        ignoreCheckBox.setSelected(false);
+        pdfCheckBox.setSelected(false);
     }
 
     private HBox createTopLayout(Stage stage) {
@@ -121,10 +133,12 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
         HBox.setHgrow(labelAddCondition, Priority.ALWAYS);
         return hbox;
     }
+
     private HBox createButtonsSection() {
         saveButton.setOnAction(event -> {
             String programName = programNameField.getText();
             LocalDate selectedDate = startDatePicker.getValue();
+
             if (programName == null || programName.trim().isEmpty()) {
                 Notification.showAlert("Empty field", "The program name field must not be empty", "Please enter the program name");
             } else if (selectedDate == null) {
@@ -133,7 +147,17 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
                 Notification.showAlert("Empty table", "No conditions.", "Please add a condition.");
             }
             else {
-                saveButton.setOnAction(e -> saveProgram());
+                Program program = new Program();
+                program.setName(programName);
+                program.setDate(selectedDate);
+                List<CountConditionModel> list = new ArrayList<>();
+
+                for (CountConditionModel condition : conditionsTable.getItems()) {
+                    list.add(condition);
+                }
+
+                program.setConditions(list);
+                saveProgram(program);
             }
         });
         return new HBox(10, saveButton, cancelButton);
@@ -143,8 +167,8 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
         return conditionsTable.getItems().isEmpty();
     }
 
-    private void saveProgram() {
-        programController.saveProgram();
+    private void saveProgram(Program program) {
+        programController.saveProgram(program);
     }
 
     private void createBox() {
@@ -243,10 +267,10 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
         });
 
         TableColumn<CountConditionModel, String> typeColumn = new TableColumn<>("Condition type");
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("conditionType"));
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
 
         TableColumn<CountConditionModel, String> valueColumn = new TableColumn<>("Value");
-        valueColumn.setCellValueFactory(new PropertyValueFactory<>("conditionValue"));
+        valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
 
         TableColumn<CountConditionModel, Void> deleteColumn = new TableColumn<>("Delete");
         deleteColumn.setMinWidth(40);

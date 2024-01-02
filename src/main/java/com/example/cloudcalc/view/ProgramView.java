@@ -74,10 +74,10 @@ public class ProgramView implements Localizable {
         });
 
         TableColumn<CountConditionModel, String> typeColumn = new TableColumn<>("Condition Type");
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("conditionType"));
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
 
         TableColumn<CountConditionModel, String> valueColumn = new TableColumn<>("Condition Value");
-        valueColumn.setCellValueFactory(new PropertyValueFactory<>("conditionValue"));
+        valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
 
         subTableView.getColumns().addAll(subIndexColumn, typeColumn, valueColumn);
 

@@ -4,48 +4,48 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class CountConditionModel {
-    private final SimpleStringProperty conditionType;
-    private final SimpleStringProperty conditionValue;
+    private final SimpleStringProperty type;
+    private final SimpleStringProperty value;
 
     public CountConditionModel() {
-        this.conditionType = new SimpleStringProperty();
-        this.conditionValue = new SimpleStringProperty();
+        this.type = new SimpleStringProperty();
+        this.value = new SimpleStringProperty();
     }
 
     public CountConditionModel(String type, String value) {
-        this.conditionType = new SimpleStringProperty(type);
-        this.conditionValue = new SimpleStringProperty(value);
+        this.type = new SimpleStringProperty(type);
+        this.value = new SimpleStringProperty(value);
     }
 
-    public String getConditionType() {
-        return conditionType.get();
+    public String getType() {
+        return type.get();
     }
 
-    public String getConditionValue() {
-        return conditionValue.get();
+    public String getValue() {
+        return value.get();
     }
 
-    public StringProperty conditionTypeProperty() {
-        return conditionType;
+    public StringProperty typeProperty() {
+        return type;
     }
 
-    public StringProperty conditionValueProperty() {
-        return conditionValue;
+    public StringProperty valueProperty() {
+        return value;
     }
 
     public void setType(String type) {
-        this.conditionType.set(type);
+        this.type.set(type);
     }
 
     public void setValue(String value) {
-        this.conditionValue.set(value);
+        this.value.set(value);
     }
 
     @Override
     public String toString() {
         return "CountConditionModel{" +
-                "type='" + getConditionType() + '\'' +
-                ", value='" + getConditionValue() + '\'' +
+                "type='" + getType() + '\'' +
+                ", value='" + getValue() + '\'' +
                 '}';
     }
 }

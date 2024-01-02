@@ -49,8 +49,8 @@ public class ProgramController extends BaseController {
         return elementsBuilder.createTopLayout(backButton, titleAddScreenLabel);
     }
 
-    public void saveProgram() {
-
+    public void saveProgram(Program program) {
+        programModel.saveProgram(program);
     }
 
     public List<Program> loadProgramsFromFile() {

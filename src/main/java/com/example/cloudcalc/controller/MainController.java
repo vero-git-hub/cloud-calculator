@@ -57,11 +57,10 @@ public class MainController {
         Button programButton = ButtonFactory.createProgramButton(e -> serviceFacade.showProgramScreen(primaryStage));
 
         return elementsBuilder.createExtendedTopLayout(
-                Arrays.asList(statsButton, arcadeButton),
+                Arrays.asList(statsButton),
                 mainView.getTitleLabel(),
                 programButton,
-                prizeButton,
-                ignoreButton
+                prizeButton
         );
     }
 

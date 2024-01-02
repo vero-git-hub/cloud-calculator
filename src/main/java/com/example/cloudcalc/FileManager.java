@@ -32,7 +32,7 @@ public class FileManager {
 
     public static void writeJsonToFile(JSONArray jsonArray, String fileName) {
         try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(fileName), StandardCharsets.UTF_8)) {
-            writer.write(jsonArray.toString());
+            writer.write(jsonArray.toString(4));
         } catch (IOException e) {
             System.out.println("Error writing JSON to file: " + fileName);
             e.printStackTrace();
