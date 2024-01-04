@@ -59,7 +59,7 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
         Hyperlink nameLink = new Hyperlink(profile.getName());
         nameLink.setOnAction(e -> {
             try {
-                Desktop.getDesktop().browse(new URI(profile.getProfileLink()));
+                Desktop.getDesktop().browse(new URI(profile.getLink()));
             } catch (IOException | URISyntaxException ex) {
                 ex.printStackTrace();
             }
@@ -86,27 +86,16 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
         VBox layout = new VBox(10);
         Profile profile = new Profile();
 
-        uploadPdfButton = ButtonFactory.createUploadPdfButton(uploadPdfButton, e -> {
-            FileChooser fileChooser = new FileChooser();
-            File selectedFile = fileChooser.showOpenDialog(primaryStage);
-            if (selectedFile != null) {
-                profile.setPdfFilePath(selectedFile.getAbsolutePath());
-            }
-        });
-
         ProfileFieldManager profileFieldManager = LanguageManager.getProfileFieldManager();
         nameField = profileFieldManager.getNameField();
-        dateField = profileFieldManager.getDateField();
         linkField = profileFieldManager.getLinkField();
 
-        Button saveButton = ButtonFactory.createSaveButton(e -> profileController.handleProfileSave(primaryStage, profile, nameField.getText(), dateField.getText(), linkField.getText()));
+        Button saveButton = ButtonFactory.createSaveButton(e -> profileController.handleProfileSave(primaryStage, profile, nameField.getText(), linkField.getText()));
 
         layout.getChildren().addAll(
                 profileController.createTopLayout(primaryStage),
                 nameField,
-                dateField,
                 linkField,
-                uploadPdfButton,
                 saveButton
         );
 

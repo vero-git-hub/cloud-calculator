@@ -53,10 +53,6 @@ public class ProfileController {
         return profileModel;
     }
 
-    public void handleDeleteAction(Stage primaryStage, Profile profile, MainController mainController) {
-        profileModel.handleDeleteAction(primaryStage, profile, mainController);
-    }
-
     public void showCreateProfileScreen(Stage primaryStage) {
         profileView.showCreateProfileScreen(primaryStage);
     }
@@ -102,11 +98,12 @@ public class ProfileController {
         sceneBuilder.createScene(scrollPane, stage);
     }
 
-    public void handleProfileSave(Stage primaryStage, Profile profile, String name, String startDate, String profileLink){
+    public void handleProfileSave(Stage primaryStage, Profile profile, String name, String link){
         if(name != null && !name.isEmpty() &&
-                startDate != null && !startDate.isEmpty() &&
-                profileLink != null && !profileLink.isEmpty()) {
-            profileModel.handleProfileSave(primaryStage, profile, name, startDate, profileLink);
+                link != null && !link.isEmpty()) {
+            profile.setName(name);
+            profile.setLink(link);
+            profileModel.handleProfileSave(primaryStage, profile);
         }
     }
 
@@ -122,4 +119,11 @@ public class ProfileController {
         mainController.showMainScreen(primaryStage);
     }
 
+    public void handleEditProfileAction(Stage stage, Profile profile, MainController mainController) {
+        profileModel.handleEditProfile(stage, profile, mainController);
+    }
+
+    public void handleDeleteAction(Stage primaryStage, Profile profile, MainController mainController) {
+        profileModel.handleDeleteAction(primaryStage, profile, mainController);
+    }
 }

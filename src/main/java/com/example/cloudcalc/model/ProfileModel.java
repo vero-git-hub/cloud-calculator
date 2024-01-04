@@ -6,7 +6,6 @@ import com.example.cloudcalc.controller.ProfileController;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.exception.PDFIsEmpty;
 import com.example.cloudcalc.exception.PageStructureFromPDFChangedException;
-import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
 import com.example.cloudcalc.util.Notification;
 import javafx.stage.Stage;
 import org.json.JSONArray;
@@ -68,19 +67,19 @@ public class ProfileModel {
                 JSONObject json = jsonArray.getJSONObject(j);
                 Profile profile = new Profile();
                 profile.setName(json.getString("name"));
-                profile.setStartDate(json.getString("startDate"));
-                profile.setProfileLink(json.getString("profileLink"));
-                if (json.has("pdfFilePath")) {
-                    profile.setPdfFilePath(json.getString("pdfFilePath"));
-                }
-                if (json.has("pdfLinks")) {
-                    JSONArray linksArray = json.getJSONArray("pdfLinks");
-                    List<String> links = new ArrayList<>();
-                    for (int i = 0; i < linksArray.length(); i++) {
-                        links.add(linksArray.getString(i));
-                    }
-                    profile.setPdfLinks(links);
-                }
+                //profile.setStartDate(json.getString("startDate"));
+                profile.setLink(json.getString("link"));
+//                if (json.has("pdfFilePath")) {
+//                    profile.setPdfFilePath(json.getString("pdfFilePath"));
+//                }
+//                if (json.has("pdfLinks")) {
+//                    JSONArray linksArray = json.getJSONArray("pdfLinks");
+//                    List<String> links = new ArrayList<>();
+//                    for (int i = 0; i < linksArray.length(); i++) {
+//                        links.add(linksArray.getString(i));
+//                    }
+//                    profile.setPdfLinks(links);
+//                }
                 if (json.has("prizes")) {
                     JSONArray prizesArray = json.getJSONArray("prizes");
                     List<String> prizes = new ArrayList<>();
@@ -105,12 +104,12 @@ public class ProfileModel {
     private void updateProfileFile(Profile profile, JSONArray profilesArray) {
         JSONObject profileJson = new JSONObject();
         profileJson.put("name", profile.getName());
-        profileJson.put("startDate", profile.getStartDate());
-        profileJson.put("profileLink", profile.getProfileLink());
-        profileJson.put("pdfFilePath", profile.getPdfFilePath());
+        //profileJson.put("startDate", profile.getStartDate());
+        profileJson.put("link", profile.getLink());
+        //profileJson.put("pdfFilePath", profile.getPdfFilePath());
 
-        JSONArray linksArray = new JSONArray(profile.getPdfLinks());
-        profileJson.put("pdfLinks", linksArray);
+        //JSONArray linksArray = new JSONArray(profile.getPdfLinks());
+        //profileJson.put("pdfLinks", linksArray);
 
         JSONArray prizesArray = new JSONArray(profile.getPrizes());
         profileJson.put("prizes", prizesArray);
@@ -156,46 +155,33 @@ public class ProfileModel {
         }
     }
 
-    public void handleProfileSave(
-            Stage primaryStage, Profile profile, String name, String startDate, String profileLink
-    ) {
-            profile.setName(name);
-            profile.setStartDate(startDate);
-            profile.setProfileLink(profileLink);
-
-            try {
-                saveFromPdfFile(profile);
-                saveProfileToFile(profile, FileName.PROFILES_FILE);
-
-                profileController.showMainScreen(primaryStage);
-            } catch (PageStructureFromPDFChangedException ex) {
-                Notification.showErrorMessage("Page Structure From PDF Changed",
-                        "Call the developer, need to check the HTML tags.");
-            } catch (PDFIsEmpty ex) {
-                Notification.showAlert("Stop, pay attention!",
-                        "Your PDF section is empty.", "Please, select the PDF file.");
-            }
+    public void handleProfileSave(Stage primaryStage, Profile profile) {
+        saveProfileToFile(profile, FileName.PROFILES_FILE);
+        profileController.showMainScreen(primaryStage);
     }
 
     private void saveFromPdfFile (Profile profile) throws PageStructureFromPDFChangedException, PDFIsEmpty {
-        if(profile.getPdfFilePath() != null) {
-
-            List<String> extractedLinks = profileController.extractHiddenLinksFromPdf(profile.getPdfFilePath());
-            if(!extractedLinks.isEmpty()) {
-                List<String> h1Contents = profileController.extractH1FromLinks(extractedLinks);
-
-                if(!h1Contents.isEmpty()) {
-                    profile.setPdfLinks(h1Contents);
-                } else {
-                    throw new PageStructureFromPDFChangedException();
-                }
-            } else {
-                throw new PageStructureFromPDFChangedException();
-            }
-
-        } else {
-            throw new PDFIsEmpty();
-        }
+//        if(profile.getPdfFilePath() != null) {
+//
+//            List<String> extractedLinks = profileController.extractHiddenLinksFromPdf(profile.getPdfFilePath());
+//            if(!extractedLinks.isEmpty()) {
+//                List<String> h1Contents = profileController.extractH1FromLinks(extractedLinks);
+//
+//                if(!h1Contents.isEmpty()) {
+//                    profile.setPdfLinks(h1Contents);
+//                } else {
+//                    throw new PageStructureFromPDFChangedException();
+//                }
+//            } else {
+//                throw new PageStructureFromPDFChangedException();
+//            }
+//
+//        } else {
+//            throw new PDFIsEmpty();
+//        }
     }
 
+    public void handleEditProfile(Stage stage, Profile profile, MainController mainController) {
+
+    }
 }

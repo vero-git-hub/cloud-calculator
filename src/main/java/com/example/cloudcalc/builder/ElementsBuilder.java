@@ -104,8 +104,8 @@ public class ElementsBuilder {
     public VBox createProfileInfoForProfile(Profile profile, String startDateText) {
         VBox profileInfoBox = new VBox(10);
 
-        TextFlow startDateFlow = createTextFlow(startDateText, profile.getStartDate());
-        profileInfoBox.getChildren().addAll(startDateFlow);
+//        TextFlow startDateFlow = createTextFlow(startDateText, profile.getStartDate());
+//        profileInfoBox.getChildren().addAll(startDateFlow);
 
         return profileInfoBox;
     }

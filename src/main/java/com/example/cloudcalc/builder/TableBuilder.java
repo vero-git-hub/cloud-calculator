@@ -12,6 +12,7 @@ import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.util.AlertGuardian;
+import com.example.cloudcalc.util.FunctionUtils;
 import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
@@ -19,14 +20,21 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class TableBuilder {
@@ -94,41 +102,35 @@ public class TableBuilder {
         return nameColumn;
     }
 
-    public TableColumn<Profile, String> createNameColumn() {
-        TableColumn<Profile, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        return nameColumn;
-    }
-
     public VBox createPdfLinksSectionForProfile(Profile profile, Label linksTitle) {
         VBox linksVBox = new VBox(5);
 
         linksVBox.getChildren().add(linksTitle);
 
-        TableView<PdfLinkItem> table = new TableView<>();
-
-        TableColumn<PdfLinkItem, Integer> indexColumn = new TableColumn<>("№");
-        indexColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
-
-        TableColumn<PdfLinkItem, String> linkColumn = new TableColumn<>("Link");
-        linkColumn.setCellValueFactory(new PropertyValueFactory<>("link"));
-
-        indexColumn.setResizable(false);
-        linkColumn.setResizable(false);
-
-        indexColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.05));
-        linkColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.95));
-
-        table.getColumns().addAll(indexColumn, linkColumn);
-
-        if (profile.getPdfLinks() != null) {
-            int index = 1;
-            for (String link : profile.getPdfLinks()) {
-                table.getItems().add(new PdfLinkItem(index++, link));
-            }
-        }
-        table.setFixedCellSize(Region.USE_COMPUTED_SIZE);
-        linksVBox.getChildren().add(table);
+//        TableView<PdfLinkItem> table = new TableView<>();
+//
+//        TableColumn<PdfLinkItem, Integer> indexColumn = new TableColumn<>("№");
+//        indexColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
+//
+//        TableColumn<PdfLinkItem, String> linkColumn = new TableColumn<>("Link");
+//        linkColumn.setCellValueFactory(new PropertyValueFactory<>("link"));
+//
+//        indexColumn.setResizable(false);
+//        linkColumn.setResizable(false);
+//
+//        indexColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.05));
+//        linkColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.95));
+//
+//        table.getColumns().addAll(indexColumn, linkColumn);
+//
+//        if (profile.getPdfLinks() != null) {
+//            int index = 1;
+//            for (String link : profile.getPdfLinks()) {
+//                table.getItems().add(new PdfLinkItem(index++, link));
+//            }
+//        }
+//        table.setFixedCellSize(Region.USE_COMPUTED_SIZE);
+//        linksVBox.getChildren().add(table);
 
         return linksVBox;
     }
@@ -307,7 +309,7 @@ public class TableBuilder {
         TableColumn<Profile, ?> dateColumn = createLastUpdatedColumnForStats();
         dateColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.20));
 
-        TableColumn<Profile, ?> nameColumn = createNameColumn();
+        TableColumn<Profile, ?> nameColumn = createColumn("Name");
         nameColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.10));
 
         TableColumn<Profile, ?> prizesColumn = createPrizesColumnForStats();
@@ -370,16 +372,20 @@ public class TableBuilder {
 
     public void configureTableColumnsWidthForMain(TableView<Profile> mainTable) {
         double numberColumnPercentage = 0.05;
-        double badgesColumnPercentage = 0.1;
+        double nameColumnPercentage = 0.1;
+        double scanColumnPercentage = 0.1;
         double viewingColumnPercentage = 0.1;
-        double actionColumnPercentage = 0.1;
-        double nameColumnPercentage = 1.0 - (numberColumnPercentage + badgesColumnPercentage + viewingColumnPercentage + actionColumnPercentage);
+        double editColumnPercentage = 0.1;
+        double deleteColumnPercentage = 0.1;
+
+        double linkColumnPercentage = 1.0 - (numberColumnPercentage + nameColumnPercentage + scanColumnPercentage + editColumnPercentage + deleteColumnPercentage);
 
         mainTable.getColumns().get(0).prefWidthProperty().bind(mainTable.widthProperty().multiply(numberColumnPercentage));
         mainTable.getColumns().get(1).prefWidthProperty().bind(mainTable.widthProperty().multiply(nameColumnPercentage));
-        mainTable.getColumns().get(2).prefWidthProperty().bind(mainTable.widthProperty().multiply(badgesColumnPercentage));
-        mainTable.getColumns().get(3).prefWidthProperty().bind(mainTable.widthProperty().multiply(viewingColumnPercentage));
-        mainTable.getColumns().get(4).prefWidthProperty().bind(mainTable.widthProperty().multiply(actionColumnPercentage));
+        mainTable.getColumns().get(2).prefWidthProperty().bind(mainTable.widthProperty().multiply(linkColumnPercentage));
+        mainTable.getColumns().get(3).prefWidthProperty().bind(mainTable.widthProperty().multiply(scanColumnPercentage));
+        mainTable.getColumns().get(4).prefWidthProperty().bind(mainTable.widthProperty().multiply(editColumnPercentage));
+        mainTable.getColumns().get(5).prefWidthProperty().bind(mainTable.widthProperty().multiply(deleteColumnPercentage));
     }
 
     public void setColumnWidthForStats(TableView<Map.Entry<String, Long>> prizeTable) {
@@ -436,18 +442,60 @@ public class TableBuilder {
         TableView<Profile> mainTable = new TableView<>();
 
         TableColumn<Profile, Void> numberColumn = createNumberingColumn();
-        TableColumn<Profile, String> nameColumn = createNameColumn();
+        TableColumn<Profile, String> nameColumn = createColumn("Name");
+        TableColumn<Profile, String> linkColumn = createLinkColumn("Link");
         TableColumn<Profile, Void> badgesColumn = createScanColumn(primaryStage, scanController);
         TableColumn<Profile, Profile> viewingColumn = createViewingColumnForProfile(primaryStage, profileController);
+        TableColumn<Profile, Profile> editColumn = createEditColumnForProfile(primaryStage, profileController, mainController);
         TableColumn<Profile, Profile> actionColumn = createActionColumnForProfile(primaryStage, profileController, mainController);
 
-        mainTable.getColumns().addAll(numberColumn, nameColumn, badgesColumn, viewingColumn, actionColumn);
+        mainTable.getColumns().addAll(numberColumn, nameColumn, linkColumn, badgesColumn, editColumn, actionColumn);
 
         List<Profile> profiles = profileController.getProfilesFromFile();
         mainTable.getItems().addAll(profiles);
 
         configureTableColumnsWidthForMain(mainTable);
         return mainTable;
+    }
+
+    private TableColumn<Profile, String> createLinkColumn(String value) {
+        TableColumn<Profile, String> column = new TableColumn<>(value);
+        column.setCellValueFactory(new PropertyValueFactory<>(value.toLowerCase()));
+
+        column.setCellFactory(tc -> new TableCell<Profile, String>() {
+            private Hyperlink hyperlink = new Hyperlink();
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    String[] fullLink = item.split("/");
+                    hyperlink.setText(fullLink[fullLink.length-1]);
+                    hyperlink.setOnAction(e -> {
+                        try {
+                            Desktop.getDesktop().browse(new URI(item));
+                        } catch (IOException | URISyntaxException ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+
+                    setGraphic(hyperlink);
+                    setText(null);
+                }
+            }
+        });
+
+        return column;
+    }
+
+    private TableColumn<Profile, String> createColumn(String value) {
+        TableColumn<Profile, String> column = new TableColumn<>(value);
+        column.setCellValueFactory(new PropertyValueFactory<>(value.toLowerCase()));
+        return column;
     }
 
     public TableView<Prize> createTableForPrize(Stage stage, List<Prize> prizes, PrizeController prizeController) {
@@ -504,7 +552,6 @@ public class TableBuilder {
 
         return deleteColumn;
     }
-
 
     public void configureTableColumnsWidthForPrize(TableView<Prize> table) {
         TableColumn<Prize, ?> numberColumn = table.getColumns().get(0);
@@ -572,6 +619,29 @@ public class TableBuilder {
         return actionColumn;
     }
 
+    public TableColumn<Profile, Profile> createEditColumnForProfile(Stage primaryStage, ProfileController profileController, MainController mainController) {
+        TableColumn<Profile, Profile> column = new TableColumn<>("Edit");
+        column.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
+        column.setCellFactory(param -> new TableCell<Profile, Profile>() {
+            @Override
+            protected void updateItem(Profile profile, boolean empty) {
+                super.updateItem(profile, empty);
+                if (profile == null || empty) {
+                    setGraphic(null);
+                    return;
+                }
+
+                EventHandler<ActionEvent> action = e -> {
+                    profileController.handleEditProfileAction(primaryStage, profile, mainController);
+                };
+
+                Button button = ButtonFactory.createEditButton(action);
+                setGraphic(button);
+            }
+        });
+        return column;
+    }
+
     public static TableColumn<Profile, Profile> createViewingColumnForProfile(Stage primaryStage, ProfileController profileController) {
             TableColumn<Profile, Profile> viewingColumn = new TableColumn<>("View");
             viewingColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
@@ -593,6 +663,8 @@ public class TableBuilder {
             });
         return viewingColumn;
     }
+
+
 
     public static TableColumn<Profile, Void> createScanColumn(Stage primaryStage, ScanController scanController) {
         TableColumn<Profile, Void> badgesColumn = new TableColumn<>("Scan");

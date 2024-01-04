@@ -49,3 +49,8 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+*.json
+src/main/resources/images/*
+src/main/resources/*.properties
+src/main/resources/com/example/cloudcalc/*.fxml

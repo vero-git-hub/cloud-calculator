@@ -150,16 +150,16 @@ public class BadgeManager {
             throw new IllegalArgumentException("Skill badges list should not be null");
         }
 
-        List<String> pdfBadgesFromProfile = profile.getPdfLinks();
+//        List<String> pdfBadgesFromProfile = profile.getPdfLinks();
+//
+//        if (pdfBadgesFromProfile == null) {
+//            throw new IllegalArgumentException("Profile's PDF links should not be null");
+//        }
+//
+//        Set<String> intersection = new HashSet<>(skillBadges);
+//        intersection.retainAll(pdfBadgesFromProfile);
 
-        if (pdfBadgesFromProfile == null) {
-            throw new IllegalArgumentException("Profile's PDF links should not be null");
-        }
-
-        Set<String> intersection = new HashSet<>(skillBadges);
-        intersection.retainAll(pdfBadgesFromProfile);
-
-        return new ArrayList<>(intersection);
+        return new ArrayList<>();
     }
 
 }

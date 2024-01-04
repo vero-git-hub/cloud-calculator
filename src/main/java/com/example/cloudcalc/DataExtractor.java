@@ -122,7 +122,7 @@ public class DataExtractor implements Localizable {
         Map<String, String> resultMap = new LinkedHashMap<>();
 
         try {
-            Document doc = Jsoup.connect(profile.getProfileLink()).timeout(10 * 1000).get();
+            Document doc = Jsoup.connect(profile.getLink()).timeout(10 * 1000).get();
 
             Elements subheadElements = doc.select(".ql-title-medium.l-mts");
             Elements bodyElements = doc.select(".ql-body-medium.l-mbs");
@@ -131,7 +131,7 @@ public class DataExtractor implements Localizable {
                 throw new ProfilePageStructureChangedException(dataExtractorDescriptionError);
             }
 
-            LocalDate profileDate = dateUtils.convertProfileOrTypeBadgeStartDate(profile.getStartDate());
+            //LocalDate profileDate = dateUtils.convertProfileOrTypeBadgeStartDate(profile.getStartDate());
 
             for(int i = 0; i < subheadElements.size(); i++) {
                 String key = subheadElements.get(i).text();
@@ -139,9 +139,9 @@ public class DataExtractor implements Localizable {
 
                 LocalDate valueDate = dateUtils.extractDateFromValue(valueStr);
 
-                if(!valueDate.isBefore(profileDate)) {
-                    resultMap.put(key, valueStr);
-                }
+//                if(!valueDate.isBefore(profileDate)) {
+//                    resultMap.put(key, valueStr);
+//                }
             }
 
         } catch (IOException e) {

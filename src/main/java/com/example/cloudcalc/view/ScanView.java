@@ -53,7 +53,7 @@ public class ScanView implements Localizable {
         Hyperlink nameLink = new Hyperlink(profile.getName());
         nameLink.setOnAction(e -> {
             try {
-                Desktop.getDesktop().browse(new URI(profile.getProfileLink()));
+                Desktop.getDesktop().browse(new URI(profile.getLink()));
             } catch (IOException | URISyntaxException ex) {
                 ex.printStackTrace();
             }
