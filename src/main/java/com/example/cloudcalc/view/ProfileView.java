@@ -16,11 +16,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,6 +27,7 @@ import java.util.ResourceBundle;
 public class ProfileView implements Localizable, ProfileFieldUpdatable {
 
     private final ProfileController profileController;
+    private final Label titleLabelEditProfileScreen;
     private Label titleLabel;
     TextField nameField;
     TextField dateField;
@@ -38,12 +37,16 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
     private Label linksTitle = new Label("PDF Links:");
     private Button uploadPdfButton = new Button("html");
 
-
     public ProfileView(ProfileController profileController) {
         this.profileController = profileController;
         this.titleLabel = new Label("CREATE PROFILE");
+        this.titleLabelEditProfileScreen = new Label("EDIT PROFILE");
 
         LanguageManager.registerLocalizable(this);
+    }
+
+    public Label getTitleLabelEditProfileScreen() {
+        return titleLabelEditProfileScreen;
     }
 
     public Label getTitleLabel() {
@@ -90,10 +93,35 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
         nameField = profileFieldManager.getNameField();
         linkField = profileFieldManager.getLinkField();
 
+        nameField.clear();
+        linkField.clear();
+
         Button saveButton = ButtonFactory.createSaveButton(e -> profileController.handleProfileSave(primaryStage, profile, nameField.getText(), linkField.getText()));
 
         layout.getChildren().addAll(
                 profileController.createTopLayout(primaryStage),
+                nameField,
+                linkField,
+                saveButton
+        );
+
+        profileController.createScene(primaryStage, layout);
+    }
+
+    public void showEditProfileScreen(Stage primaryStage, Profile profile) {
+        VBox layout = new VBox(10);
+
+        ProfileFieldManager profileFieldManager = LanguageManager.getProfileFieldManager();
+        nameField = profileFieldManager.getNameField();
+        linkField = profileFieldManager.getLinkField();
+
+        nameField.setText(profile.getName());
+        linkField.setText(profile.getLink());
+
+        Button saveButton = ButtonFactory.createSaveButton(e -> profileController.handleProfileSave(primaryStage, profile, nameField.getText(), linkField.getText()));
+
+        layout.getChildren().addAll(
+                profileController.createTopLayoutEditProfileScreen(primaryStage),
                 nameField,
                 linkField,
                 saveButton

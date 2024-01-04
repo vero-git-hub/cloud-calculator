@@ -1,8 +1,6 @@
 package com.example.cloudcalc.builder;
 
 import com.example.cloudcalc.DataExtractor;
-import com.example.cloudcalc.entity.PdfLinkItem;
-import com.example.cloudcalc.entity.badge.BadgeCounts;
 import com.example.cloudcalc.badge.BadgeManager;
 import com.example.cloudcalc.badge.FileOperationManager;
 import com.example.cloudcalc.button.ButtonFactory;
@@ -10,20 +8,20 @@ import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.*;
 import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.entity.Profile;
+import com.example.cloudcalc.entity.badge.BadgeCounts;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.util.AlertGuardian;
-import com.example.cloudcalc.util.FunctionUtils;
 import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -33,8 +31,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TableBuilder {
@@ -632,7 +632,7 @@ public class TableBuilder {
                 }
 
                 EventHandler<ActionEvent> action = e -> {
-                    profileController.handleEditProfileAction(primaryStage, profile, mainController);
+                    profileController.showEditProfileScreen(primaryStage, profile);
                 };
 
                 Button button = ButtonFactory.createEditButton(action);

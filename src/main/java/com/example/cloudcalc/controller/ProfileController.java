@@ -57,6 +57,10 @@ public class ProfileController {
         profileView.showCreateProfileScreen(primaryStage);
     }
 
+    public void showEditProfileScreen(Stage primaryStage, Profile profile) {
+        profileView.showEditProfileScreen(primaryStage, profile);
+    }
+
     public List<Profile> getProfilesFromFile() {
         return profileModel.loadProfilesFromFile(FileName.PROFILES_FILE);
     }
@@ -90,6 +94,11 @@ public class ProfileController {
         return elementsBuilder.createTopLayout(backButton, profileView.getTitleLabel());
     }
 
+    public HBox createTopLayoutEditProfileScreen(Stage primaryStage){
+        Button backButton = ButtonFactory.createBackButton(e -> mainController.showMainScreen(primaryStage));
+        return elementsBuilder.createTopLayout(backButton, profileView.getTitleLabelEditProfileScreen());
+    }
+
     public void createScene(Stage stage, VBox layout) {
         sceneBuilder.createScene(layout, stage);
     }
@@ -99,10 +108,10 @@ public class ProfileController {
     }
 
     public void handleProfileSave(Stage primaryStage, Profile profile, String name, String link){
-        if(name != null && !name.isEmpty() &&
-                link != null && !link.isEmpty()) {
+        if(name != null && !name.isEmpty() && link != null && !link.isEmpty()) {
             profile.setName(name);
             profile.setLink(link);
+
             profileModel.handleProfileSave(primaryStage, profile);
         }
     }
@@ -119,11 +128,11 @@ public class ProfileController {
         mainController.showMainScreen(primaryStage);
     }
 
-    public void handleEditProfileAction(Stage stage, Profile profile, MainController mainController) {
-        profileModel.handleEditProfile(stage, profile, mainController);
-    }
+
 
     public void handleDeleteAction(Stage primaryStage, Profile profile, MainController mainController) {
         profileModel.handleDeleteAction(primaryStage, profile, mainController);
     }
+
+
 }

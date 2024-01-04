@@ -6,7 +6,6 @@ import com.example.cloudcalc.controller.ProfileController;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.exception.PDFIsEmpty;
 import com.example.cloudcalc.exception.PageStructureFromPDFChangedException;
-import com.example.cloudcalc.util.Notification;
 import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,12 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileModel {
-
     private final ProfileController profileController;
     public ProfileModel(ProfileController profileController) {
         this.profileController = profileController;
     }
-
 
     public void handleDeleteAction(Stage primaryStage, Profile profile, MainController mainController) {
         List<Profile> profiles = loadProfilesFromFile(FileName.PROFILES_FILE);
@@ -48,13 +45,28 @@ public class ProfileModel {
             }
         }
 
+        if (profile.getId() == 0) {
+            profile.setId(getNextProfileId(profilesArray));
+        }
+
         updateProfileFile(profile, profilesArray);
 
         try (FileWriter fileWriter = new FileWriter(fileName)) {
-            fileWriter.write(profilesArray.toString());
+            fileWriter.write(profilesArray.toString(4));
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private int getNextProfileId(JSONArray profilesArray) {
+        int maxId = 0;
+        for (int i = 0; i < profilesArray.length(); i++) {
+            int currentId = profilesArray.getJSONObject(i).getInt("id");
+            if (currentId > maxId) {
+                maxId = currentId;
+            }
+        }
+        return maxId + 1;
     }
 
     public List<Profile> loadProfilesFromFile(String fileName) {
@@ -66,20 +78,9 @@ public class ProfileModel {
             for (int j = 0; j < jsonArray.length(); j++) {
                 JSONObject json = jsonArray.getJSONObject(j);
                 Profile profile = new Profile();
+                profile.setId(json.getInt("id"));
                 profile.setName(json.getString("name"));
-                //profile.setStartDate(json.getString("startDate"));
                 profile.setLink(json.getString("link"));
-//                if (json.has("pdfFilePath")) {
-//                    profile.setPdfFilePath(json.getString("pdfFilePath"));
-//                }
-//                if (json.has("pdfLinks")) {
-//                    JSONArray linksArray = json.getJSONArray("pdfLinks");
-//                    List<String> links = new ArrayList<>();
-//                    for (int i = 0; i < linksArray.length(); i++) {
-//                        links.add(linksArray.getString(i));
-//                    }
-//                    profile.setPdfLinks(links);
-//                }
                 if (json.has("prizes")) {
                     JSONArray prizesArray = json.getJSONArray("prizes");
                     List<String> prizes = new ArrayList<>();
@@ -103,28 +104,29 @@ public class ProfileModel {
 
     private void updateProfileFile(Profile profile, JSONArray profilesArray) {
         JSONObject profileJson = new JSONObject();
-        profileJson.put("name", profile.getName());
-        //profileJson.put("startDate", profile.getStartDate());
-        profileJson.put("link", profile.getLink());
-        //profileJson.put("pdfFilePath", profile.getPdfFilePath());
 
-        //JSONArray linksArray = new JSONArray(profile.getPdfLinks());
-        //profileJson.put("pdfLinks", linksArray);
+        profileJson.put("id", profile.getId());
+        profileJson.put("name", profile.getName());
+        profileJson.put("link", profile.getLink());
 
         JSONArray prizesArray = new JSONArray(profile.getPrizes());
         profileJson.put("prizes", prizesArray);
-
         profileJson.put("lastScannedDate", profile.getLastScannedDate());
+
+        boolean profileUpdated = false;
 
         for (int i = 0; i < profilesArray.length(); i++) {
             JSONObject existingProfile = profilesArray.getJSONObject(i);
-            if (existingProfile.getString("name").equals(profile.getName())) {
+            if (existingProfile.getInt("id") == profile.getId()) {
                 profilesArray.put(i, profileJson);
-                return;
+                profileUpdated = true;
+                break;
             }
         }
 
-        profilesArray.put(profileJson);
+        if (!profileUpdated) {
+            profilesArray.put(profileJson);
+        }
     }
 
     public void updateProfile(Profile profileToUpdate) {
@@ -135,7 +137,7 @@ public class ProfileModel {
 
     private void saveJSONArrayToFile(JSONArray jsonArray, String fileName) {
         try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(fileName), StandardCharsets.UTF_8)) {
-            writer.write(jsonArray.toString());
+            writer.write(jsonArray.toString(4));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -149,7 +151,7 @@ public class ProfileModel {
         }
 
         try (FileWriter fileWriter = new FileWriter(fileName)) {
-            fileWriter.write(profilesArray.toString());
+            fileWriter.write(profilesArray.toString(4));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -179,9 +181,5 @@ public class ProfileModel {
 //        } else {
 //            throw new PDFIsEmpty();
 //        }
-    }
-
-    public void handleEditProfile(Stage stage, Profile profile, MainController mainController) {
-
     }
 }

@@ -4,10 +4,19 @@ import java.util.List;
 import java.util.Objects;
 
 public class Profile {
+    private int id;
     private String name;
     private String link;
     private List<String> prizes;
     private String lastScannedDate;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -58,7 +67,9 @@ public class Profile {
     @Override
     public String toString() {
         return "Profile{" +
+                "id='" + id + '\'' +
                 "name='" + name + '\'' +
+                "link='" + link + '\'' +
                 ", prizes=" + prizes +
                 '}';
     }

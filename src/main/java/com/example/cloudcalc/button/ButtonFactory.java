@@ -22,7 +22,7 @@ public class ButtonFactory {
     private static final String ARCADE_ICON = "/images/main/arcade-64.png";
     private static final String SAVE_ICON = "/images/save-64.png";
     private static final String BOOK_ICON = "/images/main/book-48.png";
-    private static final String EDIT_ICON = "/images/icons8-edit-48.png";
+    private static final String EDIT_ICON = "/images/edit-48.png";
 
     public static Button createSaveButton(EventHandler<ActionEvent> action) {
         Image image = new Image(ButtonFactory.class.getResourceAsStream(SAVE_ICON));
