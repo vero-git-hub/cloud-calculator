@@ -106,6 +106,10 @@ public class ServiceFacade {
         return scanController;
     }
 
+    public ProgramController getProgramController() {
+        return programController;
+    }
+
     public void showCreateProfileScreen(Stage primaryStage) {
         profileController.showCreateProfileScreen(primaryStage);
     }

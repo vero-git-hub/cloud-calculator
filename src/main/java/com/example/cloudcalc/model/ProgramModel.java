@@ -29,6 +29,10 @@ public class ProgramModel {
             JSONObject programObject = jsonArray.getJSONObject(i);
             Program program = new Program();
 
+            if (programObject.has("id")) {
+                program.setId(programObject.getInt("id"));
+            }
+
             if (programObject.has("name") && programObject.has("date") && programObject.has("conditions")) {
                 program.setName(programObject.getString("name"));
 
@@ -64,9 +68,27 @@ public class ProgramModel {
 
     public void saveProgram(Program program) {
         List<Program> existingPrograms = loadProgramsFromFile();
+
+        if (program.getId() == 0) {
+            program.setId(getNextId(convertProgramsToJSONArray(existingPrograms)));
+        }
+
         existingPrograms.add(program);
+
         JSONArray jsonArray = convertProgramsToJSONArray(existingPrograms);
+
         FileManager.writeJsonToFile(jsonArray, FileName.PROGRAMS_FILE);
+    }
+
+    private int getNextId(JSONArray jsonArray) {
+        int maxId = 0;
+        for (int i = 0; i < jsonArray.length(); i++) {
+            int currentId = jsonArray.getJSONObject(i).getInt("id");
+            if (currentId > maxId) {
+                maxId = currentId;
+            }
+        }
+        return maxId + 1;
     }
 
     private JSONArray convertProgramsToJSONArray(List<Program> programs) {
@@ -74,6 +96,7 @@ public class ProgramModel {
         for (Program program : programs) {
             JSONObject jsonObject = new JSONObject();
 
+            jsonObject.put("id", program.getId());
             jsonObject.put("name", program.getName());
             jsonObject.put("date", program.getDate());
             jsonObject.put("conditions", program.getConditions());

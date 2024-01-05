@@ -1,15 +1,24 @@
 package com.example.cloudcalc.entity;
 
-import com.example.cloudcalc.controller.ProgramController;
 import com.example.cloudcalc.model.CountConditionModel;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 public class Program {
+    private int id;
     private String name;
     private LocalDate date;
     private List<CountConditionModel> conditions;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -33,5 +42,28 @@ public class Program {
 
     public void setConditions(List<CountConditionModel> conditions) {
         this.conditions = conditions;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Program program = (Program) o;
+        return id == program.id && Objects.equals(name, program.name) && Objects.equals(date, program.date) && Objects.equals(conditions, program.conditions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, date, conditions);
+    }
+
+    @Override
+    public String toString() {
+        return "Program{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", date=" + date +
+                ", conditions=" + conditions +
+                '}';
     }
 }

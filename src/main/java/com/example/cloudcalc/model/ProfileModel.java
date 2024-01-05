@@ -94,6 +94,15 @@ public class ProfileModel {
                     profile.setLastScannedDate(json.getString("lastScannedDate"));
                 }
 
+                if (json.has("programs")) {
+                    JSONArray programsArray = json.getJSONArray("programs");
+                    List<String> programs = new ArrayList<>();
+                    for (int i = 0; i < programsArray.length(); i++) {
+                        programs.add(programsArray.getString(i));
+                    }
+                    profile.setPrograms(programs);
+                }
+
                 profiles.add(profile);
             }
         } catch (IOException | JSONException e) {
@@ -112,6 +121,9 @@ public class ProfileModel {
         JSONArray prizesArray = new JSONArray(profile.getPrizes());
         profileJson.put("prizes", prizesArray);
         profileJson.put("lastScannedDate", profile.getLastScannedDate());
+
+        JSONArray programs = new JSONArray(profile.getPrograms());
+        profileJson.put("programs", programs);
 
         boolean profileUpdated = false;
 

@@ -120,7 +120,7 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
 
     private VBox createCheckBoxSection() {
         createBox();
-        HBox checkBoxes = new HBox(10, countBox, ignoreBox, pdfBox);
+        HBox checkBoxes = new HBox(10, countBox, ignoreBox);
         return new VBox(10, labelCheckBox, checkBoxes);
     }
 
@@ -174,7 +174,7 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     private void createBox() {
         countBox = new HBox(5, countCheckBox, createInfoIcon(countTooltip));
         ignoreBox = new HBox(5, ignoreCheckBox, createInfoIcon(ignoreTooltip));
-        pdfBox = new HBox(5, pdfCheckBox, createInfoIcon(pdfTooltip));
+        //pdfBox = new HBox(5, pdfCheckBox, createInfoIcon(pdfTooltip));
     }
 
     private HBox createInfoIcon(String tooltipText) {
@@ -208,9 +208,9 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
             if (ignoreCheckBox.isSelected()) {
                 modalLayout.getChildren().add(new HBox(ignoreLabel, modalIgnoreField));
             }
-            if (pdfCheckBox.isSelected()) {
-                modalLayout.getChildren().add(new HBox(pdfLabel, modalUploadPdfButton));
-            }
+//            if (pdfCheckBox.isSelected()) {
+//                modalLayout.getChildren().add(new HBox(pdfLabel, modalUploadPdfButton));
+//            }
 
             saveConditionButton.setText("Save");
             saveConditionButton.setOnAction(e -> {
@@ -224,9 +224,9 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
                     CountConditionModel newCondition = new CountConditionModel("What not to count", value);
                     conditionsTable.getItems().add(newCondition);
                 }
-                if (pdfCheckBox.isSelected()) {
-
-                }
+//                if (pdfCheckBox.isSelected()) {
+//
+//                }
 
                 modalStage.close();
             });

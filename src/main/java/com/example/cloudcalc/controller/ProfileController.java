@@ -9,6 +9,7 @@ import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.entity.Profile;
+import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.view.ProfileView;
 import javafx.scene.control.Button;
@@ -30,6 +31,7 @@ public class ProfileController {
     private final DataExtractor dataExtractor;
     //private final ScanView scanView;
     private final MainController mainController;
+    private final ProgramController programController;
     private final ElementsBuilder elementsBuilder;
     private final SceneBuilder sceneBuilder;
     private final TableBuilder tableBuilder = new TableBuilder();
@@ -43,6 +45,7 @@ public class ProfileController {
         this.mainController = serviceFacade.getMainController();
         this.elementsBuilder = new ElementsBuilder();
         this.sceneBuilder = new SceneBuilder();
+        this.programController = serviceFacade.getProgramController();
     }
 
     public MainController getMainController() {
@@ -107,13 +110,8 @@ public class ProfileController {
         sceneBuilder.createScene(scrollPane, stage);
     }
 
-    public void handleProfileSave(Stage primaryStage, Profile profile, String name, String link){
-        if(name != null && !name.isEmpty() && link != null && !link.isEmpty()) {
-            profile.setName(name);
-            profile.setLink(link);
-
-            profileModel.handleProfileSave(primaryStage, profile);
-        }
+    public void handleProfileSave(Stage primaryStage, Profile profile){
+        profileModel.handleProfileSave(primaryStage, profile);
     }
 
     public List<String> extractHiddenLinksFromPdf(String pdfFilePath) {
@@ -128,11 +126,11 @@ public class ProfileController {
         mainController.showMainScreen(primaryStage);
     }
 
-
-
     public void handleDeleteAction(Stage primaryStage, Profile profile, MainController mainController) {
         profileModel.handleDeleteAction(primaryStage, profile, mainController);
     }
 
-
+    public List<Program> loadProgramsFromFile() {
+        return programController.loadProgramsFromFile();
+    }
 }

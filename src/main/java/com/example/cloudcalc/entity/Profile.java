@@ -9,6 +9,7 @@ public class Profile {
     private String link;
     private List<String> prizes;
     private String lastScannedDate;
+    private List<String> programs;
 
     public int getId() {
         return id;
@@ -50,6 +51,14 @@ public class Profile {
         this.lastScannedDate = lastScannedDate;
     }
 
+    public List<String> getPrograms() {
+        return programs;
+    }
+
+    public void setPrograms(List<String> programs) {
+        this.programs = programs;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -71,6 +80,7 @@ public class Profile {
                 "name='" + name + '\'' +
                 "link='" + link + '\'' +
                 ", prizes=" + prizes +
+                ", programs=" + programs +
                 '}';
     }
 }
