@@ -1,9 +1,11 @@
 package com.example.cloudcalc.controller;
 
 import com.example.cloudcalc.ServiceFacade;
+import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.model.ProgramModel;
+import com.example.cloudcalc.util.Notification;
 import com.example.cloudcalc.view.ProgramView;
 import com.example.cloudcalc.view.program.AddProgramView;
 import javafx.scene.control.Button;
@@ -20,14 +22,25 @@ public class ProgramController extends BaseController {
     private ProgramModel programModel = new ProgramModel(this);
     private final AddProgramView addProgramView = new AddProgramView(this);
     public static ResourceBundle bundle;
+    String alertTitleDeletePrize = "Confirmation Dialog";
+    String alertHeaderDeletePrize = "Delete Program";
+    String alertContentDeletePrize = "Are you sure you want to delete this program?";
+    private ProfileController profileController;
 
     public ProgramController(ServiceFacade serviceFacade) {
         super(serviceFacade);
         bundle = LanguageManager.getBundle();
+        this.profileController = serviceFacade.getProfileController();
     }
 
     public static ResourceBundle getBundle() {
         return bundle;
+    }
+
+    public boolean showConfirmationAlert() {
+        return Notification.showConfirmationAlert(
+                alertTitleDeletePrize, alertHeaderDeletePrize, alertContentDeletePrize
+        );
     }
 
     @Override
@@ -55,5 +68,14 @@ public class ProgramController extends BaseController {
 
     public List<Program> loadProgramsFromFile() {
         return programModel.loadProgramsFromFile();
+    }
+
+    public List<Profile> loadProfilesFromFile() {
+        profileController = serviceFacade.getProfileController();
+        return profileController.getProfilesFromFile();
+    }
+
+    public void deleteAction(Stage stage, Program program) {
+        programModel.deleteProgram(stage, program);
     }
 }

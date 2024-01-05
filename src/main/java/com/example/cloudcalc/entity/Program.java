@@ -45,16 +45,16 @@ public class Program {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Program program = (Program) o;
-        return id == program.id && Objects.equals(name, program.name) && Objects.equals(date, program.date) && Objects.equals(conditions, program.conditions);
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Program program = (Program) obj;
+        return Objects.equals(id, program.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, date, conditions);
+        return Objects.hash(id);
     }
 
     @Override

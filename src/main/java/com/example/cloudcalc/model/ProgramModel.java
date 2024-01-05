@@ -4,8 +4,10 @@ import com.example.cloudcalc.FileManager;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.ProgramController;
 
+import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.util.Notification;
+import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -106,10 +108,24 @@ public class ProgramModel {
         return jsonArray;
     }
 
-    public void deleteProgram(Program program) {
-        List<Program> programs = loadProgramsFromFile();
-        programs.remove(program);
-        saveProgramsToFile(programs);
+    public void deleteProgram(Stage stage, Program program) {
+        boolean isConfirmationAlert = programController.showConfirmationAlert();
+
+        if (isConfirmationAlert) {
+            List<Profile> profiles = programController.loadProfilesFromFile();
+
+            boolean isProgramAssigned = profiles.stream()
+                    .anyMatch(profile -> profile.getPrograms().contains(program.getName()));
+
+            if (isProgramAssigned) {
+                Notification.showAlert("Cannot be deleted", "The program is assigned to the profile", "Please cancel the assignment before deleting.");
+            } else {
+                List<Program> programs = loadProgramsFromFile();
+                programs.remove(program);
+                saveProgramsToFile(programs);
+                programController.showScreen(stage);
+            }
+        }
     }
 
     private void saveProgramsToFile(List<Program> programs) {

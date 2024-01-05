@@ -13,6 +13,7 @@ import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.util.AlertGuardian;
 import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
@@ -373,19 +374,21 @@ public class TableBuilder {
     public void configureTableColumnsWidthForMain(TableView<Profile> mainTable) {
         double numberColumnPercentage = 0.05;
         double nameColumnPercentage = 0.1;
+        double programsColumnPercentage = 0.2;
         double scanColumnPercentage = 0.1;
         double viewingColumnPercentage = 0.1;
         double editColumnPercentage = 0.1;
         double deleteColumnPercentage = 0.1;
 
-        double linkColumnPercentage = 1.0 - (numberColumnPercentage + nameColumnPercentage + scanColumnPercentage + editColumnPercentage + deleteColumnPercentage);
+        double linkColumnPercentage = 1.0 - (numberColumnPercentage + nameColumnPercentage + programsColumnPercentage + scanColumnPercentage + editColumnPercentage + deleteColumnPercentage);
 
         mainTable.getColumns().get(0).prefWidthProperty().bind(mainTable.widthProperty().multiply(numberColumnPercentage));
         mainTable.getColumns().get(1).prefWidthProperty().bind(mainTable.widthProperty().multiply(nameColumnPercentage));
         mainTable.getColumns().get(2).prefWidthProperty().bind(mainTable.widthProperty().multiply(linkColumnPercentage));
-        mainTable.getColumns().get(3).prefWidthProperty().bind(mainTable.widthProperty().multiply(scanColumnPercentage));
-        mainTable.getColumns().get(4).prefWidthProperty().bind(mainTable.widthProperty().multiply(editColumnPercentage));
-        mainTable.getColumns().get(5).prefWidthProperty().bind(mainTable.widthProperty().multiply(deleteColumnPercentage));
+        mainTable.getColumns().get(3).prefWidthProperty().bind(mainTable.widthProperty().multiply(programsColumnPercentage));
+        mainTable.getColumns().get(4).prefWidthProperty().bind(mainTable.widthProperty().multiply(scanColumnPercentage));
+        mainTable.getColumns().get(5).prefWidthProperty().bind(mainTable.widthProperty().multiply(editColumnPercentage));
+        mainTable.getColumns().get(6).prefWidthProperty().bind(mainTable.widthProperty().multiply(deleteColumnPercentage));
     }
 
     public void setColumnWidthForStats(TableView<Map.Entry<String, Long>> prizeTable) {
@@ -444,12 +447,15 @@ public class TableBuilder {
         TableColumn<Profile, Void> numberColumn = createNumberingColumn();
         TableColumn<Profile, String> nameColumn = createColumn("Name");
         TableColumn<Profile, String> linkColumn = createLinkColumn("Link");
+
+        TableColumn<Profile, String> programsColumn = createColumn("Programs");
+
         TableColumn<Profile, Void> badgesColumn = createScanColumn(primaryStage, scanController);
         TableColumn<Profile, Profile> viewingColumn = createViewingColumnForProfile(primaryStage, profileController);
         TableColumn<Profile, Profile> editColumn = createEditColumnForProfile(primaryStage, profileController, mainController);
         TableColumn<Profile, Profile> actionColumn = createActionColumnForProfile(primaryStage, profileController, mainController);
 
-        mainTable.getColumns().addAll(numberColumn, nameColumn, linkColumn, badgesColumn, editColumn, actionColumn);
+        mainTable.getColumns().addAll(numberColumn, nameColumn, linkColumn, programsColumn, badgesColumn, editColumn, actionColumn);
 
         List<Profile> profiles = profileController.getProfilesFromFile();
         mainTable.getItems().addAll(profiles);
@@ -494,7 +500,16 @@ public class TableBuilder {
 
     private TableColumn<Profile, String> createColumn(String value) {
         TableColumn<Profile, String> column = new TableColumn<>(value);
-        column.setCellValueFactory(new PropertyValueFactory<>(value.toLowerCase()));
+        if ("Programs".equalsIgnoreCase(value)) {
+            column.setCellValueFactory(cellData -> {
+                Profile profile = cellData.getValue();
+                List<String> programs = profile.getPrograms();
+                String programsString = programs != null ? String.join(", ", programs) : "";
+                return new ReadOnlyStringWrapper(programsString);
+            });
+        } else {
+            column.setCellValueFactory(new PropertyValueFactory<>(value.toLowerCase()));
+        }
         return column;
     }
 
