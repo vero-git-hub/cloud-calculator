@@ -4,14 +4,11 @@ import com.example.cloudcalc.FileManager;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.PrizeController;
 import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.util.FunctionUtils;
 import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,8 +27,8 @@ public class PrizeModel {
         for (int j = 0; j < jsonArray.length(); j++) {
             JSONObject prizeObject = jsonArray.getJSONObject(j);
             Prize prize = new Prize();
+            prize.setId(prizeObject.getInt("id"));
             prize.setName(prizeObject.getString("name"));
-            prize.setType(prizeObject.getString("type"));
             prize.setCount(prizeObject.getInt("count"));
             if (prizeObject.has("program")) {
                 prize.setProgram(prizeObject.getString("program"));
@@ -66,8 +63,8 @@ public class PrizeModel {
         JSONArray jsonArray = new JSONArray();
         for (Prize prize : prizes) {
             JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", prize.getId());
             jsonObject.put("name", prize.getName());
-            jsonObject.put("type", prize.getType());
             jsonObject.put("count", prize.getCount());
             jsonObject.put("program", prize.getProgram());
             jsonArray.put(jsonObject);
@@ -75,26 +72,23 @@ public class PrizeModel {
         return jsonArray;
     }
 
-    public void savePrize(String namePrize, String badgeCount, String badgeType) {
-            Prize newPrize = new Prize();
-            newPrize.setName(namePrize);
-            newPrize.setType(badgeType);
+    public void savePrize(Prize prize) {
+        List<Prize> existingPrizes = loadPrizesFromFile();
 
-            try {
-                newPrize.setCount(Integer.parseInt(badgeCount));
-            } catch (NumberFormatException e) {
-                return;
+        if (prize.getId() == 0) {
+            prize.setId(FunctionUtils.getNextId(convertPrizesToJSONArray(existingPrizes)));
+            existingPrizes.add(prize);
+        } else {
+            for (int i = 0; i < existingPrizes.size(); i++) {
+                if (existingPrizes.get(i).getId() == prize.getId()) {
+                    existingPrizes.set(i, prize);
+                    break;
+                }
             }
+        }
 
-            List<Prize> existingPrizes = loadPrizesFromFile();
-            existingPrizes.add(newPrize);
+        JSONArray jsonArray = convertPrizesToJSONArray(existingPrizes);
 
-            JSONArray jsonArray = convertPrizesToJSONArray(existingPrizes);
-
-            try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(FileName.PRIZES_FILE), StandardCharsets.UTF_8)) {
-                writer.write(jsonArray.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        FileManager.writeJsonToFile(jsonArray, FileName.PRIZES_FILE);
     }
 }

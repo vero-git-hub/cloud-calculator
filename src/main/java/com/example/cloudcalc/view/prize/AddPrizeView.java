@@ -2,19 +2,17 @@ package com.example.cloudcalc.view.prize;
 
 import com.example.cloudcalc.builder.fields.prize.PrizeFieldManager;
 import com.example.cloudcalc.builder.fields.prize.PrizeFieldUpdatable;
-import com.example.cloudcalc.entity.badge.TypeBadge;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.PrizeController;
+import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -24,44 +22,36 @@ import java.util.ResourceBundle;
 public class AddPrizeView implements Localizable, PrizeFieldUpdatable {
     private final PrizeController prizeController;
     private String title = "ADD PRIZE";
-    private ComboBox<String> badgeTypeComboBox;
-    private TextField nameTextField;
-    private TextField badgeCountTextField;
+    private ComboBox<String> programsComboBox = new ComboBox<>();
+    private TextField nameTextField = new TextField();
+    private TextField badgeCountTextField = new TextField();
 
     public AddPrizeView(PrizeController prizeController) {
         this.prizeController = prizeController;
 
-        badgeTypeComboBox = new ComboBox<>();
-        badgeTypeComboBox.setPromptText("Select badge type");
+        programsComboBox.setPromptText("Select program");
 
         LanguageManager.registerLocalizable(this);
     }
 
     public void showScreen(Stage stage) {
+        resetForm();
         VBox layout = new VBox(10);
 
-        HBox typeLayout = new HBox();
-        typeLayout.setAlignment(Pos.CENTER);
-
-        badgeTypeComboBox.getItems().clear();
-        List<TypeBadge> typeBadgeList = prizeController.loadTypesBadgeFromFile();
-        typeBadgeList.forEach(typeBadge -> badgeTypeComboBox.getItems().add(typeBadge.getName()));
-
-        Button addTypeBadgeButton = ButtonFactory.createAddButton(e -> prizeController.showAddTypeBadgeScreen(stage));
-
-        Pane leftSpacer = new Pane();
-        Pane rightSpacer = new Pane();
-
-        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
-        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
-        typeLayout.getChildren().addAll(badgeTypeComboBox, addTypeBadgeButton, rightSpacer);
+        List<Program> programs = prizeController.loadProgramsFromFile();
+        programsComboBox.getItems().clear();
+        programs.forEach(program -> programsComboBox.getItems().add(program.getName()));
 
         PrizeFieldManager prizeTextFieldManager = LanguageManager.getTextFieldPrizeManager();
         nameTextField = prizeTextFieldManager.getNameField();
         badgeCountTextField = prizeTextFieldManager.getBadgeCountField();
 
         Button saveButton = ButtonFactory.createSaveButton(e -> {
-            prizeController.savePrize(stage, badgeTypeComboBox.getValue(), nameTextField, badgeCountTextField);
+            Prize prize = new Prize();
+            prize.setName(nameTextField.getText());
+            prize.setCount(Integer.parseInt(badgeCountTextField.getText()));
+            prize.setProgram(programsComboBox.getValue());
+            prizeController.savePrize(stage, prize);
         });
 
         Button backButton = ButtonFactory.createBackButton(e -> prizeController.showScreen(stage));
@@ -72,17 +62,22 @@ public class AddPrizeView implements Localizable, PrizeFieldUpdatable {
                 topLayout,
                 nameTextField,
                 badgeCountTextField,
-                typeLayout,
+                programsComboBox,
                 saveButton
         );
 
         prizeController.createScene(layout, stage);
     }
 
+    private void resetForm() {
+        nameTextField.clear();
+        badgeCountTextField.clear();
+    }
+
     @Override
     public void updateLocalization(ResourceBundle bundle) {
         title = bundle.getString("addPrizeTitle");
-        badgeTypeComboBox.setPromptText(bundle.getString("addPrizeTypeComboBox"));
+        programsComboBox.setPromptText(bundle.getString("programsLabelSelect"));
 
         updateNameFieldPlaceholder(bundle.getString("addPrizeNameField"));
         updateBadgeCountFieldPlaceholder(bundle.getString("addPrizeCountField"));
@@ -101,5 +96,4 @@ public class AddPrizeView implements Localizable, PrizeFieldUpdatable {
             badgeCountTextField.setPromptText(placeholder);
         }
     }
-
 }

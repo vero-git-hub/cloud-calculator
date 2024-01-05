@@ -3,22 +3,25 @@ package com.example.cloudcalc.entity;
 import java.util.Objects;
 
 public class Prize {
+    private int id;
     private String name;
-    private String type;
     private String program;
     private int count;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
-    }
-    public String getType() {
-        return type;
-    }
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getProgram() {
@@ -32,6 +35,7 @@ public class Prize {
     public int getCount() {
         return count;
     }
+
     public void setCount(int count) {
         this.count = count;
     }
@@ -42,20 +46,21 @@ public class Prize {
         if (o == null || getClass() != o.getClass()) return false;
         Prize prize = (Prize) o;
         return count == prize.count &&
-                Objects.equals(name, prize.name) &&
-                Objects.equals(type, prize.type);
+                Objects.equals(id, prize.id) &&
+                Objects.equals(name, prize.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type, count);
+        return Objects.hash(id, name, count);
     }
 
     @Override
     public String toString() {
         return "Prize{" +
+                "id='" + id + '\'' +
                 "name='" + name + '\'' +
-                ", type='" + type + '\'' +
+                ", program='" + program + '\'' +
                 ", count=" + count +
                 '}';
     }

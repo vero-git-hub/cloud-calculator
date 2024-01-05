@@ -518,11 +518,11 @@ public class TableBuilder {
 
         TableColumn<Prize, Integer> idxColumn = createNumberColumnForPrize(table);
         TableColumn<Prize, String> nameColumn = createNameColumnForPrize();
-        TableColumn<Prize, String> typeColumn = createTypeColumnForPrize();
+        TableColumn<Prize, String> programColumn = createProgramColumnForPrize();
         TableColumn<Prize, Integer> countColumn = createCountColumnForPrize();
         TableColumn<Prize, Void> deleteColumn = createDeleteColumnForPrize(stage, prizeController);
 
-        table.getColumns().addAll(idxColumn, nameColumn, typeColumn, countColumn, deleteColumn);
+        table.getColumns().addAll(idxColumn, nameColumn, programColumn, countColumn, deleteColumn);
         table.getItems().addAll(prizes);
 
         configureTableColumnsWidthForPrize(table);
@@ -571,7 +571,7 @@ public class TableBuilder {
     public void configureTableColumnsWidthForPrize(TableView<Prize> table) {
         TableColumn<Prize, ?> numberColumn = table.getColumns().get(0);
         TableColumn<Prize, ?> nameColumn = table.getColumns().get(1);
-        TableColumn<Prize, ?> typeColumn = table.getColumns().get(2);
+        TableColumn<Prize, ?> programColumn = table.getColumns().get(2);
         TableColumn<Prize, ?> countColumn = table.getColumns().get(3);
         TableColumn<Prize, ?> deleteColumn = table.getColumns().get(4);
 
@@ -582,11 +582,11 @@ public class TableBuilder {
         double remained = 1.0 - (numberColumnPercentage + countColumnPercentage + deleteColumnPercentage);
         double lastSpace = remained / 2;
         double nameColumnPercentage = lastSpace;
-        double typeColumnPercentage = lastSpace;
+        double programColumnPercentage = lastSpace;
 
         numberColumn.prefWidthProperty().bind(table.widthProperty().multiply(numberColumnPercentage));
         nameColumn.prefWidthProperty().bind(table.widthProperty().multiply(nameColumnPercentage));
-        typeColumn.prefWidthProperty().bind(table.widthProperty().multiply(typeColumnPercentage));
+        programColumn.prefWidthProperty().bind(table.widthProperty().multiply(programColumnPercentage));
         countColumn.prefWidthProperty().bind(table.widthProperty().multiply(countColumnPercentage));
         deleteColumn.prefWidthProperty().bind(table.widthProperty().multiply(deleteColumnPercentage));
     }
@@ -600,6 +600,12 @@ public class TableBuilder {
         TableColumn<Prize, String> typeColumn = new TableColumn<>("Type");
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
         return typeColumn;
+    }
+
+    private TableColumn<Prize, String> createProgramColumnForPrize() {
+        TableColumn<Prize, String> column = new TableColumn<>("Program");
+        column.setCellValueFactory(new PropertyValueFactory<>("program"));
+        return column;
     }
 
     public TableColumn<Prize, String> createNameColumnForPrize() {

@@ -4,6 +4,7 @@ import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.constant.IBadgeCategory;
 import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.entity.badge.TypeBadge;
 import com.example.cloudcalc.model.PrizeModel;
 import com.example.cloudcalc.util.Notification;
@@ -29,13 +30,14 @@ public class PrizeController extends BaseController {
     private TableBuilder tableBuilder = new TableBuilder();
     private final AddPrizeView addPrizeView = new AddPrizeView(this);
     private final Map<String, Prize> receivedPrizes = new HashMap<>();
-
     String alertTitleDeletePrize = "Confirmation Dialog";
     String alertHeaderDeletePrize = "Delete Prize";
     String alertContentDeletePrize = "Are you sure you want to delete this prize?";
+    private ProgramController programController;
 
     public PrizeController(ServiceFacade serviceFacade) {
         super(serviceFacade);
+        this.programController = serviceFacade.getProgramController();
     }
 
     public Map<String, Prize> getReceivedPrizes() {
@@ -65,13 +67,9 @@ public class PrizeController extends BaseController {
         return tableBuilder.createTableForPrize(stage, prizes, this);
     }
 
-    public void savePrize(Stage stage, String badgeType, TextField namePrizeField, TextField badgeCountField) {
-        String namePrize = namePrizeField.getText();
-        String badgeCount = badgeCountField.getText();
-        if (namePrize != null && badgeCount != null && !badgeCount.isEmpty() && badgeType != null) {
-            prizeModel.savePrize(namePrize, badgeCount, badgeType);
-            showScreen(stage);
-        }
+    public void savePrize(Stage stage, Prize prize) {
+        prizeModel.savePrize(prize);
+        showScreen(stage);
     }
 
     public void deleteAction(Stage stage, Prize prize) {
@@ -104,41 +102,44 @@ public class PrizeController extends BaseController {
         serviceFacade.showTypeBadgeScreen(stage);
     }
 
-
     public List<String> determinePrizesForBadgeCount(int prizePDF, int prizeSkill, int prizeActivity, int prizeTypeBadge) {
         List<Prize> prizes = loadPrizesFromFile();
 
         receivedPrizes.clear();
 
-        prizes.stream()
-                .filter(prize -> "pdf".equals(prize.getType()))
-                .filter(prize -> prizePDF >= prize.getCount())
-                .findFirst()
-                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.PDF_FOR_PRIZE, prize));
-
-        prizes.stream()
-                .filter(prize -> "skill".equals(prize.getType()))
-                .sorted(Comparator.comparing(Prize::getCount).reversed())
-                .filter(prize -> prizeSkill >= prize.getCount())
-                .findFirst()
-                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_PRIZE, prize));
-
-        if (prizeActivity >= 30) {
-            prizes.stream()
-                    .filter(prize -> "activity".equals(prize.getType()))
-                    .sorted(Comparator.comparing(Prize::getCount).reversed())
-                    .filter(prize -> prizeActivity >= prize.getCount())
-                    .findFirst()
-                    .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_ACTIVITY, prize));
-        }
-
-        prizes.stream()
-                .filter(prize -> "pl-02.10.2023".equals(prize.getType()))
-                .sorted(Comparator.comparing(Prize::getCount).reversed())
-                .filter(prize ->  prizeTypeBadge >= prize.getCount())
-                .findFirst()
-                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_PL, prize));
+//        prizes.stream()
+//                .filter(prize -> "pdf".equals(prize.getType()))
+//                .filter(prize -> prizePDF >= prize.getCount())
+//                .findFirst()
+//                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.PDF_FOR_PRIZE, prize));
+//
+//        prizes.stream()
+//                .filter(prize -> "skill".equals(prize.getType()))
+//                .sorted(Comparator.comparing(Prize::getCount).reversed())
+//                .filter(prize -> prizeSkill >= prize.getCount())
+//                .findFirst()
+//                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_PRIZE, prize));
+//
+//        if (prizeActivity >= 30) {
+//            prizes.stream()
+//                    .filter(prize -> "activity".equals(prize.getType()))
+//                    .sorted(Comparator.comparing(Prize::getCount).reversed())
+//                    .filter(prize -> prizeActivity >= prize.getCount())
+//                    .findFirst()
+//                    .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_ACTIVITY, prize));
+//        }
+//
+//        prizes.stream()
+//                .filter(prize -> "pl-02.10.2023".equals(prize.getType()))
+//                .sorted(Comparator.comparing(Prize::getCount).reversed())
+//                .filter(prize ->  prizeTypeBadge >= prize.getCount())
+//                .findFirst()
+//                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_PL, prize));
 
         return receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
+    }
+
+    public List<Program> loadProgramsFromFile() {
+        return programController.loadProgramsFromFile();
     }
 }

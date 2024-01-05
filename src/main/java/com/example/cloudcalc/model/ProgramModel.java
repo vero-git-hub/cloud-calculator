@@ -6,6 +6,7 @@ import com.example.cloudcalc.controller.ProgramController;
 
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.entity.Program;
+import com.example.cloudcalc.util.FunctionUtils;
 import com.example.cloudcalc.util.Notification;
 import javafx.stage.Stage;
 import org.json.JSONArray;
@@ -72,7 +73,7 @@ public class ProgramModel {
         List<Program> existingPrograms = loadProgramsFromFile();
 
         if (program.getId() == 0) {
-            program.setId(getNextId(convertProgramsToJSONArray(existingPrograms)));
+            program.setId(FunctionUtils.getNextId(convertProgramsToJSONArray(existingPrograms)));
             existingPrograms.add(program);
         } else {
             for (int i = 0; i < existingPrograms.size(); i++) {
@@ -84,17 +85,6 @@ public class ProgramModel {
         }
         JSONArray jsonArray = convertProgramsToJSONArray(existingPrograms);
         FileManager.writeJsonToFile(jsonArray, FileName.PROGRAMS_FILE);
-    }
-
-    private int getNextId(JSONArray jsonArray) {
-        int maxId = 0;
-        for (int i = 0; i < jsonArray.length(); i++) {
-            int currentId = jsonArray.getJSONObject(i).getInt("id");
-            if (currentId > maxId) {
-                maxId = currentId;
-            }
-        }
-        return maxId + 1;
     }
 
     private JSONArray convertProgramsToJSONArray(List<Program> programs) {
