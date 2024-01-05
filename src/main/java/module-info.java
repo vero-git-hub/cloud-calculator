@@ -38,4 +38,6 @@ module com.example.cloudcalc {
     opens com.example.cloudcalc.builder.fields.prize to javafx.fxml;
     exports com.example.cloudcalc.builder.fields.type;
     opens com.example.cloudcalc.builder.fields.type to javafx.fxml;
+    exports com.example.cloudcalc.view.program;
+    opens com.example.cloudcalc.view.program to javafx.fxml;
 }

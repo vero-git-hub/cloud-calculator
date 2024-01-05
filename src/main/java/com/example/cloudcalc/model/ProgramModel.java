@@ -73,12 +73,16 @@ public class ProgramModel {
 
         if (program.getId() == 0) {
             program.setId(getNextId(convertProgramsToJSONArray(existingPrograms)));
+            existingPrograms.add(program);
+        } else {
+            for (int i = 0; i < existingPrograms.size(); i++) {
+                if (existingPrograms.get(i).getId() == program.getId()) {
+                    existingPrograms.set(i, program);
+                    break;
+                }
+            }
         }
-
-        existingPrograms.add(program);
-
         JSONArray jsonArray = convertProgramsToJSONArray(existingPrograms);
-
         FileManager.writeJsonToFile(jsonArray, FileName.PROGRAMS_FILE);
     }
 

@@ -6,8 +6,8 @@ import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.model.ProgramModel;
 import com.example.cloudcalc.util.Notification;
-import com.example.cloudcalc.view.ProgramView;
-import com.example.cloudcalc.view.program.AddProgramView;
+import com.example.cloudcalc.view.program.ProgramView;
+import com.example.cloudcalc.view.program.SaveProgramView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
 public class ProgramController extends BaseController {
     private ProgramView programView = new ProgramView(this);
     private ProgramModel programModel = new ProgramModel(this);
-    private final AddProgramView addProgramView = new AddProgramView(this);
+    private final SaveProgramView saveProgramView = new SaveProgramView(this);
     public static ResourceBundle bundle;
     String alertTitleDeletePrize = "Confirmation Dialog";
     String alertHeaderDeletePrize = "Delete Program";
@@ -50,7 +50,7 @@ public class ProgramController extends BaseController {
 
     @Override
     public void showAddScreen(Stage stage) {
-        addProgramView.showScreen(stage);
+        saveProgramView.showScreen(stage);
     }
 
     @Override
@@ -62,8 +62,9 @@ public class ProgramController extends BaseController {
         return elementsBuilder.createTopLayout(backButton, titleAddScreenLabel);
     }
 
-    public void saveProgram(Program program) {
+    public void saveProgram(Stage stage, Program program) {
         programModel.saveProgram(program);
+        showScreen(stage);
     }
 
     public List<Program> loadProgramsFromFile() {
@@ -77,5 +78,9 @@ public class ProgramController extends BaseController {
 
     public void deleteAction(Stage stage, Program program) {
         programModel.deleteProgram(stage, program);
+    }
+
+    public void showEditProgramScreen(Stage primaryStage, Program program) {
+        saveProgramView.showEditProgramScreen(primaryStage, program);
     }
 }

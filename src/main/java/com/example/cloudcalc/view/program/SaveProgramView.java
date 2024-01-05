@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class AddProgramView implements Localizable, ProgramFieldUpdatable {
+public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     private final ProgramController programController;
     private CheckBox countCheckBox = new CheckBox();
     private CheckBox ignoreCheckBox = new CheckBox();
@@ -39,7 +39,6 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     private VBox layout;
     private HBox countBox;
     private HBox ignoreBox;
-    private HBox pdfBox;
     TextField countField = new TextField();
     TextField ignoreField = new TextField();
     Button uploadPdfButton = new Button();
@@ -68,7 +67,7 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     private Label pdfLabel = new Label("Download PDF:");
     Button createButton = new Button();
 
-    public AddProgramView(ProgramController programController) {
+    public SaveProgramView(ProgramController programController) {
         this.programController = programController;
         LanguageManager.registerLocalizable(this);
         initializeConditionsTable();
@@ -83,7 +82,7 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
                 createCheckBoxSection(),
                 createAddConditionButton(),
                 conditionsTable,
-                createButtonsSection()
+                createButtonsSection(stage)
         );
 
         programController.createScene(layout, stage);
@@ -101,10 +100,6 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
     private HBox createTopLayout(Stage stage) {
         Button backButton = ButtonFactory.createBackButton(e -> programController.showScreen(stage));
         return programController.createTopLayoutForAddScreen(backButton, titleAddScreenLabel);
-    }
-
-    private HBox createForm() {
-        return new HBox(10, labelName, programNameField, labelDate, startDatePicker);
     }
 
     private GridPane createFormLayout() {
@@ -134,7 +129,7 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
         return hbox;
     }
 
-    private HBox createButtonsSection() {
+    private HBox createButtonsSection(Stage stage) {
         saveButton.setOnAction(event -> {
             String programName = programNameField.getText();
             LocalDate selectedDate = startDatePicker.getValue();
@@ -157,7 +152,7 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
                 }
 
                 program.setConditions(list);
-                saveProgram(program);
+                saveProgram(stage, program);
             }
         });
         return new HBox(10, saveButton, cancelButton);
@@ -167,14 +162,13 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
         return conditionsTable.getItems().isEmpty();
     }
 
-    private void saveProgram(Program program) {
-        programController.saveProgram(program);
+    private void saveProgram(Stage stage, Program program) {
+        programController.saveProgram(stage, program);
     }
 
     private void createBox() {
         countBox = new HBox(5, countCheckBox, createInfoIcon(countTooltip));
         ignoreBox = new HBox(5, ignoreCheckBox, createInfoIcon(ignoreTooltip));
-        //pdfBox = new HBox(5, pdfCheckBox, createInfoIcon(pdfTooltip));
     }
 
     private HBox createInfoIcon(String tooltipText) {
@@ -208,9 +202,6 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
             if (ignoreCheckBox.isSelected()) {
                 modalLayout.getChildren().add(new HBox(ignoreLabel, modalIgnoreField));
             }
-//            if (pdfCheckBox.isSelected()) {
-//                modalLayout.getChildren().add(new HBox(pdfLabel, modalUploadPdfButton));
-//            }
 
             saveConditionButton.setText("Save");
             saveConditionButton.setOnAction(e -> {
@@ -224,9 +215,6 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
                     CountConditionModel newCondition = new CountConditionModel("What not to count", value);
                     conditionsTable.getItems().add(newCondition);
                 }
-//                if (pdfCheckBox.isSelected()) {
-//
-//                }
 
                 modalStage.close();
             });
@@ -303,6 +291,65 @@ public class AddProgramView implements Localizable, ProgramFieldUpdatable {
         };
         deleteColumn.setCellFactory(cellFactory);
         conditionsTable.getColumns().addAll(indexColumn, typeColumn, valueColumn, deleteColumn);
+    }
+
+    public void showEditProgramScreen(Stage stage, Program program) {
+        resetForm();
+        layout = new VBox(10);
+
+        programNameField.setText(program.getName());
+        startDatePicker.setValue(program.getDate());
+
+        countCheckBox.setSelected(program.getConditions().stream()
+                .anyMatch(cond -> "What to count".equals(cond.getType())));
+        ignoreCheckBox.setSelected(program.getConditions().stream()
+                .anyMatch(cond -> "What not to count".equals(cond.getType())));
+
+        conditionsTable.getItems().addAll(program.getConditions());
+
+        layout.getChildren().addAll(
+                createTopLayout(stage),
+                createFormLayout(),
+                createCheckBoxSection(),
+                createAddConditionButton(),
+                conditionsTable,
+                createButtonsSection(stage)
+        );
+
+        saveButton.setOnAction(event -> {
+            String programName = programNameField.getText();
+            LocalDate selectedDate = startDatePicker.getValue();
+
+            if (validateInput(programName, selectedDate)) {
+                updateExistingProgram(stage, program, programName, selectedDate);
+            }
+        });
+
+        programController.createScene(layout, stage);
+    }
+
+    private void updateExistingProgram(Stage stage, Program program, String programName, LocalDate selectedDate) {
+        program.setName(programName);
+        program.setDate(selectedDate);
+
+        List<CountConditionModel> list = new ArrayList<>(conditionsTable.getItems());
+        program.setConditions(list);
+
+        programController.saveProgram(stage, program);
+    }
+
+    private boolean validateInput(String programName, LocalDate selectedDate) {
+        if (programName == null || programName.trim().isEmpty()) {
+            Notification.showAlert("Empty field", "The program name field must not be empty", "Please enter the program name");
+            return false;
+        } else if (selectedDate == null) {
+            Notification.showAlert("Empty field", "No date selected.", "Please select a date.");
+            return false;
+        } else if (isConditionsTableEmpty()) {
+            Notification.showAlert("Empty table", "No conditions.", "Please add a condition.");
+            return false;
+        }
+        return true;
     }
 
     @Override
