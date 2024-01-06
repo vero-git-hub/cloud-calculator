@@ -21,49 +21,32 @@ import java.util.ResourceBundle;
 
 public class AddPrizeView implements Localizable, PrizeFieldUpdatable {
     private final PrizeController prizeController;
-    private String title = "ADD PRIZE";
     private ComboBox<String> programsComboBox = new ComboBox<>();
     private TextField nameTextField = new TextField();
     private TextField badgeCountTextField = new TextField();
+    Label titleLabel = new Label();
+    private VBox layout;
+    PrizeFieldManager prizeTextFieldManager;
+    Button saveButton = new Button();
+    Button cancelButton = new Button();
 
     public AddPrizeView(PrizeController prizeController) {
         this.prizeController = prizeController;
-
-        programsComboBox.setPromptText("Select program");
-
         LanguageManager.registerLocalizable(this);
     }
 
     public void showScreen(Stage stage) {
         resetForm();
-        VBox layout = new VBox(10);
+        layout = new VBox(10);
 
-        List<Program> programs = prizeController.loadProgramsFromFile();
-        programsComboBox.getItems().clear();
-        programs.forEach(program -> programsComboBox.getItems().add(program.getName()));
-
-        PrizeFieldManager prizeTextFieldManager = LanguageManager.getTextFieldPrizeManager();
-        nameTextField = prizeTextFieldManager.getNameField();
-        badgeCountTextField = prizeTextFieldManager.getBadgeCountField();
-
-        Button saveButton = ButtonFactory.createSaveButton(e -> {
-            Prize prize = new Prize();
-            prize.setName(nameTextField.getText());
-            prize.setCount(Integer.parseInt(badgeCountTextField.getText()));
-            prize.setProgram(programsComboBox.getValue());
-            prizeController.savePrize(stage, prize);
-        });
-
-        Button backButton = ButtonFactory.createBackButton(e -> prizeController.showScreen(stage));
-
-        HBox topLayout = prizeController.createTopLayoutForAddScreen(backButton, new Label(title));
+        prizeTextFieldManager = LanguageManager.getTextFieldPrizeManager();
 
         layout.getChildren().addAll(
-                topLayout,
-                nameTextField,
-                badgeCountTextField,
-                programsComboBox,
-                saveButton
+                createTopLayout(stage),
+                createNameField(),
+                createBadgeCountField(),
+                createComboBox(),
+                createSaveButton(stage)
         );
 
         prizeController.createScene(layout, stage);
@@ -74,10 +57,47 @@ public class AddPrizeView implements Localizable, PrizeFieldUpdatable {
         badgeCountTextField.clear();
     }
 
+    private HBox createTopLayout(Stage stage) {
+        Button backButton = ButtonFactory.createBackButton(e -> prizeController.showScreen(stage));
+        return prizeController.createTopLayoutForAddScreen(backButton, titleLabel);
+    }
+
+    private TextField createNameField() {
+        return nameTextField = prizeTextFieldManager.getNameField();
+    }
+
+    private TextField createBadgeCountField() {
+        return badgeCountTextField = prizeTextFieldManager.getBadgeCountField();
+    }
+
+    private ComboBox<String> createComboBox() {
+        List<Program> programs = prizeController.loadProgramsFromFile();
+        programsComboBox.getItems().clear();
+        programs.forEach(program -> {
+            programsComboBox.getItems().add(program.getName());
+        });
+        return programsComboBox;
+    }
+
+    private HBox createSaveButton(Stage stage) {
+        saveButton = ButtonFactory.createSaveButton(e -> {
+            Prize prize = new Prize();
+            prize.setName(nameTextField.getText());
+            prize.setCount(Integer.parseInt(badgeCountTextField.getText()));
+            prize.setProgram(programsComboBox.getValue());
+            prizeController.savePrize(stage, prize);
+        });
+
+        return new HBox(10, saveButton, cancelButton);
+    }
+
     @Override
     public void updateLocalization(ResourceBundle bundle) {
-        title = bundle.getString("addPrizeTitle");
-        programsComboBox.setPromptText(bundle.getString("programsLabelSelect"));
+        String title = bundle.getString("addPrizeTitle");
+        titleLabel.setText(title);
+        String promptText = bundle.getString("programsLabelSelect");
+        programsComboBox.setPromptText(promptText);
+        cancelButton.setText(bundle.getString("cancelButton"));
 
         updateNameFieldPlaceholder(bundle.getString("addPrizeNameField"));
         updateBadgeCountFieldPlaceholder(bundle.getString("addPrizeCountField"));

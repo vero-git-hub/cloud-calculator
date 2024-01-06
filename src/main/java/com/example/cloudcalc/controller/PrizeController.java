@@ -2,10 +2,10 @@ package com.example.cloudcalc.controller;
 
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.builder.TableBuilder;
-import com.example.cloudcalc.constant.IBadgeCategory;
 import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.entity.badge.TypeBadge;
+import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.model.PrizeModel;
 import com.example.cloudcalc.util.Notification;
 import com.example.cloudcalc.view.prize.AddPrizeView;
@@ -13,15 +13,14 @@ import com.example.cloudcalc.view.prize.PrizeView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class PrizeController extends BaseController {
@@ -29,6 +28,7 @@ public class PrizeController extends BaseController {
     private PrizeModel prizeModel = new PrizeModel(this);
     private TableBuilder tableBuilder = new TableBuilder();
     private final AddPrizeView addPrizeView = new AddPrizeView(this);
+    public static ResourceBundle bundle;
     private final Map<String, Prize> receivedPrizes = new HashMap<>();
     String alertTitleDeletePrize = "Confirmation Dialog";
     String alertHeaderDeletePrize = "Delete Prize";
@@ -37,7 +37,12 @@ public class PrizeController extends BaseController {
 
     public PrizeController(ServiceFacade serviceFacade) {
         super(serviceFacade);
+        bundle = LanguageManager.getBundle();
         this.programController = serviceFacade.getProgramController();
+    }
+
+    public static ResourceBundle getBundle() {
+        return bundle;
     }
 
     public Map<String, Prize> getReceivedPrizes() {
