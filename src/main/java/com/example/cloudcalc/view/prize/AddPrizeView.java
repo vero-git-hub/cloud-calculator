@@ -8,10 +8,7 @@ import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -29,6 +26,7 @@ public class AddPrizeView implements Localizable, PrizeFieldUpdatable {
     PrizeFieldManager prizeTextFieldManager;
     Button saveButton = new Button();
     Button cancelButton = new Button();
+    String promptTextComboBox = "";
 
     public AddPrizeView(PrizeController prizeController) {
         this.prizeController = prizeController;
@@ -36,7 +34,10 @@ public class AddPrizeView implements Localizable, PrizeFieldUpdatable {
     }
 
     public void showScreen(Stage stage) {
+        createComboBox();
+
         resetForm();
+
         layout = new VBox(10);
 
         prizeTextFieldManager = LanguageManager.getTextFieldPrizeManager();
@@ -45,7 +46,7 @@ public class AddPrizeView implements Localizable, PrizeFieldUpdatable {
                 createTopLayout(stage),
                 createNameField(),
                 createBadgeCountField(),
-                createComboBox(),
+                programsComboBox,
                 createSaveButton(stage)
         );
 
@@ -70,13 +71,24 @@ public class AddPrizeView implements Localizable, PrizeFieldUpdatable {
         return badgeCountTextField = prizeTextFieldManager.getBadgeCountField();
     }
 
-    private ComboBox<String> createComboBox() {
-        List<Program> programs = prizeController.loadProgramsFromFile();
+    private void createComboBox() {
         programsComboBox.getItems().clear();
-        programs.forEach(program -> {
-            programsComboBox.getItems().add(program.getName());
+
+        List<Program> programs = prizeController.loadProgramsFromFile();
+        programs.forEach(program -> programsComboBox.getItems().add(program.getName()));
+
+        programsComboBox.setPromptText(promptTextComboBox);
+        programsComboBox.setButtonCell(new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty) ;
+                if (empty || item == null) {
+                    setText("Select Subject");
+                } else {
+                    setText(item);
+                }
+            }
         });
-        return programsComboBox;
     }
 
     private HBox createSaveButton(Stage stage) {
@@ -93,10 +105,11 @@ public class AddPrizeView implements Localizable, PrizeFieldUpdatable {
 
     @Override
     public void updateLocalization(ResourceBundle bundle) {
-        String title = bundle.getString("addPrizeTitle");
-        titleLabel.setText(title);
-        String promptText = bundle.getString("programsLabelSelect");
-        programsComboBox.setPromptText(promptText);
+        titleLabel.setText(bundle.getString("addPrizeTitle"));
+
+        promptTextComboBox = bundle.getString("programsLabelSelect");
+        programsComboBox.setPromptText(promptTextComboBox);
+
         cancelButton.setText(bundle.getString("cancelButton"));
 
         updateNameFieldPlaceholder(bundle.getString("addPrizeNameField"));

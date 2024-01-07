@@ -27,7 +27,8 @@ public class PrizeController extends BaseController {
     private PrizeView prizeView = new PrizeView(this);
     private PrizeModel prizeModel = new PrizeModel(this);
     private TableBuilder tableBuilder = new TableBuilder();
-    private final AddPrizeView addPrizeView = new AddPrizeView(this);
+    private AddPrizeView addPrizeView;
+
     public static ResourceBundle bundle;
     private final Map<String, Prize> receivedPrizes = new HashMap<>();
     String alertTitleDeletePrize = "Confirmation Dialog";
@@ -39,6 +40,8 @@ public class PrizeController extends BaseController {
         super(serviceFacade);
         bundle = LanguageManager.getBundle();
         this.programController = serviceFacade.getProgramController();
+
+        addPrizeView = new AddPrizeView(this);
     }
 
     public static ResourceBundle getBundle() {
