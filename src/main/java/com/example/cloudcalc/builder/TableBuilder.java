@@ -517,17 +517,41 @@ public class TableBuilder {
         TableView<Prize> table = new TableView<>();
 
         TableColumn<Prize, Integer> idxColumn = createNumberColumnForPrize(table);
-        TableColumn<Prize, String> nameColumn = createNameColumnForPrize();
-        TableColumn<Prize, String> programColumn = createProgramColumnForPrize();
+        TableColumn<Prize, String> nameColumn = createColumnForPrize("Name");
+        TableColumn<Prize, String> programColumn = createColumnForPrize("Program");
         TableColumn<Prize, Integer> countColumn = createCountColumnForPrize();
+        TableColumn<Prize, Prize> editColumn = createEditColumn(stage, prizeController);
         TableColumn<Prize, Void> deleteColumn = createDeleteColumnForPrize(stage, prizeController);
 
-        table.getColumns().addAll(idxColumn, nameColumn, programColumn, countColumn, deleteColumn);
+        table.getColumns().addAll(idxColumn, nameColumn, programColumn, countColumn, editColumn, deleteColumn);
         table.getItems().addAll(prizes);
 
         configureTableColumnsWidthForPrize(table);
 
         return table;
+    }
+
+    private TableColumn<Prize, Prize> createEditColumn(Stage stage, PrizeController prizeController) {
+        TableColumn<Prize, Prize> column = new TableColumn<>("Edit");
+        column.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
+        column.setCellFactory(param -> new TableCell<Prize, Prize>() {
+            @Override
+            protected void updateItem(Prize prize, boolean empty) {
+                super.updateItem(prize, empty);
+                if (prize == null || empty) {
+                    setGraphic(null);
+                    return;
+                }
+
+                EventHandler<ActionEvent> action = e -> {
+                    prizeController.showEditPrizeScreen(stage, prize);
+                };
+
+                Button button = ButtonFactory.createEditButton(action);
+                setGraphic(button);
+            }
+        });
+        return column;
     }
 
     public TableColumn<Prize, Integer> createNumberColumnForPrize(TableView<Prize> mainTable) {
@@ -573,13 +597,15 @@ public class TableBuilder {
         TableColumn<Prize, ?> nameColumn = table.getColumns().get(1);
         TableColumn<Prize, ?> programColumn = table.getColumns().get(2);
         TableColumn<Prize, ?> countColumn = table.getColumns().get(3);
-        TableColumn<Prize, ?> deleteColumn = table.getColumns().get(4);
+        TableColumn<Prize, ?> editColumn = table.getColumns().get(4);
+        TableColumn<Prize, ?> deleteColumn = table.getColumns().get(5);
 
         double numberColumnPercentage = 0.05;
         double countColumnPercentage = 0.1;
+        double editColumnPercentage = 0.1;
         double deleteColumnPercentage = 0.1;
 
-        double remained = 1.0 - (numberColumnPercentage + countColumnPercentage + deleteColumnPercentage);
+        double remained = 1.0 - (numberColumnPercentage + countColumnPercentage + editColumnPercentage + deleteColumnPercentage);
         double lastSpace = remained / 2;
         double nameColumnPercentage = lastSpace;
         double programColumnPercentage = lastSpace;
@@ -588,6 +614,7 @@ public class TableBuilder {
         nameColumn.prefWidthProperty().bind(table.widthProperty().multiply(nameColumnPercentage));
         programColumn.prefWidthProperty().bind(table.widthProperty().multiply(programColumnPercentage));
         countColumn.prefWidthProperty().bind(table.widthProperty().multiply(countColumnPercentage));
+        editColumn.prefWidthProperty().bind(table.widthProperty().multiply(editColumnPercentage));
         deleteColumn.prefWidthProperty().bind(table.widthProperty().multiply(deleteColumnPercentage));
     }
 
@@ -596,22 +623,11 @@ public class TableBuilder {
         countColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
         return countColumn;
     }
-    public TableColumn<Prize, String> createTypeColumnForPrize() {
-        TableColumn<Prize, String> typeColumn = new TableColumn<>("Type");
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
-        return typeColumn;
-    }
 
-    private TableColumn<Prize, String> createProgramColumnForPrize() {
-        TableColumn<Prize, String> column = new TableColumn<>("Program");
-        column.setCellValueFactory(new PropertyValueFactory<>("program"));
+    public TableColumn<Prize, String> createColumnForPrize(String value) {
+        TableColumn<Prize, String> column = new TableColumn<>(value);
+        column.setCellValueFactory(new PropertyValueFactory<>(value.toLowerCase()));
         return column;
-    }
-
-    public TableColumn<Prize, String> createNameColumnForPrize() {
-        TableColumn<Prize, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        return nameColumn;
     }
 
     public TableColumn<Profile, Profile> createActionColumnForProfile(Stage primaryStage, ProfileController profileController, MainController mainController) {

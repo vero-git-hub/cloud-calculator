@@ -8,7 +8,7 @@ import com.example.cloudcalc.entity.badge.TypeBadge;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.model.PrizeModel;
 import com.example.cloudcalc.util.Notification;
-import com.example.cloudcalc.view.prize.AddPrizeView;
+import com.example.cloudcalc.view.prize.SavePrizeView;
 import com.example.cloudcalc.view.prize.PrizeView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -27,7 +27,7 @@ public class PrizeController extends BaseController {
     private PrizeView prizeView = new PrizeView(this);
     private PrizeModel prizeModel = new PrizeModel(this);
     private TableBuilder tableBuilder = new TableBuilder();
-    private AddPrizeView addPrizeView;
+    private SavePrizeView savePrizeView;
 
     public static ResourceBundle bundle;
     private final Map<String, Prize> receivedPrizes = new HashMap<>();
@@ -41,7 +41,7 @@ public class PrizeController extends BaseController {
         bundle = LanguageManager.getBundle();
         this.programController = serviceFacade.getProgramController();
 
-        addPrizeView = new AddPrizeView(this);
+        savePrizeView = new SavePrizeView(this);
     }
 
     public static ResourceBundle getBundle() {
@@ -64,7 +64,7 @@ public class PrizeController extends BaseController {
 
     @Override
     public void showAddScreen(Stage stage) {
-        addPrizeView.showScreen(stage);
+        savePrizeView.showScreen(stage);
     }
 
     public List<Prize> loadPrizesFromFile(){
@@ -149,5 +149,9 @@ public class PrizeController extends BaseController {
 
     public List<Program> loadProgramsFromFile() {
         return programController.loadProgramsFromFile();
+    }
+
+    public void showEditPrizeScreen(Stage stage, Prize prize) {
+        savePrizeView.showEditPrizeScreen(stage, prize);
     }
 }
