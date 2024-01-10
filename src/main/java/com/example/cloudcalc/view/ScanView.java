@@ -63,12 +63,31 @@ public class ScanView implements Localizable {
         HBox topLayout = scanController.createTopLayoutWithBackAndText(backButton, textFlow);
 
         BadgeCounts badgeCounts = scanController.calculateBadgeCounts(profile, siteLinks);
-        TableView<BadgeCategory> mainCategoriesTable = createMainCategoriesTable(badgeCounts);
 
+        TableView<BadgeCategory> mainCategoriesTable = createMainCategoriesTable(badgeCounts);
         TableView<BadgeCategory> prizeCategoriesTable = createPrizeCategoriesTable(profile, badgeCounts);
-        layout.getChildren().addAll(topLayout, mainCategoriesTable, subtitleLabel, prizeCategoriesTable);
+        //layout.getChildren().addAll(topLayout, mainCategoriesTable, subtitleLabel, prizeCategoriesTable);
+
+        TableView<BadgeCategory> scanTable = createScanTable(profile, badgeCounts);
+
+        layout.getChildren().addAll(topLayout, subtitleLabel, scanTable);
 
         scanController.createScene(layout, primaryStage);
+    }
+
+    private TableView<BadgeCategory> createScanTable(Profile profile, BadgeCounts badgeCounts) {
+        Map<String, Prize> receivedPrizes = getReceivedPrizes();
+
+        List<String> prizeNames = receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
+        profile.setPrizes(prizeNames);
+        scanController.updateProfile(profile);
+
+        TableView<BadgeCategory> table = new TableView<>();
+        table.getItems().addAll(createBadgeCategoriesList(badgeCounts));
+
+        setupTableColumns(table, receivedPrizes);
+
+        return table;
     }
 
     private TableView<BadgeCategory> createMainCategoriesTable(BadgeCounts badgeCounts) {
@@ -148,23 +167,32 @@ public class ScanView implements Localizable {
     }
 
     private TableColumn<BadgeCategory, String> createCategoryColumn(TableView<BadgeCategory> table, double width) {
-        TableColumn<BadgeCategory, String> categoryColumn = new TableColumn<>("Category");
-        categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCategory()));
+        TableColumn<BadgeCategory, String> categoryColumn = new TableColumn<>("Program");
+
+        // TODO: Read profile programs
+
+        //categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCategory()));
         categoryColumn.setResizable(false);
         categoryColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
         return categoryColumn;
     }
 
     private TableColumn<BadgeCategory, String> createValueColumn(TableView<BadgeCategory> table, double width) {
-        TableColumn<BadgeCategory, String> valueColumn = new TableColumn<>("Value");
-        valueColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getValue()));
+        TableColumn<BadgeCategory, String> valueColumn = new TableColumn<>("Badges");
+
+        // TODO: Count badges
+
+        //valueColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getValue()));
         valueColumn.setResizable(false);
         valueColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
         return valueColumn;
     }
 
     private TableColumn<BadgeCategory, String> createPrizesColumn(Map<String, Prize> receivedPrizes, TableView<BadgeCategory> table) {
-        TableColumn<BadgeCategory, String> prizesColumn = new TableColumn<>("Prizes");
+        TableColumn<BadgeCategory, String> prizesColumn = new TableColumn<>("Prize");
+
+        // TODO: Calculate prizes
+
         prizesColumn.setCellValueFactory(cellData -> {
             String categoryKey = cellData.getValue().getCategory();
             if (receivedPrizes.containsKey(categoryKey)) {
@@ -183,5 +211,4 @@ public class ScanView implements Localizable {
         titlePreText = bundle.getString("scanTitle");
         subtitleLabel.setText(bundle.getString("scanSubtitle"));
     }
-
 }

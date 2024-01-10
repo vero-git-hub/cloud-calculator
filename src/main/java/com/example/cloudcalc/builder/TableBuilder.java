@@ -212,7 +212,7 @@ public class TableBuilder {
             }
         });
 
-        setColumnWidthForStats(prizeTable);
+        //setColumnWidthForStats(prizeTable);
 
         return prizeTable;
     }
@@ -305,34 +305,24 @@ public class TableBuilder {
         mainTable = new TableView<>();
 
         TableColumn<Profile, ?> numberColumn = createNumberColumnForStats(mainTable);
-        numberColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.05));
-
         TableColumn<Profile, ?> dateColumn = createLastUpdatedColumnForStats();
-        dateColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.20));
-
         TableColumn<Profile, ?> nameColumn = createColumn("Name");
-        nameColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.10));
-
         TableColumn<Profile, ?> programColumn = createColumn("Programs");
-        nameColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.10));
-
         TableColumn<Profile, ?> prizesColumn = createPrizesColumnForStats();
-        prizesColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.50));
-
         TableColumn<Profile, ?> updateColumn = createUpdateColumnForStats(dataExtractor, badgeManager, profileModel, mainTable, prizeController, prizeTable);
-        updateColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.10));
-
         TableColumn<Profile, Void> detailsColumn = createScanColumn(stage, prizeController.getScanController());
 
         mainTable.getColumns().addAll(
                 numberColumn,
+                dateColumn,
                 nameColumn,
                 programColumn,
                 prizesColumn,
-                dateColumn,
                 updateColumn,
                 detailsColumn
         );
+
+        setColumnWidthForStats(mainTable);
 
         List<Profile> profiles = profileModel.loadProfilesFromFile(FileName.PROFILES_FILE);
         mainTable.getItems().addAll(profiles);
@@ -398,17 +388,30 @@ public class TableBuilder {
         mainTable.getColumns().get(6).prefWidthProperty().bind(mainTable.widthProperty().multiply(deleteColumnPercentage));
     }
 
-    public void setColumnWidthForStats(TableView<Map.Entry<String, Long>> prizeTable) {
-        double numberColumnPercentage = 0.1;
-        double countColumnPercentage = 0.2;
-        double programColumnPercentage = 0.2;
-        double prizeColumnPercentage = 1.0 - (numberColumnPercentage + countColumnPercentage + programColumnPercentage);
+    public void setColumnWidthForStats(TableView<Profile> table) {
+        double numberColumnPercentage = 0.05;
+        double dateColumnPercentage = 0.15;
+        double nameColumnPercentage = 0.15;
+        double programsColumnPercentage = 0.2;
+        double prizesColumnPercentage = 0.2;
+        double updateColumnPercentage = 0.15;
+        double scanColumnPercentage = 0.1;
 
-        prizeTable.getColumns().get(0).prefWidthProperty().bind(prizeTable.widthProperty().multiply(numberColumnPercentage));
-        prizeTable.getColumns().get(1).prefWidthProperty().bind(prizeTable.widthProperty().multiply(prizeColumnPercentage));
-        prizeTable.getColumns().get(2).prefWidthProperty().bind(prizeTable.widthProperty().multiply(programColumnPercentage));
-        prizeTable.getColumns().get(3).prefWidthProperty().bind(prizeTable.widthProperty().multiply(countColumnPercentage));
+        setColumnWidths(table, numberColumnPercentage, dateColumnPercentage, nameColumnPercentage, programsColumnPercentage, prizesColumnPercentage, updateColumnPercentage, scanColumnPercentage);
     }
+
+    private void setColumnWidths(TableView<?> table, double... percentages) {
+        int numColumns = table.getColumns().size();
+        if (percentages.length != numColumns) {
+            throw new IllegalArgumentException("The number of percentage values must match the number of table columns");
+        }
+
+        for (int i = 0; i < numColumns; i++) {
+            TableColumn<?, ?> column = table.getColumns().get(i);
+            column.prefWidthProperty().bind(table.widthProperty().multiply(percentages[i]));
+        }
+    }
+
 
     public void updateTitle(String newTitle) {
         if (titleLabel != null) {
