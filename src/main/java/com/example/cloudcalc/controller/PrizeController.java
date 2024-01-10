@@ -35,11 +35,13 @@ public class PrizeController extends BaseController {
     String alertHeaderDeletePrize = "Delete Prize";
     String alertContentDeletePrize = "Are you sure you want to delete this prize?";
     private ProgramController programController;
+    private ScanController scanController;
 
     public PrizeController(ServiceFacade serviceFacade) {
         super(serviceFacade);
         bundle = LanguageManager.getBundle();
         this.programController = serviceFacade.getProgramController();
+        this.scanController = serviceFacade.getScanController();
 
         savePrizeView = new SavePrizeView(this);
     }
@@ -50,6 +52,10 @@ public class PrizeController extends BaseController {
 
     public Map<String, Prize> getReceivedPrizes() {
         return receivedPrizes;
+    }
+
+    public ScanController getScanController() {
+        return scanController;
     }
 
     @Override

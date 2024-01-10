@@ -143,7 +143,7 @@ public class TableBuilder {
     }
 
     public TableColumn<Profile, String> createLastUpdatedColumnForStats() {
-        TableColumn<Profile, String> lastUpdatedColumn = new TableColumn<>("Date");
+        TableColumn<Profile, String> lastUpdatedColumn = new TableColumn<>("Update Date");
         lastUpdatedColumn.setCellValueFactory(new PropertyValueFactory<>("lastScannedDate"));
         return lastUpdatedColumn;
     }
@@ -301,7 +301,7 @@ public class TableBuilder {
         prizeTable.refresh();
     }
 
-    public TableView<Profile> createMainTableForStats(TableView<Profile> mainTable, ProfileModel profileModel, DataExtractor dataExtractor, BadgeManager badgeManager, PrizeController prizeController, TableView<Map.Entry<String, Long>> prizeTable) {
+    public TableView<Profile> createMainTableForStats(Stage stage, TableView<Profile> mainTable, ProfileModel profileModel, DataExtractor dataExtractor, BadgeManager badgeManager, PrizeController prizeController, TableView<Map.Entry<String, Long>> prizeTable) {
         mainTable = new TableView<>();
 
         TableColumn<Profile, ?> numberColumn = createNumberColumnForStats(mainTable);
@@ -313,18 +313,25 @@ public class TableBuilder {
         TableColumn<Profile, ?> nameColumn = createColumn("Name");
         nameColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.10));
 
+        TableColumn<Profile, ?> programColumn = createColumn("Programs");
+        nameColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.10));
+
         TableColumn<Profile, ?> prizesColumn = createPrizesColumnForStats();
         prizesColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.50));
 
         TableColumn<Profile, ?> updateColumn = createUpdateColumnForStats(dataExtractor, badgeManager, profileModel, mainTable, prizeController, prizeTable);
         updateColumn.prefWidthProperty().bind(mainTable.widthProperty().multiply(0.10));
 
+        TableColumn<Profile, Void> detailsColumn = createScanColumn(stage, prizeController.getScanController());
+
         mainTable.getColumns().addAll(
                 numberColumn,
                 nameColumn,
+                programColumn,
                 prizesColumn,
+                dateColumn,
                 updateColumn,
-                dateColumn
+                detailsColumn
         );
 
         List<Profile> profiles = profileModel.loadProfilesFromFile(FileName.PROFILES_FILE);
