@@ -387,20 +387,17 @@ public class TableBuilder {
         double numberColumnPercentage = 0.05;
         double nameColumnPercentage = 0.1;
         double programsColumnPercentage = 0.2;
-        double scanColumnPercentage = 0.1;
-        double viewingColumnPercentage = 0.1;
         double editColumnPercentage = 0.1;
         double deleteColumnPercentage = 0.1;
 
-        double linkColumnPercentage = 1.0 - (numberColumnPercentage + nameColumnPercentage + programsColumnPercentage + scanColumnPercentage + editColumnPercentage + deleteColumnPercentage);
+        double linkColumnPercentage = 1.0 - (numberColumnPercentage + nameColumnPercentage + programsColumnPercentage + editColumnPercentage + deleteColumnPercentage);
 
         mainTable.getColumns().get(0).prefWidthProperty().bind(mainTable.widthProperty().multiply(numberColumnPercentage));
         mainTable.getColumns().get(1).prefWidthProperty().bind(mainTable.widthProperty().multiply(nameColumnPercentage));
         mainTable.getColumns().get(2).prefWidthProperty().bind(mainTable.widthProperty().multiply(linkColumnPercentage));
         mainTable.getColumns().get(3).prefWidthProperty().bind(mainTable.widthProperty().multiply(programsColumnPercentage));
-        mainTable.getColumns().get(4).prefWidthProperty().bind(mainTable.widthProperty().multiply(scanColumnPercentage));
-        mainTable.getColumns().get(5).prefWidthProperty().bind(mainTable.widthProperty().multiply(editColumnPercentage));
-        mainTable.getColumns().get(6).prefWidthProperty().bind(mainTable.widthProperty().multiply(deleteColumnPercentage));
+        mainTable.getColumns().get(4).prefWidthProperty().bind(mainTable.widthProperty().multiply(editColumnPercentage));
+        mainTable.getColumns().get(5).prefWidthProperty().bind(mainTable.widthProperty().multiply(deleteColumnPercentage));
     }
 
     public void setColumnWidthForStats(TableView<Profile> table) {
@@ -478,7 +475,7 @@ public class TableBuilder {
         TableColumn<Profile, Profile> editColumn = createEditColumnForProfile(primaryStage, profileController, mainController);
         TableColumn<Profile, Profile> actionColumn = createActionColumnForProfile(primaryStage, profileController, mainController);
 
-        mainTable.getColumns().addAll(numberColumn, nameColumn, linkColumn, programsColumn, badgesColumn, editColumn, actionColumn);
+        mainTable.getColumns().addAll(numberColumn, nameColumn, linkColumn, programsColumn, editColumn, actionColumn);
 
         List<Profile> profiles = profileController.getProfilesFromFile();
         mainTable.getItems().addAll(profiles);
@@ -747,7 +744,7 @@ public class TableBuilder {
     }
 
     public static TableColumn<Profile, Void> createScanColumn(Stage primaryStage, ScanController scanController) {
-        TableColumn<Profile, Void> badgesColumn = new TableColumn<>("Scan");
+        TableColumn<Profile, Void> badgesColumn = new TableColumn<>("Details");
         badgesColumn.setCellValueFactory(param -> null);
         badgesColumn.setCellFactory(col -> {
             return new TableCell<Profile, Void>() {

@@ -38,7 +38,7 @@ public class ScanController {
         profile.setLastScannedDate(DateUtils.getCurrentDate());
         serviceFacade.getProfileController().getProfileModel().updateProfile(profile);
 
-        scanView.showScreen(stage, profile, siteLinks);
+        scanView.showScreen(stage, profile);
     }
 
     public void showMainScreen(Stage stage) {
