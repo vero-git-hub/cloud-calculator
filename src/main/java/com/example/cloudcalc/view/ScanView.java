@@ -3,6 +3,8 @@ package com.example.cloudcalc.view;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.IBadgeCategory;
 import com.example.cloudcalc.controller.ScanController;
+import com.example.cloudcalc.entity.PrizeInfo;
+import com.example.cloudcalc.entity.ProgramPrize;
 import com.example.cloudcalc.entity.badge.BadgeCategory;
 import com.example.cloudcalc.entity.badge.BadgeCounts;
 import com.example.cloudcalc.entity.Prize;
@@ -64,10 +66,6 @@ public class ScanView implements Localizable {
 
         BadgeCounts badgeCounts = scanController.calculateBadgeCounts(profile, siteLinks);
 
-        TableView<BadgeCategory> mainCategoriesTable = createMainCategoriesTable(badgeCounts);
-        TableView<BadgeCategory> prizeCategoriesTable = createPrizeCategoriesTable(profile, badgeCounts);
-        //layout.getChildren().addAll(topLayout, mainCategoriesTable, subtitleLabel, prizeCategoriesTable);
-
         TableView<BadgeCategory> scanTable = createScanTable(profile, badgeCounts);
 
         layout.getChildren().addAll(topLayout, subtitleLabel, scanTable);
@@ -78,9 +76,11 @@ public class ScanView implements Localizable {
     private TableView<BadgeCategory> createScanTable(Profile profile, BadgeCounts badgeCounts) {
         Map<String, Prize> receivedPrizes = getReceivedPrizes();
 
-        List<String> prizeNames = receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
-        profile.setPrizes(prizeNames);
-        scanController.updateProfile(profile);
+//        List<String> prizeNames = receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
+//        profile.setPrizes(prizeNames);
+//        scanController.updateProfile(profile);
+
+        updateProfileWithReceivedPrizes(profile, receivedPrizes);
 
         TableView<BadgeCategory> table = new TableView<>();
         table.getItems().addAll(createBadgeCategoriesList(badgeCounts));
@@ -88,6 +88,26 @@ public class ScanView implements Localizable {
         setupTableColumns(table, receivedPrizes);
 
         return table;
+    }
+
+    private void updateProfileWithReceivedPrizes(Profile profile, Map<String, Prize> receivedPrizes) {
+        List<ProgramPrize> programPrizes = new ArrayList<>();
+
+        for (String programName : receivedPrizes.keySet()) {
+            Prize prize = receivedPrizes.get(programName);
+
+            ProgramPrize programPrize = new ProgramPrize();
+            programPrize.setProgram(programName);
+
+            PrizeInfo prizeInfo = new PrizeInfo();
+            prizeInfo.setPrize(prize.getName());
+            prizeInfo.setEarnedPoints(prize.getPoints());
+
+            programPrize.getPrizeInfoList().add(prizeInfo);
+            programPrizes.add(programPrize);
+        }
+
+        profile.setProgramPrizes(programPrizes);
     }
 
     private TableView<BadgeCategory> createMainCategoriesTable(BadgeCounts badgeCounts) {
@@ -115,7 +135,7 @@ public class ScanView implements Localizable {
         Map<String, Prize> receivedPrizes = getReceivedPrizes();
 
         List<String> prizeNames = receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
-        profile.setPrizes(prizeNames);
+        //profile.setPrizes(prizeNames);
         scanController.updateProfile(profile);
 
         TableView<BadgeCategory> table = new TableView<>();

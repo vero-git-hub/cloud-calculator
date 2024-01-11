@@ -29,7 +29,7 @@ public class PrizeModel {
             Prize prize = new Prize();
             prize.setId(prizeObject.getInt("id"));
             prize.setName(prizeObject.getString("name"));
-            prize.setCount(prizeObject.getInt("count"));
+            prize.setPoints(prizeObject.getInt("points"));
             if (prizeObject.has("program")) {
                 prize.setProgram(prizeObject.getString("program"));
             }
@@ -65,7 +65,7 @@ public class PrizeModel {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", prize.getId());
             jsonObject.put("name", prize.getName());
-            jsonObject.put("count", prize.getCount());
+            jsonObject.put("points", prize.getPoints());
             jsonObject.put("program", prize.getProgram());
             jsonArray.put(jsonObject);
         }

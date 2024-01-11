@@ -8,7 +8,9 @@ import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.*;
 import com.example.cloudcalc.entity.Prize;
 import com.example.cloudcalc.entity.Profile;
+import com.example.cloudcalc.entity.ProgramPrize;
 import com.example.cloudcalc.entity.badge.BadgeCounts;
+import com.example.cloudcalc.entity.PrizeInfo;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.util.AlertGuardian;
 import com.example.cloudcalc.util.Notification;
@@ -151,10 +153,20 @@ public class TableBuilder {
     public TableColumn<Profile, String> createPrizesColumnForStats() {
         TableColumn<Profile, String> prizesColumn = new TableColumn<>("Prizes");
         prizesColumn.setCellValueFactory(cellData -> {
-            List<String> prizes = cellData.getValue().getPrizes();
-            if (prizes == null || prizes.isEmpty()) {
+            List<ProgramPrize> programPrizes = cellData.getValue().getProgramPrizes();
+            if (programPrizes == null || programPrizes.isEmpty()) {
                 return new SimpleStringProperty("No prizes");
             }
+
+            List<String> prizes = programPrizes.stream()
+                    .flatMap(programPrize -> programPrize.getPrizeInfoList().stream()
+                            .map(PrizeInfo::getPrize))
+                    .collect(Collectors.toList());
+
+            if (prizes.isEmpty()) {
+                return new SimpleStringProperty("No prizes");
+            }
+
             return new SimpleStringProperty(String.join(", ", prizes));
         });
         return prizesColumn;
@@ -233,14 +245,16 @@ public class TableBuilder {
         List<Prize> availablePrizes = prizeController.loadPrizesFromFile();
         List<String> allAvailablePrizeNames = availablePrizes.stream().map(Prize::getName).collect(Collectors.toList());
 
-        List<String> allProfilePrizes = profiles.stream()
-                .flatMap(profile -> profile.getPrizes().stream())
-                .collect(Collectors.toList());
-
         Map<String, Long> prizeCounts = new LinkedHashMap<>();
 
         for (String prizeName : allAvailablePrizeNames) {
-            prizeCounts.put(prizeName, allProfilePrizes.stream().filter(prizeName::equals).count());
+            long totalPrizeCount = profiles.stream()
+                    .flatMap(profile -> profile.getProgramPrizes().stream())
+                    .flatMap(programPrize -> programPrize.getPrizeInfoList().stream())
+                    .filter(prizeInfo -> prizeInfo.getPrize().equals(prizeName))
+                    .count();
+
+            prizeCounts.put(prizeName, totalPrizeCount);
         }
 
         long totalPrizesCount = prizeCounts.values().stream().mapToLong(Long::longValue).sum();
@@ -275,7 +289,8 @@ public class TableBuilder {
 //                                    badgeCounts.getPrizePL()
 //                            );
                             List<String> prizes = new ArrayList<>();
-                                    profile.setPrizes(prizes);
+
+                            //profile.setPrizes(prizes);
 
                             LocalDate currentDate = LocalDate.now();
                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -412,7 +427,6 @@ public class TableBuilder {
         }
     }
 
-
     public void updateTitle(String newTitle) {
         if (titleLabel != null) {
             titleLabel.setText(newTitle);
@@ -435,7 +449,6 @@ public class TableBuilder {
         if (AlertGuardian.nameAlertContent != null) {
             AlertGuardian.nameAlertContent = newContentAlert;
         }
-
     }
 
     public static void updateDeleteAlert(String newAlertTitleDeleteBadge, String newAlertHeaderDeleteBadge, String newAlertContentDeleteBadge) {
@@ -513,13 +526,35 @@ public class TableBuilder {
         if ("Programs".equalsIgnoreCase(value)) {
             column.setCellValueFactory(cellData -> {
                 Profile profile = cellData.getValue();
-                List<String> programs = profile.getPrograms();
-                String programsString = programs != null ? String.join(", ", programs) : "";
+                List<String> programNames = profile.getProgramPrizes().stream()
+                        .map(ProgramPrize::getProgram)
+                        .collect(Collectors.toList());
+                String programsString = String.join(", ", programNames);
                 return new ReadOnlyStringWrapper(programsString);
             });
         } else {
-            column.setCellValueFactory(new PropertyValueFactory<>(value.toLowerCase()));
+            column.setCellValueFactory(cellData -> {
+                String propertyValue = "";
+                switch (value.toLowerCase()) {
+                    case "id":
+                        propertyValue = Integer.toString(cellData.getValue().getId());
+                        break;
+                    case "name":
+                        propertyValue = cellData.getValue().getName();
+                        break;
+                    case "link":
+                        propertyValue = cellData.getValue().getLink();
+                        break;
+                    case "lastscanned":
+                        propertyValue = cellData.getValue().getLastScannedDate();
+                        break;
+                    default:
+                        break;
+                }
+                return new ReadOnlyStringWrapper(propertyValue);
+            });
         }
+
         return column;
     }
 
@@ -629,8 +664,8 @@ public class TableBuilder {
     }
 
     public TableColumn<Prize, Integer> createCountColumnForPrize() {
-        TableColumn<Prize, Integer> countColumn = new TableColumn<>("Count");
-        countColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
+        TableColumn<Prize, Integer> countColumn = new TableColumn<>("Points");
+        countColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
         return countColumn;
     }
 
@@ -711,8 +746,6 @@ public class TableBuilder {
         return viewingColumn;
     }
 
-
-
     public static TableColumn<Profile, Void> createScanColumn(Stage primaryStage, ScanController scanController) {
         TableColumn<Profile, Void> badgesColumn = new TableColumn<>("Scan");
         badgesColumn.setCellValueFactory(param -> null);
@@ -737,5 +770,4 @@ public class TableBuilder {
         });
         return badgesColumn;
     }
-
 }

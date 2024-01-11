@@ -6,7 +6,7 @@ public class Prize {
     private int id;
     private String name;
     private String program;
-    private int count;
+    private int points;
 
     public int getId() {
         return id;
@@ -32,12 +32,12 @@ public class Prize {
         this.program = program;
     }
 
-    public int getCount() {
-        return count;
+    public int getPoints() {
+        return points;
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    public void setPoints(int points) {
+        this.points = points;
     }
 
     @Override
@@ -45,14 +45,14 @@ public class Prize {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Prize prize = (Prize) o;
-        return count == prize.count &&
+        return points == prize.points &&
                 Objects.equals(id, prize.id) &&
                 Objects.equals(name, prize.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, count);
+        return Objects.hash(id, name, points);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class Prize {
                 "id='" + id + '\'' +
                 "name='" + name + '\'' +
                 ", program='" + program + '\'' +
-                ", count=" + count +
+                ", points=" + points +
                 '}';
     }
 }

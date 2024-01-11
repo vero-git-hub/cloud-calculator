@@ -1,15 +1,13 @@
 package com.example.cloudcalc.view;
 
-import com.example.cloudcalc.builder.fields.profile.ProfileFieldManager;
 import com.example.cloudcalc.builder.fields.profile.ProfileFieldUpdatable;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.ProfileController;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.entity.Program;
+import com.example.cloudcalc.entity.ProgramPrize;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -21,15 +19,13 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
-
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.ResourceBundle;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class ProfileView implements Localizable, ProfileFieldUpdatable {
@@ -96,15 +92,11 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
     }
 
     public void showCreateProfileScreen(Stage primaryStage) {
-        VBox layout = new VBox(10);
-        Profile profile = new Profile();
-
-        ProfileFieldManager profileFieldManager = LanguageManager.getProfileFieldManager();
-        nameField = profileFieldManager.getNameField();
-        linkField = profileFieldManager.getLinkField();
-
+        VBox layout = createLayout();
         nameField.clear();
         linkField.clear();
+
+        Profile profile = createEmptyProfile();
 
         layout.getChildren().addAll(
                 profileController.createTopLayout(primaryStage),
@@ -114,14 +106,37 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
         );
 
         List<Program> programs = profileController.loadProgramsFromFile();
+        List<CheckBox> checkBoxes = createCheckBoxes(programs, layout);
+
+        Button saveButton = createSaveButton(primaryStage, checkBoxes, profile);
+        layout.getChildren().add(saveButton);
+
+        profileController.createScene(primaryStage, layout);
+    }
+
+    private VBox createLayout() {
+        VBox layout = new VBox(10);
+        nameField = LanguageManager.getProfileFieldManager().getNameField();
+        linkField = LanguageManager.getProfileFieldManager().getLinkField();
+        return layout;
+    }
+
+    private Profile createEmptyProfile() {
+        return new Profile();
+    }
+
+    private List<CheckBox> createCheckBoxes(List<Program> programs, VBox layout) {
         List<CheckBox> checkBoxes = new ArrayList<>();
         for (Program program : programs) {
             CheckBox checkBox = new CheckBox(program.getName());
             checkBoxes.add(checkBox);
             layout.getChildren().add(checkBox);
         }
+        return checkBoxes;
+    }
 
-        Button saveButton = ButtonFactory.createSaveButton(e -> {
+    private Button createSaveButton(Stage primaryStage, List<CheckBox> checkBoxes, Profile profile) {
+        return ButtonFactory.createSaveButton(e -> {
             List<String> selectedProgramNames = checkBoxes.stream()
                     .filter(CheckBox::isSelected)
                     .map(CheckBox::getText)
@@ -129,30 +144,32 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
 
             String name = nameField.getText();
             String link = linkField.getText();
-            if(name != null && !name.isEmpty() && link != null && !link.isEmpty()) {
+            if (name != null && !name.isEmpty() && link != null && !link.isEmpty()) {
                 profile.setName(name);
                 profile.setLink(link);
             }
 
-            profile.setPrograms(selectedProgramNames);
+            List<ProgramPrize> programPrizes = createProgramPrizes(selectedProgramNames);
+            profile.setProgramPrizes(programPrizes);
 
             profileController.handleProfileSave(primaryStage, profile);
         });
+    }
 
-        layout.getChildren().add(saveButton);
-
-        profileController.createScene(primaryStage, layout);
+    private List<ProgramPrize> createProgramPrizes(List<String> programNames) {
+        return programNames.stream()
+                .map(programName -> {
+                    ProgramPrize programPrize = new ProgramPrize();
+                    programPrize.setProgram(programName);
+                    programPrize.setPrizeInfoList(new ArrayList<>());
+                    return programPrize;
+                })
+                .collect(Collectors.toList());
     }
 
     public void showEditProfileScreen(Stage primaryStage, Profile profile) {
-        VBox layout = new VBox(10);
-
-        ProfileFieldManager profileFieldManager = LanguageManager.getProfileFieldManager();
-        nameField = profileFieldManager.getNameField();
-        linkField = profileFieldManager.getLinkField();
-
-        nameField.setText(profile.getName());
-        linkField.setText(profile.getLink());
+        VBox layout = createLayout();
+        setupNameAndLinkFields(profile);
 
         layout.getChildren().addAll(
                 profileController.createTopLayoutEditProfileScreen(primaryStage),
@@ -162,19 +179,41 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
         );
 
         List<Program> programs = profileController.loadProgramsFromFile();
+        List<CheckBox> checkBoxes = createCheckBoxes(layout, programs, profile);
+
+        Button saveButton = createSaveButton(checkBoxes, profile, primaryStage);
+        layout.getChildren().add(saveButton);
+
+        profileController.createScene(primaryStage, layout);
+    }
+
+    private void setupNameAndLinkFields(Profile profile) {
+        nameField.setText(profile.getName());
+        linkField.setText(profile.getLink());
+    }
+
+    private boolean programIsSelected(Profile profile, String programName) {
+        return profile.getProgramPrizes().stream()
+                .anyMatch(programPrize -> programPrize.getProgram().equals(programName));
+    }
+
+    private List<CheckBox> createCheckBoxes(VBox layout, List<Program> programs, Profile profile) {
         List<CheckBox> checkBoxes = new ArrayList<>();
         for (Program program : programs) {
             CheckBox checkBox = new CheckBox(program.getName());
 
-            if (profile.getPrograms() != null && profile.getPrograms().contains(program.getName())) {
+            if (programIsSelected(profile, program.getName())) {
                 checkBox.setSelected(true);
             }
 
             checkBoxes.add(checkBox);
             layout.getChildren().add(checkBox);
         }
+        return checkBoxes;
+    }
 
-        Button saveButton = ButtonFactory.createSaveButton(e -> {
+    private Button createSaveButton(List<CheckBox> checkBoxes, Profile profile, Stage primaryStage) {
+        return ButtonFactory.createSaveButton(e -> {
             List<String> selectedProgramNames = checkBoxes.stream()
                     .filter(CheckBox::isSelected)
                     .map(CheckBox::getText)
@@ -182,14 +221,12 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
 
             profile.setName(nameField.getText());
             profile.setLink(linkField.getText());
-            profile.setPrograms(selectedProgramNames);
+
+            List<ProgramPrize> programPrizes = createProgramPrizes(selectedProgramNames);
+            profile.setProgramPrizes(programPrizes);
 
             profileController.handleProfileSave(primaryStage, profile);
         });
-
-        layout.getChildren().add(saveButton);
-
-        profileController.createScene(primaryStage, layout);
     }
 
     @Override

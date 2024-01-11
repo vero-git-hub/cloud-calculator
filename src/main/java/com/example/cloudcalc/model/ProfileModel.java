@@ -3,7 +3,9 @@ package com.example.cloudcalc.model;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.MainController;
 import com.example.cloudcalc.controller.ProfileController;
+import com.example.cloudcalc.entity.PrizeInfo;
 import com.example.cloudcalc.entity.Profile;
+import com.example.cloudcalc.entity.ProgramPrize;
 import com.example.cloudcalc.exception.PDFIsEmpty;
 import com.example.cloudcalc.exception.PageStructureFromPDFChangedException;
 import javafx.stage.Stage;
@@ -81,26 +83,35 @@ public class ProfileModel {
                 profile.setId(json.getInt("id"));
                 profile.setName(json.getString("name"));
                 profile.setLink(json.getString("link"));
-                if (json.has("prizes")) {
-                    JSONArray prizesArray = json.getJSONArray("prizes");
-                    List<String> prizes = new ArrayList<>();
-                    for (int i = 0; i < prizesArray.length(); i++) {
-                        prizes.add(prizesArray.getString(i));
-                    }
-                    profile.setPrizes(prizes);
-                }
 
                 if (json.has("lastScannedDate")) {
                     profile.setLastScannedDate(json.getString("lastScannedDate"));
                 }
 
-                if (json.has("programs")) {
-                    JSONArray programsArray = json.getJSONArray("programs");
-                    List<String> programs = new ArrayList<>();
-                    for (int i = 0; i < programsArray.length(); i++) {
-                        programs.add(programsArray.getString(i));
+                if (json.has("programPrizes")) {
+                    JSONArray programPrizesArray = json.getJSONArray("programPrizes");
+                    List<ProgramPrize> programPrizes = new ArrayList<>();
+                    for (int i = 0; i < programPrizesArray.length(); i++) {
+                        JSONObject programPrizeJson = programPrizesArray.getJSONObject(i);
+                        ProgramPrize programPrize = new ProgramPrize();
+                        programPrize.setProgram(programPrizeJson.getString("program"));
+
+                        if (programPrizeJson.has("prizeInfoList")) {
+                            JSONArray prizeInfoListArray = programPrizeJson.getJSONArray("prizeInfoList");
+                            List<PrizeInfo> prizeInfoList = new ArrayList<>();
+                            for (int k = 0; k < prizeInfoListArray.length(); k++) {
+                                JSONObject prizeInfoJson = prizeInfoListArray.getJSONObject(k);
+                                PrizeInfo prizeInfo = new PrizeInfo();
+                                prizeInfo.setPrize(prizeInfoJson.getString("prize"));
+                                prizeInfo.setEarnedPoints(prizeInfoJson.getInt("earnedPoints"));
+                                prizeInfoList.add(prizeInfo);
+                            }
+                            programPrize.setPrizeInfoList(prizeInfoList);
+                        }
+
+                        programPrizes.add(programPrize);
                     }
-                    profile.setPrograms(programs);
+                    profile.setProgramPrizes(programPrizes);
                 }
 
                 profiles.add(profile);
@@ -112,24 +123,61 @@ public class ProfileModel {
     }
 
     private void updateProfileFile(Profile profile, JSONArray profilesArray) {
-        JSONObject profileJson = new JSONObject();
+        JSONObject profileJson = createProfileJsonObject(profile);
 
+        if (profile.getProgramPrizes() != null) {
+            JSONArray programPrizesArray = createProgramPrizesJsonArray(profile.getProgramPrizes());
+            profileJson.put("programPrizes", programPrizesArray);
+        }
+
+        updateProfileArray(profilesArray, profileJson);
+    }
+
+
+    private JSONObject createProfileJsonObject(Profile profile) {
+        JSONObject profileJson = new JSONObject();
         profileJson.put("id", profile.getId());
         profileJson.put("name", profile.getName());
         profileJson.put("link", profile.getLink());
-
-        JSONArray prizesArray = new JSONArray(profile.getPrizes());
-        profileJson.put("prizes", prizesArray);
         profileJson.put("lastScannedDate", profile.getLastScannedDate());
+        return profileJson;
+    }
 
-        JSONArray programs = new JSONArray(profile.getPrograms());
-        profileJson.put("programs", programs);
+    private JSONArray createProgramPrizesJsonArray(List<ProgramPrize> programPrizes) {
+        JSONArray programPrizesArray = new JSONArray();
 
+        for (ProgramPrize programPrize : programPrizes) {
+            JSONObject programPrizeJson = new JSONObject();
+            programPrizeJson.put("program", programPrize.getProgram());
+
+            JSONArray prizeInfoListArray = createPrizeInfoListJsonArray(programPrize.getPrizeInfoList());
+            programPrizeJson.put("prizeInfoList", prizeInfoListArray);
+
+            programPrizesArray.put(programPrizeJson);
+        }
+
+        return programPrizesArray;
+    }
+
+    private JSONArray createPrizeInfoListJsonArray(List<PrizeInfo> prizeInfoList) {
+        JSONArray prizeInfoListArray = new JSONArray();
+
+        for (PrizeInfo prizeInfo : prizeInfoList) {
+            JSONObject prizeInfoJson = new JSONObject();
+            prizeInfoJson.put("prize", prizeInfo.getPrize());
+            prizeInfoJson.put("earnedPoints", prizeInfo.getEarnedPoints());
+            prizeInfoListArray.put(prizeInfoJson);
+        }
+
+        return prizeInfoListArray;
+    }
+
+    private void updateProfileArray(JSONArray profilesArray, JSONObject profileJson) {
         boolean profileUpdated = false;
 
         for (int i = 0; i < profilesArray.length(); i++) {
             JSONObject existingProfile = profilesArray.getJSONObject(i);
-            if (existingProfile.getInt("id") == profile.getId()) {
+            if (existingProfile.getInt("id") == profileJson.getInt("id")) {
                 profilesArray.put(i, profileJson);
                 profileUpdated = true;
                 break;
@@ -140,6 +188,24 @@ public class ProfileModel {
             profilesArray.put(profileJson);
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void updateProfile(Profile profileToUpdate) {
         JSONArray profilesArray = new JSONArray(loadProfilesFromFile(FileName.PROFILES_FILE));

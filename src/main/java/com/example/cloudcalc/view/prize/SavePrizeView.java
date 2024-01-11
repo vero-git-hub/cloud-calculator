@@ -79,7 +79,7 @@ public class SavePrizeView implements Localizable, PrizeFieldUpdatable {
         if(prize == null) {
             badgeCountTextField = prizeTextFieldManager.getBadgeCountField();
         } else {
-            badgeCountTextField = new TextField(prize.getCount() + "");
+            badgeCountTextField = new TextField(prize.getPoints() + "");
         }
     }
 
@@ -120,7 +120,7 @@ public class SavePrizeView implements Localizable, PrizeFieldUpdatable {
             } else {
                 Prize prize = new Prize();
                 prize.setName(name);
-                prize.setCount(Integer.parseInt(count));
+                prize.setPoints(Integer.parseInt(count));
                 prize.setProgram(program);
                 savePrize(stage, prize);
             }
@@ -197,7 +197,7 @@ public class SavePrizeView implements Localizable, PrizeFieldUpdatable {
 
     private void updateExistingPrize(Stage stage, Prize prize, String name, String count, String program) {
         prize.setName(name);
-        prize.setCount(Integer.parseInt(count));
+        prize.setPoints(Integer.parseInt(count));
         prize.setProgram(program);
 
         prizeController.savePrize(stage, prize);

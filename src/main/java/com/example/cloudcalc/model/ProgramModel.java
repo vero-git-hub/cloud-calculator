@@ -109,7 +109,8 @@ public class ProgramModel {
             List<Profile> profiles = programController.loadProfilesFromFile();
 
             boolean isProgramAssigned = profiles.stream()
-                    .anyMatch(profile -> profile.getPrograms().contains(program.getName()));
+                    .flatMap(profile -> profile.getProgramPrizes().stream())
+                    .anyMatch(programPrize -> programPrize.getProgram().equals(program.getName()));
 
             if (isProgramAssigned) {
                 Notification.showAlert("Cannot be deleted", "The program is assigned to the profile", "Please cancel the assignment before deleting.");
