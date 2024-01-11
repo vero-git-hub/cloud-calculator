@@ -7,9 +7,8 @@ public class Profile {
     private int id;
     private String name;
     private String link;
-    private List<String> prizes;
     private String lastScannedDate;
-    private List<String> programs;
+    private List<ProgramPrize> programPrizes;
 
     public int getId() {
         return id;
@@ -35,14 +34,6 @@ public class Profile {
         this.link = link;
     }
 
-    public List<String> getPrizes() {
-        return prizes;
-    }
-
-    public void setPrizes(List<String> prizes) {
-        this.prizes = prizes;
-    }
-
     public String getLastScannedDate() {
         return lastScannedDate;
     }
@@ -51,12 +42,12 @@ public class Profile {
         this.lastScannedDate = lastScannedDate;
     }
 
-    public List<String> getPrograms() {
-        return programs;
+    public List<ProgramPrize> getProgramPrizes() {
+        return programPrizes;
     }
 
-    public void setPrograms(List<String> programs) {
-        this.programs = programs;
+    public void setProgramPrizes(List<ProgramPrize> programPrizes) {
+        this.programPrizes = programPrizes;
     }
 
     @Override
@@ -79,8 +70,8 @@ public class Profile {
                 "id='" + id + '\'' +
                 "name='" + name + '\'' +
                 "link='" + link + '\'' +
-                ", prizes=" + prizes +
-                ", programs=" + programs +
+                ", lastScannedDate='" + lastScannedDate + '\'' +
+                ", programPrizes=" + programPrizes +
                 '}';
     }
 }
