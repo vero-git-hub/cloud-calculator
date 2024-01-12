@@ -26,19 +26,18 @@ public class ScanController {
     private final ElementsBuilder elementsBuilder = new ElementsBuilder();
     private final SceneBuilder sceneBuilder = new SceneBuilder();
 
-
     public ScanController(ServiceFacade serviceFacade) {
         this.serviceFacade = serviceFacade;
     }
 
     public void showScreen(Stage stage, Profile profile) {
         serviceFacade.getProfileController().scanAndUpdateProfile(stage, profile);
-        ArrayList<String> siteLinks = serviceFacade.getDataExtractor().performScan(profile);
-
-        profile.setLastScannedDate(DateUtils.getCurrentDate());
-        serviceFacade.getProfileController().getProfileModel().updateProfile(profile);
 
         scanView.showScreen(stage, profile);
+    }
+
+    public void showStatsScreen(Stage stage) {
+        serviceFacade.getStatsController().showStatsScreen(stage);
     }
 
     public void showMainScreen(Stage stage) {

@@ -72,7 +72,7 @@ public class StatsController {
      }
 
     public Label createSubtitleLabelForStats() {
-        return elementsBuilder.createSubtitleLabelForStats(statsView.getSubtitleLabel());
+        return elementsBuilder.createSubtitleLabel(statsView.getSubtitleLabel());
     }
 
     public TableView<Profile> createMainTableForStats(Stage stage, TableView<Profile> mainTable, TableView<Map.Entry<String, Long>> prizeTable) {

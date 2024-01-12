@@ -83,4 +83,8 @@ public class ProgramController extends BaseController {
     public void showEditProgramScreen(Stage primaryStage, Program program) {
         saveProgramView.showEditProgramScreen(primaryStage, program);
     }
+
+    public Label createSubtitleLabel() {
+        return elementsBuilder.createSubtitleLabel(saveProgramView.getSubtitleLabel());
+    }
 }

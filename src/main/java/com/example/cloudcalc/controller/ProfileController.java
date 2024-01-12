@@ -10,6 +10,8 @@ import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.entity.Program;
+import com.example.cloudcalc.entity.ProgramPrize;
+import com.example.cloudcalc.model.CountConditionModel;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.view.ProfileView;
 import javafx.scene.control.Button;
@@ -20,6 +22,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,11 +72,47 @@ public class ProfileController {
     }
 
     public void scanAndUpdateProfile(Stage primaryStage, Profile profile) {
-        ArrayList<String> siteLinks = dataExtractor.performScan(profile);
+        List<String> profilePrograms = new ArrayList<>();
+        List<ProgramPrize> programPrizeList = profile.getProgramPrizes();
+        for (ProgramPrize programPrize : programPrizeList) {
+            profilePrograms.add(programPrize.getProgram());
+        }
+        //System.out.println("profilePrograms -> " + profilePrograms);
+
+        List<Program> allPrograms = loadProgramsFromFile();
+        //System.out.println("allPrograms -> " + allPrograms);
+
+        if(!allPrograms.isEmpty()) {
+            for (Program program : allPrograms) {
+                for (String profileProgramName : profilePrograms) {
+                    if(program.getName().equals(profileProgramName)) {
+                        LocalDate date = program.getDate();
+
+                        List<CountConditionModel> conditions = program.getConditions();
+                        List<String> countingList = new ArrayList<>();
+                        List<String> ignoreList = new ArrayList<>();
+                        for (CountConditionModel countConditionModel : conditions) {
+                            if(countConditionModel.getType().equals("What to count")) {
+                                countingList.add(countConditionModel.getValue());
+                            } else if (countConditionModel.getType().equals("What not to count")) {
+                                ignoreList.add(countConditionModel.getValue());
+                            }
+                        }
+
+                        System.out.println("date " + date);
+                        System.out.println("countingList " + countingList);
+                        System.out.println("ignoreList " + ignoreList);
+                    }
+                }
+            }
+        }
+
+        updateProfile(profile);
+    }
+
+    private void updateProfile(Profile profile) {
         profile.setLastScannedDate(DateUtils.getCurrentDate());
         profileModel.updateProfile(profile);
-
-        //scanView.showScreen(primaryStage, profile, siteLinks);
     }
 
     public void showProfileDetailsScreen(Stage stage, Profile profile) {

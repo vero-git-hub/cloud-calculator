@@ -1,7 +1,6 @@
 package com.example.cloudcalc.builder;
 
 import com.example.cloudcalc.button.ButtonFactory;
-import com.example.cloudcalc.controller.ArcadeController;
 import com.example.cloudcalc.controller.IScreenController;
 import com.example.cloudcalc.controller.MainController;
 import com.example.cloudcalc.entity.Profile;
@@ -115,7 +114,7 @@ public class ElementsBuilder {
 //        return uiCallbacks.createTopLayout(backButton, titleLabel);
 //    }
 
-    public Label createSubtitleLabelForStats(Label subtitleLabel) {
+    public Label createSubtitleLabel(Label subtitleLabel) {
         subtitleLabel.setStyle("-fx-font-style: italic;");
         return subtitleLabel;
     }

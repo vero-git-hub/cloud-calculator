@@ -65,6 +65,7 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     private Label ignoreLabel = new Label("What not to count (" +
             "separated by commas):");
     private Label pdfLabel = new Label("Download PDF:");
+    private Label subtitleLabel = new Label("If you can get more than 1 prize, create another program. Does not apply to Arcade.");
     Button createButton = new Button();
 
     public SaveProgramView(ProgramController programController) {
@@ -73,11 +74,16 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         initializeConditionsTable();
     }
 
+    public Label getSubtitleLabel() {
+        return subtitleLabel;
+    }
+
     public void showScreen(Stage stage) {
         resetForm();
         layout = new VBox(10);
         layout.getChildren().addAll(
                 createTopLayout(stage),
+                programController.createSubtitleLabel(),
                 createFormLayout(),
                 createCheckBoxSection(),
                 createAddConditionButton(),

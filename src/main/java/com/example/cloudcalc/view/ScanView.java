@@ -50,7 +50,7 @@ public class ScanView implements Localizable {
     public void showScreen(Stage primaryStage, Profile profile) {
         VBox layout = new VBox(10);
 
-        Button backButton = ButtonFactory.createBackButton(e -> scanController.showMainScreen(primaryStage));
+        Button backButton = ButtonFactory.createBackButton(e -> scanController.showStatsScreen(primaryStage));
 
         Text preTextLabel = new Text(titlePreText);
         Hyperlink nameLink = new Hyperlink(profile.getName());
@@ -73,7 +73,7 @@ public class ScanView implements Localizable {
         scanController.createScene(layout, primaryStage);
     }
 
-    private List<PrizeData> parseProfilePrizes(com.example.cloudcalc.entity.Profile profile) {
+    private List<PrizeData> parseProfilePrizes(Profile profile) {
         List<PrizeData> prizeDataList = new ArrayList<>();
         JSONArray programPrizesArray = new JSONArray(profile.getProgramPrizes());
 
@@ -119,9 +119,9 @@ public class ScanView implements Localizable {
         table.getColumns().addAll(indexColumn, programColumn, prizeColumn, pointsColumn);
         table.setItems(data);
 
+        System.out.println("createScanTable");
         return table;
     }
-
 
     private void updateProfileWithReceivedPrizes(Profile profile, Map<String, Prize> receivedPrizes) {
         List<ProgramPrize> programPrizes = profile.getProgramPrizes();
@@ -224,23 +224,21 @@ public class ScanView implements Localizable {
     }
 
     private TableColumn<Profile, String> createProgramColumn(TableView<Profile> table, double width) {
-        System.out.println("createProgramColumn");
         TableColumn<Profile, String> programColumn = new TableColumn<>("Programs");
 
-        programColumn.setCellValueFactory(data -> {
-            System.out.println("setCellValueFactory");
-            Profile profile = data.getValue();
-
-            List<String> programNames = profile.getProgramPrizes().stream()
-                    .map(ProgramPrize::getProgram)
-                    .collect(Collectors.toList());
-
-            return new SimpleStringProperty(String.join(", ", programNames));
-        });
-
-
-        programColumn.setResizable(false);
-        programColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
+//        programColumn.setCellValueFactory(data -> {
+//            Profile profile = data.getValue();
+//
+//            List<String> programNames = profile.getProgramPrizes().stream()
+//                    .map(ProgramPrize::getProgram)
+//                    .collect(Collectors.toList());
+//
+//            return new SimpleStringProperty(String.join(", ", programNames));
+//        });
+//
+//
+//        programColumn.setResizable(false);
+//        programColumn.prefWidthProperty().bind(table.widthProperty().multiply(width));
         return programColumn;
     }
 

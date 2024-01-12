@@ -94,13 +94,16 @@ public class DataExtractor implements Localizable {
         typeBadgeExtractedData.clear();
 
         Map<String, String> extractedData = null;
-        try {
-            extractedData = scanProfileLink(profile);
+        //try {
+
+            //extractedData = scanProfileLink(profile);
+            extractedData = new LinkedHashMap<>();
             extractTypeBadgesAfterDate(extractedData, "02.10.2023");
 
-        } catch (ProfilePageStructureChangedException ex) {
-            Notification.showErrorMessage(dataExtractorError, dataExtractorTitleError);
-        }
+        //}
+//        catch (ProfilePageStructureChangedException ex) {
+//            Notification.showErrorMessage(dataExtractorError, dataExtractorTitleError);
+//        }
 
         return new ArrayList<>(extractedData.keySet());
     }
@@ -130,20 +133,20 @@ public class DataExtractor implements Localizable {
             if (subheadElements.isEmpty() || bodyElements.isEmpty() || subheadElements.size() != bodyElements.size()) {
                 throw new ProfilePageStructureChangedException(dataExtractorDescriptionError);
             }
-
-            //LocalDate profileDate = dateUtils.convertProfileOrTypeBadgeStartDate(profile.getStartDate());
-
-            for(int i = 0; i < subheadElements.size(); i++) {
-                String key = subheadElements.get(i).text();
-                String valueStr = bodyElements.get(i).text();
-
-                LocalDate valueDate = dateUtils.extractDateFromValue(valueStr);
-
-//                if(!valueDate.isBefore(profileDate)) {
-//                    resultMap.put(key, valueStr);
-//                }
-            }
-
+//
+//            //LocalDate profileDate = dateUtils.convertProfileOrTypeBadgeStartDate(profile.getStartDate());
+//
+//            for(int i = 0; i < subheadElements.size(); i++) {
+//                String key = subheadElements.get(i).text();
+//                String valueStr = bodyElements.get(i).text();
+//
+//                LocalDate valueDate = dateUtils.extractDateFromValue(valueStr);
+//
+////                if(!valueDate.isBefore(profileDate)) {
+////                    resultMap.put(key, valueStr);
+////                }
+//            }
+//
         } catch (IOException e) {
             e.printStackTrace();
         }
