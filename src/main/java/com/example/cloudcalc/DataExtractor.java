@@ -121,7 +121,7 @@ public class DataExtractor implements Localizable {
         }
     }
 
-    public Map<String, String> scanProfileLink(Profile profile) throws ProfilePageStructureChangedException {
+    public Map<String, String> scanProfileLink(Profile profile, LocalDate profileDate) throws ProfilePageStructureChangedException {
         Map<String, String> resultMap = new LinkedHashMap<>();
 
         try {
@@ -133,20 +133,18 @@ public class DataExtractor implements Localizable {
             if (subheadElements.isEmpty() || bodyElements.isEmpty() || subheadElements.size() != bodyElements.size()) {
                 throw new ProfilePageStructureChangedException(dataExtractorDescriptionError);
             }
-//
-//            //LocalDate profileDate = dateUtils.convertProfileOrTypeBadgeStartDate(profile.getStartDate());
-//
-//            for(int i = 0; i < subheadElements.size(); i++) {
-//                String key = subheadElements.get(i).text();
-//                String valueStr = bodyElements.get(i).text();
-//
-//                LocalDate valueDate = dateUtils.extractDateFromValue(valueStr);
-//
-////                if(!valueDate.isBefore(profileDate)) {
-////                    resultMap.put(key, valueStr);
-////                }
-//            }
-//
+
+            for(int i = 0; i < subheadElements.size(); i++) {
+                String key = subheadElements.get(i).text();
+                String valueStr = bodyElements.get(i).text();
+
+                LocalDate valueDate = dateUtils.extractDateFromValue(valueStr);
+
+                if(!valueDate.isBefore(profileDate)) {
+                    resultMap.put(key, valueStr);
+                }
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -97,6 +97,8 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         startDatePicker.setValue(null);
         conditionsTable.getItems().clear();
         radioGroup.selectToggle(null);
+        countRadioButton.setDisable(false);
+        ignoreRadioButton.setDisable(false);
     }
 
     private HBox createTopLayout(Stage stage) {
@@ -332,8 +334,10 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     private void setRadioButtonSelection(Program program) {
         if (program.getConditions().stream().anyMatch(cond -> "What to count".equals(cond.getType()))) {
             countRadioButton.setSelected(true);
+            ignoreRadioButton.setDisable(true);
         } else if (program.getConditions().stream().anyMatch(cond -> "What not to count".equals(cond.getType()))) {
             ignoreRadioButton.setSelected(true);
+            countRadioButton.setDisable(true);
         }
     }
 

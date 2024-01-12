@@ -386,11 +386,11 @@ public class TableBuilder {
     public void configureTableColumnsWidthForMain(TableView<Profile> mainTable) {
         double numberColumnPercentage = 0.05;
         double nameColumnPercentage = 0.1;
-        double programsColumnPercentage = 0.2;
+        double linkColumnPercentage = 0.2;
         double editColumnPercentage = 0.1;
         double deleteColumnPercentage = 0.1;
 
-        double linkColumnPercentage = 1.0 - (numberColumnPercentage + nameColumnPercentage + programsColumnPercentage + editColumnPercentage + deleteColumnPercentage);
+        double programsColumnPercentage = 1.0 - (numberColumnPercentage + nameColumnPercentage + linkColumnPercentage + editColumnPercentage + deleteColumnPercentage);
 
         mainTable.getColumns().get(0).prefWidthProperty().bind(mainTable.widthProperty().multiply(numberColumnPercentage));
         mainTable.getColumns().get(1).prefWidthProperty().bind(mainTable.widthProperty().multiply(nameColumnPercentage));

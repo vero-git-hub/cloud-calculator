@@ -68,30 +68,7 @@ public class ProgramView implements Localizable {
 
         tableView.getColumns().addAll(indexColumn, nameColumn, dateColumn, editColumn, deleteColumn);
 
-        TableView<CountConditionModel> subTableView = new TableView<>();
-
-        TableColumn<CountConditionModel, Number> subIndexColumn = new TableColumn<>("#");
-        subIndexColumn.setSortable(false);
-        subIndexColumn.setCellValueFactory(column -> new ReadOnlyObjectWrapper<>(subTableView.getItems().indexOf(column.getValue()) + 1));
-        subIndexColumn.setCellFactory(column -> new TableCell<CountConditionModel, Number>() {
-            @Override
-            protected void updateItem(Number item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(item.toString());
-                }
-            }
-        });
-
-        TableColumn<CountConditionModel, String> typeColumn = new TableColumn<>("Condition Type");
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
-
-        TableColumn<CountConditionModel, String> valueColumn = new TableColumn<>("Condition Value");
-        valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
-
-        subTableView.getColumns().addAll(subIndexColumn, typeColumn, valueColumn);
+        TableView<CountConditionModel> subTableView = createSubTableView();
 
         tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -111,6 +88,40 @@ public class ProgramView implements Localizable {
         configureTableColumnsWidth(tableView);
         programController.createScene(layout, stage);
     }
+
+    private TableView<CountConditionModel> createSubTableView() {
+        TableView<CountConditionModel> subTableView = new TableView<>();
+
+        TableColumn<CountConditionModel, Number> subIndexColumn = new TableColumn<>("№");
+        subIndexColumn.setMinWidth(30);
+        subIndexColumn.setMaxWidth(50);
+        subIndexColumn.setSortable(false);
+        subIndexColumn.setCellValueFactory(column -> new ReadOnlyObjectWrapper<>(subTableView.getItems().indexOf(column.getValue()) + 1));
+        subIndexColumn.setCellFactory(column -> new TableCell<CountConditionModel, Number>() {
+            @Override
+            protected void updateItem(Number item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.toString());
+                }
+            }
+        });
+
+        TableColumn<CountConditionModel, String> typeColumn = new TableColumn<>("Condition Type");
+        typeColumn.setPrefWidth(150);
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+
+        TableColumn<CountConditionModel, String> valueColumn = new TableColumn<>("Condition Value");
+        valueColumn.setPrefWidth(600);
+        valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+
+        subTableView.getColumns().addAll(subIndexColumn, typeColumn, valueColumn);
+
+        return subTableView;
+    }
+
 
     private void configureTableColumnsWidth(TableView<Program> table) {
         double numberColumnPercentage = 0.05;

@@ -11,8 +11,10 @@ import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.entity.ProgramPrize;
+import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
 import com.example.cloudcalc.model.CountConditionModel;
 import com.example.cloudcalc.model.ProfileModel;
+import com.example.cloudcalc.util.Notification;
 import com.example.cloudcalc.view.ProfileView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -25,6 +27,7 @@ import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ProfileController {
 
@@ -77,10 +80,8 @@ public class ProfileController {
         for (ProgramPrize programPrize : programPrizeList) {
             profilePrograms.add(programPrize.getProgram());
         }
-        //System.out.println("profilePrograms -> " + profilePrograms);
 
         List<Program> allPrograms = loadProgramsFromFile();
-        //System.out.println("allPrograms -> " + allPrograms);
 
         if(!allPrograms.isEmpty()) {
             for (Program program : allPrograms) {
@@ -99,9 +100,31 @@ public class ProfileController {
                             }
                         }
 
-                        System.out.println("date " + date);
-                        System.out.println("countingList " + countingList);
-                        System.out.println("ignoreList " + ignoreList);
+                        int points = 0;
+                        try {
+                            Map<String, String> map = dataExtractor.scanProfileLink(profile, date);
+
+                            for (Map.Entry<String, String> entry : map.entrySet()) {
+                                if (!countingList.isEmpty()) {
+                                    for(String elem : countingList) {
+                                        if(elem.equals(entry.getKey())) {
+                                            points++;
+                                        }
+                                    }
+                                } else if(!ignoreList.isEmpty()) {
+                                    for(String elem : ignoreList) {
+                                        if(!elem.equals(entry.getKey())) {
+                                            points++;
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (ProfilePageStructureChangedException ex) {
+                            Notification.showErrorMessage("Error", "Page structure has changed.");
+                        }
+
+                        System.out.println("points -> " + points);
+
                     }
                 }
             }
