@@ -25,6 +25,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,18 +35,13 @@ import java.util.ResourceBundle;
 
 public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     private final ProgramController programController;
-    private CheckBox countCheckBox = new CheckBox();
-    private CheckBox ignoreCheckBox = new CheckBox();
-    private CheckBox pdfCheckBox = new CheckBox();
     private VBox layout;
     private HBox countBox;
     private HBox ignoreBox;
     TextField countField = new TextField();
     TextField ignoreField = new TextField();
-    Button uploadPdfButton = new Button();
     String countTooltip;
     String ignoreTooltip;
-    String pdfTooltip;
     GridPane gridPane;
     Label labelName = new Label();
     TextField programNameField = new TextField();
@@ -57,16 +54,17 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     Button cancelButton = new Button();
     private TableView<CountConditionModel> conditionsTable;
     Stage modalStage;
-    Button modalUploadPdfButton = new Button();
     Button saveConditionButton = new Button();
     Button closeConditionButton = new Button();
     private Label countLabel = new Label("What to count (" +
             "separated by commas):");
     private Label ignoreLabel = new Label("What not to count (" +
             "separated by commas):");
-    private Label pdfLabel = new Label("Download PDF:");
     private Label subtitleLabel = new Label("If you can get more than 1 prize, create another program. Does not apply to Arcade.");
     Button createButton = new Button();
+    private RadioButton countRadioButton = new RadioButton("Count");
+    private RadioButton ignoreRadioButton = new RadioButton("Ignore");
+    private ToggleGroup radioGroup = new ToggleGroup();
 
     public SaveProgramView(ProgramController programController) {
         this.programController = programController;
@@ -98,9 +96,7 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         programNameField.clear();
         startDatePicker.setValue(null);
         conditionsTable.getItems().clear();
-        countCheckBox.setSelected(false);
-        ignoreCheckBox.setSelected(false);
-        pdfCheckBox.setSelected(false);
+        radioGroup.selectToggle(null);
     }
 
     private HBox createTopLayout(Stage stage) {
@@ -121,8 +117,16 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
 
     private VBox createCheckBoxSection() {
         createBox();
-        HBox checkBoxes = new HBox(10, countBox, ignoreBox);
-        return new VBox(10, labelCheckBox, checkBoxes);
+        HBox radioButtons = new HBox(10, countBox, ignoreBox);
+        return new VBox(10, labelCheckBox, radioButtons);
+    }
+
+    private void createBox() {
+        countRadioButton.setToggleGroup(radioGroup);
+        ignoreRadioButton.setToggleGroup(radioGroup);
+
+        countBox = new HBox(5, countRadioButton, createInfoIcon(countTooltip));
+        ignoreBox = new HBox(5, ignoreRadioButton, createInfoIcon(ignoreTooltip));
     }
 
     private HBox createAddConditionButton() {
@@ -172,11 +176,6 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         programController.saveProgram(stage, program);
     }
 
-    private void createBox() {
-        countBox = new HBox(5, countCheckBox, createInfoIcon(countTooltip));
-        ignoreBox = new HBox(5, ignoreCheckBox, createInfoIcon(ignoreTooltip));
-    }
-
     private HBox createInfoIcon(String tooltipText) {
         ImageView infoIcon = new ImageView(new Image(ButtonFactory.class.getResourceAsStream("/images/info-48.png")));
         infoIcon.setFitHeight(20);
@@ -190,7 +189,9 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     }
 
     private void showAddConditionModal() {
-        if (countCheckBox.isSelected() || ignoreCheckBox.isSelected() || pdfCheckBox.isSelected()) {
+        RadioButton selectedRadioButton = (RadioButton) radioGroup.getSelectedToggle();
+
+        if (selectedRadioButton != null) {
             modalStage = new Stage();
             modalStage.initModality(Modality.APPLICATION_MODAL);
             modalStage.setTitle("Add condition");
@@ -198,27 +199,24 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
             VBox modalLayout = new VBox(10);
             modalLayout.setPadding(new Insets(10));
 
-            TextField modalCountField = new TextField();
-            TextField modalIgnoreField = new TextField();
-            modalUploadPdfButton = new Button("Download PDF");
+            TextField modalTextField = new TextField();
+            Label modalLabel = new Label();
 
-            if (countCheckBox.isSelected()) {
-                modalLayout.getChildren().add(new HBox(countLabel, modalCountField));
-            }
-            if (ignoreCheckBox.isSelected()) {
-                modalLayout.getChildren().add(new HBox(ignoreLabel, modalIgnoreField));
+            if (selectedRadioButton == countRadioButton) {
+                modalLabel.setText("What to count:");
+                modalLayout.getChildren().add(new HBox(modalLabel, modalTextField));
+            } else if (selectedRadioButton == ignoreRadioButton) {
+                modalLabel.setText("What not to count:");
+                modalLayout.getChildren().add(new HBox(modalLabel, modalTextField));
             }
 
             saveConditionButton.setText("Save");
             saveConditionButton.setOnAction(e -> {
-                if (countCheckBox.isSelected()) {
-                    String value = modalCountField.getText();
-                    CountConditionModel newCondition = new CountConditionModel("What to count", value);
-                    conditionsTable.getItems().add(newCondition);
-                }
-                if (ignoreCheckBox.isSelected()) {
-                    String value = modalIgnoreField.getText();
-                    CountConditionModel newCondition = new CountConditionModel("What not to count", value);
+                String value = modalTextField.getText();
+                String conditionType = modalLabel.getText();
+
+                if (!value.isEmpty()) {
+                    CountConditionModel newCondition = new CountConditionModel(conditionType, value);
                     conditionsTable.getItems().add(newCondition);
                 }
 
@@ -306,10 +304,7 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         programNameField.setText(program.getName());
         startDatePicker.setValue(program.getDate());
 
-        countCheckBox.setSelected(program.getConditions().stream()
-                .anyMatch(cond -> "What to count".equals(cond.getType())));
-        ignoreCheckBox.setSelected(program.getConditions().stream()
-                .anyMatch(cond -> "What not to count".equals(cond.getType())));
+        setRadioButtonSelection(program);
 
         conditionsTable.getItems().addAll(program.getConditions());
 
@@ -332,6 +327,14 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         });
 
         programController.createScene(layout, stage);
+    }
+
+    private void setRadioButtonSelection(Program program) {
+        if (program.getConditions().stream().anyMatch(cond -> "What to count".equals(cond.getType()))) {
+            countRadioButton.setSelected(true);
+        } else if (program.getConditions().stream().anyMatch(cond -> "What not to count".equals(cond.getType()))) {
+            ignoreRadioButton.setSelected(true);
+        }
     }
 
     private void updateExistingProgram(Stage stage, Program program, String programName, LocalDate selectedDate) {
@@ -367,15 +370,11 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         labelCheckBox.setText(bundle.getString("labelCheckBox"));
 
         labelAddCondition.setText(bundle.getString("addConditionButton"));
-        countCheckBox.setText(bundle.getString("countCheckBox"));
-        ignoreCheckBox.setText(bundle.getString("ignoreCheckBox"));
-        pdfCheckBox.setText(bundle.getString("pdfCheckBox"));
+        countRadioButton.setText(bundle.getString("countCheckBox"));
+        ignoreRadioButton.setText(bundle.getString("ignoreCheckBox"));
 
         countTooltip = bundle.getString("countTooltip");
         ignoreTooltip = bundle.getString("ignoreTooltip");
-        pdfTooltip = bundle.getString("pdfTooltip");
-
-        uploadPdfButton.setText(bundle.getString("pdfCheckBox"));
 
         saveButton.setText(bundle.getString("saveButton"));
         cancelButton.setText(bundle.getString("cancelButton"));
