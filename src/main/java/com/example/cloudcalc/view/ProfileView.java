@@ -222,11 +222,29 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
             profile.setName(nameField.getText());
             profile.setLink(linkField.getText());
 
-            List<ProgramPrize> programPrizes = createProgramPrizes(selectedProgramNames);
+            List<ProgramPrize> existingProgramPrizes = profile.getProgramPrizes();
+            List<ProgramPrize> programPrizes = createProgramPrizes(selectedProgramNames, existingProgramPrizes);
             profile.setProgramPrizes(programPrizes);
 
             profileController.handleProfileSave(primaryStage, profile);
         });
+    }
+
+    private List<ProgramPrize> createProgramPrizes(List<String> selectedProgramNames, List<ProgramPrize> existingProgramPrizes) {
+        List<ProgramPrize> newProgramPrizes = new ArrayList<>();
+        for (String programName : selectedProgramNames) {
+            ProgramPrize existingPrize = existingProgramPrizes.stream()
+                    .filter(prize -> prize.getProgram().equals(programName))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingPrize != null) {
+                newProgramPrizes.add(existingPrize);
+            } else {
+                newProgramPrizes.add(new ProgramPrize(programName, new ArrayList<>()));
+            }
+        }
+        return newProgramPrizes;
     }
 
     @Override

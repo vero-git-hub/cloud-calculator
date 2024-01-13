@@ -6,6 +6,14 @@ public class ProgramPrize {
     private String program;
     private List<PrizeInfo> prizeInfoList;
 
+    public ProgramPrize() {
+    }
+
+    public ProgramPrize(String program, List<PrizeInfo> prizeInfoList) {
+        this.program = program;
+        this.prizeInfoList = prizeInfoList;
+    }
+
     public String getProgram() {
         return program;
     }
