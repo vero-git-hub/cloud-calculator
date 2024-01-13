@@ -121,7 +121,7 @@ public class ProgramModel {
         return jsonArray;
     }
 
-    public void deleteProgram(Stage stage, Program program) {
+    public void deleteProgram(Stage stage, Program programToDelete) {
         boolean isConfirmationAlert = programController.showConfirmationAlert();
 
         if (isConfirmationAlert) {
@@ -129,13 +129,14 @@ public class ProgramModel {
 
             boolean isProgramAssigned = profiles.stream()
                     .flatMap(profile -> profile.getProgramPrizes().stream())
-                    .anyMatch(programPrize -> programPrize.getProgram().equals(program.getName()));
+                    .anyMatch(programPrize -> programPrize.getProgram().equals(programToDelete.getName()));
 
             if (isProgramAssigned) {
                 Notification.showAlert("Cannot be deleted", "The program is assigned to the profile", "Please cancel the assignment before deleting.");
             } else {
                 List<Program> programs = loadProgramsFromFile();
-                programs.remove(program);
+                programs.removeIf(p -> p.getId() == programToDelete.getId());
+
                 saveProgramsToFile(programs);
                 programController.showScreen(stage);
             }

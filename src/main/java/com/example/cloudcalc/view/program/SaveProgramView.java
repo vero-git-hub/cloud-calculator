@@ -11,16 +11,11 @@ import com.example.cloudcalc.model.CountConditionModel;
 import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -29,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     private final ProgramController programController;
@@ -49,13 +43,10 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     Button saveButton = new Button();
     Button cancelButton = new Button();
     private TableView<CountConditionModel> conditionsTable;
-    Stage modalStage;
     private Label subtitleLabel = new Label("If you can get more than 1 prize, create another program. Does not apply to Arcade.");
-    Button createButton = new Button();
     private ComboBox<String> conditionTypeComboBox;
     private TextField badgeNameField;
     private Button addBadgeButton;
-    private VBox badgeListContainer;
     private final String typeTitle = "Type:";
     private final String badgeTitle = "Badge:";
 
@@ -177,16 +168,6 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         return gridPaneBuilder.getGridPane();
     }
 
-    private HBox createAddConditionButton() {
-        createButton = ButtonFactory.createAddButton(e -> showAddConditionModal());
-        labelAddCondition.setAlignment(Pos.CENTER);
-        HBox hbox = new HBox(10, labelAddCondition, createButton);
-        hbox.setAlignment(Pos.CENTER_LEFT);
-
-        HBox.setHgrow(labelAddCondition, Priority.ALWAYS);
-        return hbox;
-    }
-
     private HBox createButtonsSection(Stage stage) {
         saveButton.setOnAction(event -> {
             String programName = programNameField.getText();
@@ -226,39 +207,6 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
 
     private void saveProgram(Stage stage, Program program) {
         programController.saveProgram(stage, program);
-    }
-
-    private void showAddConditionModal() {
-        modalStage = new Stage();
-        modalStage.initModality(Modality.APPLICATION_MODAL);
-        modalStage.setTitle("Add condition");
-
-        VBox modalLayout = new VBox(10);
-        modalLayout.setPadding(new Insets(10));
-
-        modalLayout.getChildren().addAll(new HBox(10, new Label("Condition Type:"), conditionTypeComboBox), badgeNameField, addBadgeButton, badgeListContainer);
-
-        Button saveConditionButton = new Button("Save Condition");
-        saveConditionButton.setOnAction(e -> saveCondition());
-        modalLayout.getChildren().add(saveConditionButton);
-
-        Scene modalScene = new Scene(modalLayout, 400, 300);
-        modalStage.setScene(modalScene);
-        modalStage.showAndWait();
-    }
-
-    private void saveCondition() {
-        List<String> badges = badgeListContainer.getChildren().stream()
-                .map(node -> ((Label) node).getText())
-                .collect(Collectors.toList());
-
-        if (!badges.isEmpty()) {
-            String conditionType = conditionTypeComboBox.getValue();
-            CountConditionModel condition = new CountConditionModel(conditionType, badges);
-            conditionsTable.getItems().add(condition);
-            badgeListContainer.getChildren().clear();
-        }
-        modalStage.close();
     }
 
     private void initializeConditionsTable() {
@@ -328,10 +276,26 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         programNameField.setText(program.getName());
         startDatePicker.setValue(program.getDate());
 
+        conditionTypeComboBox.setValue(program.getCondition().getType());
+        conditionTypeComboBox.setDisable(true);
+
+        List<CountConditionModel> conditionModels = new ArrayList<>();
+        for (String badge : program.getCondition().getValues()) {
+            conditionModels.add(new CountConditionModel(program.getCondition().getType(), Arrays.asList(badge)));
+        }
+        conditionsTable.setItems(FXCollections.observableArrayList(conditionModels));
+
+        HBox badgeEntryLayout = new HBox(10);
+        badgeEntryLayout.getChildren().addAll(
+                new Label(typeTitle), conditionTypeComboBox,
+                new Label(badgeTitle), badgeNameField,
+                addBadgeButton
+        );
+
         layout.getChildren().addAll(
                 createTopLayout(stage),
                 createFormLayout(),
-                createAddConditionButton(),
+                badgeEntryLayout,
                 conditionsTable,
                 createButtonsSection(stage)
         );
@@ -351,6 +315,16 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     private void updateExistingProgram(Stage stage, Program program, String programName, LocalDate selectedDate) {
         program.setName(programName);
         program.setDate(selectedDate);
+
+        List<String> badges = new ArrayList<>();
+        for (CountConditionModel conditionModel : conditionsTable.getItems()) {
+            badges.addAll(conditionModel.getValues());
+        }
+
+        CountConditionModel updatedCondition = new CountConditionModel();
+        updatedCondition.setType(conditionTypeComboBox.getValue());
+        updatedCondition.setValues(badges);
+        program.setCondition(updatedCondition);
 
         programController.saveProgram(stage, program);
     }
