@@ -30,12 +30,10 @@ import java.util.List;
 import java.util.Map;
 
 public class ProfileController {
-
     private ServiceFacade serviceFacade;
     private final ProfileView profileView;
     private final ProfileModel profileModel;
     private final DataExtractor dataExtractor;
-    //private final ScanView scanView;
     private final MainController mainController;
     private final ProgramController programController;
     private final ElementsBuilder elementsBuilder;
@@ -47,7 +45,6 @@ public class ProfileController {
         this.profileView = new ProfileView(this);
         this.profileModel = new ProfileModel(this);
         this.dataExtractor = serviceFacade.getDataExtractor();
-        //this.scanView = serviceFacade.getScanManager();
         this.mainController = serviceFacade.getMainController();
         this.elementsBuilder = new ElementsBuilder();
         this.sceneBuilder = new SceneBuilder();
@@ -89,14 +86,14 @@ public class ProfileController {
                     if(program.getName().equals(profileProgramName)) {
                         LocalDate date = program.getDate();
 
-                        List<CountConditionModel> conditions = program.getConditions();
+                        CountConditionModel condition = program.getCondition();
                         List<String> countingList = new ArrayList<>();
                         List<String> ignoreList = new ArrayList<>();
-                        for (CountConditionModel countConditionModel : conditions) {
-                            if(countConditionModel.getType().equals("What to count")) {
-                                countingList.add(countConditionModel.getValue());
-                            } else if (countConditionModel.getType().equals("What not to count")) {
-                                ignoreList.add(countConditionModel.getValue());
+                        if (condition != null) {
+                            if (condition.getType().equals("What to count")) {
+                                countingList = condition.getValues();
+                            } else if (condition.getType().equals("What not to count")) {
+                                ignoreList = condition.getValues();
                             }
                         }
 
@@ -174,14 +171,6 @@ public class ProfileController {
 
     public void handleProfileSave(Stage primaryStage, Profile profile){
         profileModel.handleProfileSave(primaryStage, profile);
-    }
-
-    public List<String> extractHiddenLinksFromPdf(String pdfFilePath) {
-        return dataExtractor.extractHiddenLinksFromPdf(pdfFilePath);
-    }
-
-    public List<String> extractH1FromLinks(List<String> extractedLinks) {
-        return dataExtractor.extractH1FromLinks(extractedLinks);
     }
 
     public void showMainScreen(Stage primaryStage) {

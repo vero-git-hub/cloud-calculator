@@ -36,7 +36,7 @@ public class ProgramModel {
                 program.setId(programObject.getInt("id"));
             }
 
-            if (programObject.has("name") && programObject.has("date") && programObject.has("conditions")) {
+            if (programObject.has("name") && programObject.has("date") && programObject.has("condition")) {
                 program.setName(programObject.getString("name"));
 
                 String dateString = programObject.getString("date");
@@ -48,18 +48,22 @@ public class ProgramModel {
                     Notification.showErrorMessage("Date error", "Check that the date is correct.");
                 }
 
-                JSONArray conditionsArray = programObject.getJSONArray("conditions");
-                List<CountConditionModel> conditions = new ArrayList<>();
-                for (int j = 0; j < conditionsArray.length(); j++) {
-                    JSONObject conditionObject = conditionsArray.getJSONObject(j);
-                    CountConditionModel condition = new CountConditionModel();
+                JSONObject conditionObject = programObject.getJSONObject("condition");
+                CountConditionModel condition = new CountConditionModel();
 
-                    condition.setType(conditionObject.getString("type"));
-                    condition.setValue(conditionObject.getString("value"));
+                condition.setType(conditionObject.getString("type"));
 
-                    conditions.add(condition);
+                if (conditionObject.has("values")) {
+                    JSONArray valuesArray = conditionObject.getJSONArray("values");
+                    List<String> values = new ArrayList<>();
+                    for (int k = 0; k < valuesArray.length(); k++) {
+                        values.add(valuesArray.getString(k));
+                    }
+                    condition.setValues(values);
                 }
-                program.setConditions(conditions);
+
+                program.setCondition(condition);
+
                 programs.add(program);
             } else {
                 Notification.showErrorMessage("Error keys", "Wrong keys has detected while loading programs.");
@@ -94,8 +98,23 @@ public class ProgramModel {
 
             jsonObject.put("id", program.getId());
             jsonObject.put("name", program.getName());
-            jsonObject.put("date", program.getDate());
-            jsonObject.put("conditions", program.getConditions());
+            jsonObject.put("date", program.getDate().toString());
+
+            CountConditionModel condition = program.getCondition();
+            if (condition != null) {
+                JSONObject conditionObject = new JSONObject();
+                conditionObject.put("type", condition.getType());
+
+                JSONArray valuesArray = new JSONArray();
+                if (condition.getValues() != null) {
+                    for (String value : condition.getValues()) {
+                        valuesArray.put(value);
+                    }
+                }
+                conditionObject.put("values", valuesArray);
+
+                jsonObject.put("condition", conditionObject);
+            }
 
             jsonArray.put(jsonObject);
         }

@@ -10,14 +10,12 @@ import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.model.CountConditionModel;
 import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -25,19 +23,17 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ToggleGroup;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     private final ProgramController programController;
     private VBox layout;
-    private HBox countBox;
-    private HBox ignoreBox;
     TextField countField = new TextField();
     TextField ignoreField = new TextField();
     String countTooltip;
@@ -54,22 +50,81 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     Button cancelButton = new Button();
     private TableView<CountConditionModel> conditionsTable;
     Stage modalStage;
-    Button saveConditionButton = new Button();
-    Button closeConditionButton = new Button();
-    private Label countLabel = new Label("What to count (" +
-            "separated by commas):");
-    private Label ignoreLabel = new Label("What not to count (" +
-            "separated by commas):");
     private Label subtitleLabel = new Label("If you can get more than 1 prize, create another program. Does not apply to Arcade.");
     Button createButton = new Button();
-    private RadioButton countRadioButton = new RadioButton("Count");
-    private RadioButton ignoreRadioButton = new RadioButton("Ignore");
-    private ToggleGroup radioGroup = new ToggleGroup();
+    private ComboBox<String> conditionTypeComboBox;
+    private TextField badgeNameField;
+    private Button addBadgeButton;
+    private VBox badgeListContainer;
+    private final String typeTitle = "Type:";
+    private final String badgeTitle = "Badge:";
 
     public SaveProgramView(ProgramController programController) {
         this.programController = programController;
         LanguageManager.registerLocalizable(this);
+
+        initializeBadgeEntryFields();
+        initializeConditionTypeComboBox();
         initializeConditionsTable();
+    }
+
+    private void addBadgeToList() {
+        String badgeName = badgeNameField.getText();
+        String conditionType = conditionTypeComboBox.getValue();
+
+        if (!badgeName.isEmpty() && conditionType != null) {
+            CountConditionModel condition = new CountConditionModel(conditionType, Arrays.asList(badgeName));
+            conditionsTable.getItems().add(condition);
+            badgeNameField.clear();
+        }
+    }
+
+    private void initializeBadgeEntryFields() {
+        badgeNameField = new TextField();
+        badgeNameField.setPromptText("Enter Badge Name");
+        addBadgeButton = new Button("Add Badge");
+        addBadgeButton.setOnAction(e -> addBadgeToList());
+    }
+
+    private void initializeConditionTypeComboBox() {
+        List<String> conditionTypes = Arrays.asList("What to count", "What not to count");
+        conditionTypeComboBox = new ComboBox<>(FXCollections.observableArrayList(conditionTypes));
+
+        conditionTypeComboBox.setPromptText("Select Condition Type");
+
+        conditionTypeComboBox.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue != null) {
+                badgeNameField.setDisable(false);
+            }
+        });
+
+        conditionTypeComboBox.setOnAction(e -> {
+            if (conditionTypeComboBox.getValue() != null) {
+                conditionTypeComboBox.setDisable(true);
+            }
+        });
+
+        badgeNameField.setDisable(true);
+    }
+
+    private void resetConditionTypeComboBox() {
+        conditionTypeComboBox.setValue(null);
+        conditionTypeComboBox.setPromptText("Select Condition Type");
+        conditionTypeComboBox.setDisable(false);
+
+        conditionTypeComboBox.setButtonCell(new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty) ;
+                if (empty || item == null) {
+                    setText("Select Subject");
+                } else {
+                    setText(item);
+                }
+            }
+        });
+
+        badgeNameField.setDisable(true);
     }
 
     public Label getSubtitleLabel() {
@@ -77,14 +132,22 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     }
 
     public void showScreen(Stage stage) {
+        resetConditionTypeComboBox();
         resetForm();
         layout = new VBox(10);
+
+        HBox badgeEntryLayout = new HBox(10);
+        badgeEntryLayout.getChildren().addAll(
+                new Label(typeTitle), conditionTypeComboBox,
+                new Label(badgeTitle), badgeNameField,
+                addBadgeButton
+        );
+
         layout.getChildren().addAll(
                 createTopLayout(stage),
                 programController.createSubtitleLabel(),
                 createFormLayout(),
-                createCheckBoxSection(),
-                createAddConditionButton(),
+                badgeEntryLayout,
                 conditionsTable,
                 createButtonsSection(stage)
         );
@@ -96,9 +159,6 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         programNameField.clear();
         startDatePicker.setValue(null);
         conditionsTable.getItems().clear();
-        radioGroup.selectToggle(null);
-        countRadioButton.setDisable(false);
-        ignoreRadioButton.setDisable(false);
     }
 
     private HBox createTopLayout(Stage stage) {
@@ -115,20 +175,6 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         gridPaneBuilder.setHAlignmentGridPane(labelName, labelDate);
 
         return gridPaneBuilder.getGridPane();
-    }
-
-    private VBox createCheckBoxSection() {
-        createBox();
-        HBox radioButtons = new HBox(10, countBox, ignoreBox);
-        return new VBox(10, labelCheckBox, radioButtons);
-    }
-
-    private void createBox() {
-        countRadioButton.setToggleGroup(radioGroup);
-        ignoreRadioButton.setToggleGroup(radioGroup);
-
-        countBox = new HBox(5, countRadioButton, createInfoIcon(countTooltip));
-        ignoreBox = new HBox(5, ignoreRadioButton, createInfoIcon(ignoreTooltip));
     }
 
     private HBox createAddConditionButton() {
@@ -157,13 +203,17 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
                 Program program = new Program();
                 program.setName(programName);
                 program.setDate(selectedDate);
-                List<CountConditionModel> list = new ArrayList<>();
 
-                for (CountConditionModel condition : conditionsTable.getItems()) {
-                    list.add(condition);
+                List<String> badges = new ArrayList<>();
+                for (CountConditionModel conditionModel : conditionsTable.getItems()) {
+                    badges.addAll(conditionModel.getValues());
                 }
 
-                program.setConditions(list);
+                CountConditionModel condition = new CountConditionModel();
+                condition.setType(conditionTypeComboBox.getValue());
+                condition.setValues(badges);
+                program.setCondition(condition);
+
                 saveProgram(stage, program);
             }
         });
@@ -178,67 +228,37 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         programController.saveProgram(stage, program);
     }
 
-    private HBox createInfoIcon(String tooltipText) {
-        ImageView infoIcon = new ImageView(new Image(ButtonFactory.class.getResourceAsStream("/images/info-48.png")));
-        infoIcon.setFitHeight(20);
-        infoIcon.setFitWidth(20);
-        infoIcon.setCursor(Cursor.HAND);
+    private void showAddConditionModal() {
+        modalStage = new Stage();
+        modalStage.initModality(Modality.APPLICATION_MODAL);
+        modalStage.setTitle("Add condition");
 
-        Tooltip tooltip = new Tooltip(tooltipText);
-        Tooltip.install(infoIcon, tooltip);
+        VBox modalLayout = new VBox(10);
+        modalLayout.setPadding(new Insets(10));
 
-        return new HBox(infoIcon);
+        modalLayout.getChildren().addAll(new HBox(10, new Label("Condition Type:"), conditionTypeComboBox), badgeNameField, addBadgeButton, badgeListContainer);
+
+        Button saveConditionButton = new Button("Save Condition");
+        saveConditionButton.setOnAction(e -> saveCondition());
+        modalLayout.getChildren().add(saveConditionButton);
+
+        Scene modalScene = new Scene(modalLayout, 400, 300);
+        modalStage.setScene(modalScene);
+        modalStage.showAndWait();
     }
 
-    private void showAddConditionModal() {
-        RadioButton selectedRadioButton = (RadioButton) radioGroup.getSelectedToggle();
+    private void saveCondition() {
+        List<String> badges = badgeListContainer.getChildren().stream()
+                .map(node -> ((Label) node).getText())
+                .collect(Collectors.toList());
 
-        if (selectedRadioButton != null) {
-            modalStage = new Stage();
-            modalStage.initModality(Modality.APPLICATION_MODAL);
-            modalStage.setTitle("Add condition");
-
-            VBox modalLayout = new VBox(10);
-            modalLayout.setPadding(new Insets(10));
-
-            TextField modalTextField = new TextField();
-            Label modalLabel = new Label();
-
-            if (selectedRadioButton == countRadioButton) {
-                modalLabel.setText("What to count:");
-                modalLayout.getChildren().add(new HBox(modalLabel, modalTextField));
-            } else if (selectedRadioButton == ignoreRadioButton) {
-                modalLabel.setText("What not to count:");
-                modalLayout.getChildren().add(new HBox(modalLabel, modalTextField));
-            }
-
-            saveConditionButton.setText("Save");
-            saveConditionButton.setOnAction(e -> {
-                String value = modalTextField.getText();
-                String conditionType = modalLabel.getText();
-
-                if (!value.isEmpty()) {
-                    CountConditionModel newCondition = new CountConditionModel(conditionType, value);
-                    conditionsTable.getItems().add(newCondition);
-                }
-
-                modalStage.close();
-            });
-
-            closeConditionButton.setText("Close");
-            closeConditionButton.setOnAction(e -> modalStage.close());
-
-            HBox buttonLayout = new HBox(10, saveConditionButton, closeConditionButton);
-            buttonLayout.setAlignment(Pos.CENTER);
-
-            modalLayout.getChildren().add(buttonLayout);
-
-            Scene modalScene = new Scene(modalLayout, 300, 200);
-            modalStage.setScene(modalScene);
-            modalStage.showAndWait();
-        } else {
-            Notification.showAlert("Info", "Counting condition not selected", "Please select counting condition");
+        if (!badges.isEmpty()) {
+            String conditionType = conditionTypeComboBox.getValue();
+            CountConditionModel condition = new CountConditionModel(conditionType, badges);
+            conditionsTable.getItems().add(condition);
+            badgeListContainer.getChildren().clear();
         }
+        modalStage.close();
     }
 
     private void initializeConditionsTable() {
@@ -263,8 +283,10 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         TableColumn<CountConditionModel, String> typeColumn = new TableColumn<>("Condition type");
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
 
-        TableColumn<CountConditionModel, String> valueColumn = new TableColumn<>("Value");
-        valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+        TableColumn<CountConditionModel, String> valueColumn = new TableColumn<>("Values");
+        valueColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(
+                String.join(", ", cellData.getValue().getValues())
+        ));
 
         TableColumn<CountConditionModel, Void> deleteColumn = new TableColumn<>("Delete");
         deleteColumn.setMinWidth(40);
@@ -306,14 +328,9 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         programNameField.setText(program.getName());
         startDatePicker.setValue(program.getDate());
 
-        setRadioButtonSelection(program);
-
-        conditionsTable.getItems().addAll(program.getConditions());
-
         layout.getChildren().addAll(
                 createTopLayout(stage),
                 createFormLayout(),
-                createCheckBoxSection(),
                 createAddConditionButton(),
                 conditionsTable,
                 createButtonsSection(stage)
@@ -331,22 +348,9 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         programController.createScene(layout, stage);
     }
 
-    private void setRadioButtonSelection(Program program) {
-        if (program.getConditions().stream().anyMatch(cond -> "What to count".equals(cond.getType()))) {
-            countRadioButton.setSelected(true);
-            ignoreRadioButton.setDisable(true);
-        } else if (program.getConditions().stream().anyMatch(cond -> "What not to count".equals(cond.getType()))) {
-            ignoreRadioButton.setSelected(true);
-            countRadioButton.setDisable(true);
-        }
-    }
-
     private void updateExistingProgram(Stage stage, Program program, String programName, LocalDate selectedDate) {
         program.setName(programName);
         program.setDate(selectedDate);
-
-        List<CountConditionModel> list = new ArrayList<>(conditionsTable.getItems());
-        program.setConditions(list);
 
         programController.saveProgram(stage, program);
     }
@@ -374,8 +378,6 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         labelCheckBox.setText(bundle.getString("labelCheckBox"));
 
         labelAddCondition.setText(bundle.getString("addConditionButton"));
-        countRadioButton.setText(bundle.getString("countCheckBox"));
-        ignoreRadioButton.setText(bundle.getString("ignoreCheckBox"));
 
         countTooltip = bundle.getString("countTooltip");
         ignoreTooltip = bundle.getString("ignoreTooltip");

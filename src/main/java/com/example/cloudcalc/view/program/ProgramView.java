@@ -72,7 +72,12 @@ public class ProgramView implements Localizable {
 
         tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                subTableView.setItems(FXCollections.observableArrayList(newSelection.getConditions()));
+                CountConditionModel condition = newSelection.getCondition();
+                if (condition != null) {
+                    subTableView.setItems(FXCollections.observableArrayList(condition));
+                } else {
+                    subTableView.setItems(FXCollections.observableArrayList());
+                }
             } else {
                 subTableView.setItems(FXCollections.observableArrayList());
             }
@@ -113,9 +118,13 @@ public class ProgramView implements Localizable {
         typeColumn.setPrefWidth(150);
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
 
-        TableColumn<CountConditionModel, String> valueColumn = new TableColumn<>("Condition Value");
+        TableColumn<CountConditionModel, String> valueColumn = new TableColumn<>("Condition Values");
         valueColumn.setPrefWidth(600);
-        valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+        valueColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(
+                String.join(", ", cellData.getValue().getValues())
+        ));
+
+
 
         subTableView.getColumns().addAll(subIndexColumn, typeColumn, valueColumn);
 
