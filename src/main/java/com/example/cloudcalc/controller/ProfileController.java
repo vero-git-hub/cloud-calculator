@@ -8,6 +8,7 @@ import com.example.cloudcalc.builder.SceneBuilder;
 import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
+import com.example.cloudcalc.entity.PrizeInfo;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.entity.ProgramPrize;
@@ -82,8 +83,8 @@ public class ProfileController {
 
         if(!allPrograms.isEmpty()) {
             for (Program program : allPrograms) {
-                for (String profileProgramName : profilePrograms) {
-                    if(program.getName().equals(profileProgramName)) {
+                for (ProgramPrize programPrize : programPrizeList) {
+                    if(program.getName().equals(programPrize.getProgram())) {
                         LocalDate date = program.getDate();
 
                         CountConditionModel condition = program.getCondition();
@@ -120,7 +121,17 @@ public class ProfileController {
                             Notification.showErrorMessage("Error", "Page structure has changed.");
                         }
 
-                        System.out.println("points -> " + points);
+                        List<PrizeInfo> prizeInfos = programPrize.getPrizeInfoList();
+                        if (prizeInfos == null || prizeInfos.isEmpty()) {
+                            prizeInfos = new ArrayList<>();
+                            prizeInfos.add(new PrizeInfo());
+                        }
+                        prizeInfos.get(0).setEarnedPoints(points);
+                        programPrize.setPrizeInfoList(prizeInfos);
+
+                        // TODO: calculate prizes
+
+                        // TODO: set prizes to profile
 
                     }
                 }

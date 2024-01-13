@@ -102,7 +102,7 @@ public class ProfileModel {
                             for (int k = 0; k < prizeInfoListArray.length(); k++) {
                                 JSONObject prizeInfoJson = prizeInfoListArray.getJSONObject(k);
                                 PrizeInfo prizeInfo = new PrizeInfo();
-                                prizeInfo.setPrize(prizeInfoJson.getString("prize"));
+                                prizeInfo.setPrize(prizeInfoJson.optString("prize", "No prize"));
                                 prizeInfo.setEarnedPoints(prizeInfoJson.getInt("earnedPoints"));
                                 prizeInfoList.add(prizeInfo);
                             }
