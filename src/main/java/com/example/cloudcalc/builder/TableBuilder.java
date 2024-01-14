@@ -1,6 +1,5 @@
 package com.example.cloudcalc.builder;
 
-import com.example.cloudcalc.badge.FileOperationManager;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.*;
@@ -87,7 +86,7 @@ public class TableBuilder {
         return prizesColumn;
     }
 
-    public TableView<Profile> createMainTableForStats(Stage stage, ProfileModel profileModel, PrizeController prizeController) {
+    public TableView<Profile> createTableForStats(Stage stage, ProfileModel profileModel, PrizeController prizeController) {
         TableView<Profile> mainTable = new TableView<>();
 
         TableColumn<Profile, ?> numberColumn = createNumberColumnForStats(mainTable);
@@ -95,7 +94,7 @@ public class TableBuilder {
         TableColumn<Profile, ?> nameColumn = createColumn("Name");
         TableColumn<Profile, ?> programColumn = createColumn("Programs");
         TableColumn<Profile, ?> prizesColumn = createPrizesColumnForStats();
-        TableColumn<Profile, Void> detailsColumn = createScanColumn(stage, prizeController.getScanController());
+        TableColumn<Profile, Void> scanColumn = createScanColumn(stage, prizeController.getScanController(), false);
 
         mainTable.getColumns().addAll(
                 numberColumn,
@@ -103,7 +102,7 @@ public class TableBuilder {
                 nameColumn,
                 programColumn,
                 prizesColumn,
-                detailsColumn
+                scanColumn
         );
 
         setColumnWidthForStats(mainTable);
@@ -187,11 +186,11 @@ public class TableBuilder {
 
         TableColumn<Profile, String> programsColumn = createColumn("Programs");
 
-        TableColumn<Profile, Void> badgesColumn = createScanColumn(primaryStage, scanController);
+        TableColumn<Profile, Void> scanColumn = createScanColumn(primaryStage, scanController, true);
         TableColumn<Profile, Profile> editColumn = createEditColumnForProfile(primaryStage, profileController, mainController);
         TableColumn<Profile, Profile> actionColumn = createActionColumnForProfile(primaryStage, profileController, mainController);
 
-        mainTable.getColumns().addAll(numberColumn, nameColumn, linkColumn, programsColumn, editColumn, actionColumn);
+        mainTable.getColumns().addAll(numberColumn, nameColumn, linkColumn, programsColumn, scanColumn, editColumn, actionColumn);
 
         List<Profile> profiles = profileController.getProfilesFromFile();
         mainTable.getItems().addAll(profiles);
@@ -437,7 +436,7 @@ public class TableBuilder {
         return column;
     }
 
-    public static TableColumn<Profile, Void> createScanColumn(Stage primaryStage, ScanController scanController) {
+    public static TableColumn<Profile, Void> createScanColumn(Stage primaryStage, ScanController scanController, boolean isMovedFromMain) {
         TableColumn<Profile, Void> badgesColumn = new TableColumn<>("Details");
         badgesColumn.setCellValueFactory(param -> null);
         badgesColumn.setCellFactory(col -> {
@@ -451,7 +450,7 @@ public class TableBuilder {
                     } else {
                         Profile profile = getTableView().getItems().get(getIndex());
                         EventHandler<ActionEvent> scanAction = e -> {
-                            scanController.showScreen(primaryStage, profile);
+                            scanController.showScreen(primaryStage, profile, isMovedFromMain);
                         };
                         Button scanButton = ButtonFactory.createScanButton(scanAction);
                         setGraphic(scanButton);

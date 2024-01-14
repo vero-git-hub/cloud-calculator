@@ -43,10 +43,16 @@ public class ScanView implements Localizable {
         LanguageManager.registerLocalizable(this);
     }
 
-    public void showScreen(Stage primaryStage, Profile profile) {
+    public void showScreen(Stage primaryStage, Profile profile, boolean isMovedFromMain) {
         VBox layout = new VBox(10);
 
-        Button backButton = ButtonFactory.createBackButton(e -> scanController.showStatsScreen(primaryStage));
+        Button backButton = ButtonFactory.createBackButton(e -> {
+            if(isMovedFromMain) {
+                scanController.showMainScreen(primaryStage);
+            } else {
+                scanController.showStatsScreen(primaryStage);
+            }
+        });
 
         Text preTextLabel = new Text(titlePreText);
         Hyperlink nameLink = new Hyperlink(profile.getName());

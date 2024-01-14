@@ -21,11 +21,11 @@ public class ScanController {
         this.serviceFacade = serviceFacade;
     }
 
-    public void showScreen(Stage stage, Profile profile) {
+    public void showScreen(Stage stage, Profile profile, boolean isMovedFromMain) {
         boolean isScanSuccess = serviceFacade.getProfileController().scanAndUpdateProfile(profile);
 
         if(isScanSuccess) {
-            scanView.showScreen(stage, profile);
+            scanView.showScreen(stage, profile, isMovedFromMain);
         }
     }
 

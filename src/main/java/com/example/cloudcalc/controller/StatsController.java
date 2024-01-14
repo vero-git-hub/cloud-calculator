@@ -1,6 +1,5 @@
 package com.example.cloudcalc.controller;
 
-import com.example.cloudcalc.DataExtractor;
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.builder.ElementsBuilder;
 import com.example.cloudcalc.builder.SceneBuilder;
@@ -54,6 +53,6 @@ public class StatsController {
     }
 
     public TableView<Profile> createMainTableForStats(Stage stage) {
-        return tableBuilder.createMainTableForStats(stage, profileModel, prizeController);
+        return tableBuilder.createTableForStats(stage, profileModel, prizeController);
     }
 }
