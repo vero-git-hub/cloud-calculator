@@ -27,67 +27,10 @@ public class DataExtractor implements Localizable {
     public List<String> typeBadgeExtractedData = new ArrayList<>();
     private String dataExtractorError = "Error";
     private String dataExtractorTitleError = "The given HTML structure was not found on the page.";
-    private String dataExtractorDescriptionError = "The structure of the profile page has changed!";
+    private String dataExtractorDescriptionError = "The structure of the profile page has changed or page is empty!";
 
     public DataExtractor() {
         LanguageManager.registerLocalizable(this);
-    }
-
-    public List<String> extractHiddenLinksFromPdf(String pdfFilePath) {
-        List<String> links = new ArrayList<>();
-
-        try (PDDocument document = PDDocument.load(new File(pdfFilePath))) {
-            for (PDPage page : document.getPages()) {
-                for (PDAnnotation annotation : page.getAnnotations()) {
-                    if (annotation instanceof PDAnnotationLink) {
-                        PDAnnotationLink link = (PDAnnotationLink) annotation;
-                        if (link.getAction() instanceof PDActionURI) {
-                            PDActionURI uri = (PDActionURI) link.getAction();
-                            String linkUrl = uri.getURI();
-                            if (linkUrl.startsWith("https://www.cloudskillsboost.google/")) {
-                                links.add(linkUrl);
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return links;
-    }
-
-    public List<String> extractH1FromLinks(List<String> extractedLinks) {
-        List<String> h1Contents = new ArrayList<>();
-
-        for (String link : extractedLinks) {
-            if (isURLAccessible(link)) {
-                try {
-                    Document doc = Jsoup.connect(link).timeout(30 * 1000).get();
-                    Elements h1Elements = doc.select("h1[class=\"ql-display-small\"]");
-                    for (int i = 0; i < h1Elements.size(); i++) {
-                        String str = h1Elements.get(i).text();
-                        h1Contents.add(str);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return h1Contents;
-    }
-
-    public boolean isURLAccessible(String url) {
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("HEAD");
-            int responseCode = connection.getResponseCode();
-            return (200 <= responseCode && responseCode <= 399);
-        } catch (IOException exception) {
-            return false;
-        }
     }
 
     public ArrayList<String> performScan(Profile profile) {

@@ -8,10 +8,7 @@ import com.example.cloudcalc.builder.SceneBuilder;
 import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
-import com.example.cloudcalc.entity.PrizeInfo;
-import com.example.cloudcalc.entity.Profile;
-import com.example.cloudcalc.entity.Program;
-import com.example.cloudcalc.entity.ProgramPrize;
+import com.example.cloudcalc.entity.*;
 import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
 import com.example.cloudcalc.model.CountConditionModel;
 import com.example.cloudcalc.model.ProfileModel;
@@ -37,6 +34,7 @@ public class ProfileController {
     private final DataExtractor dataExtractor;
     private final MainController mainController;
     private final ProgramController programController;
+    private final PrizeController prizeController;
     private final ElementsBuilder elementsBuilder;
     private final SceneBuilder sceneBuilder;
     private final TableBuilder tableBuilder = new TableBuilder();
@@ -50,6 +48,7 @@ public class ProfileController {
         this.elementsBuilder = new ElementsBuilder();
         this.sceneBuilder = new SceneBuilder();
         this.programController = serviceFacade.getProgramController();
+        this.prizeController = serviceFacade.getPrizeController();
     }
 
     public MainController getMainController() {
@@ -72,7 +71,7 @@ public class ProfileController {
         return profileModel.loadProfilesFromFile(FileName.PROFILES_FILE);
     }
 
-    public void scanAndUpdateProfile(Stage primaryStage, Profile profile) {
+    public void scanAndUpdateProfile(Profile profile) {
         List<String> profilePrograms = new ArrayList<>();
         List<ProgramPrize> programPrizeList = profile.getProgramPrizes();
         for (ProgramPrize programPrize : programPrizeList) {
@@ -80,11 +79,16 @@ public class ProfileController {
         }
 
         List<Program> allPrograms = loadProgramsFromFile();
+        List<Prize> allPrizes = prizeController.loadPrizesFromFile();
 
         if(!allPrograms.isEmpty()) {
             for (Program program : allPrograms) {
                 for (ProgramPrize programPrize : programPrizeList) {
-                    if(program.getName().equals(programPrize.getProgram())) {
+
+                    String programName = program.getName();
+                    String userProgramName = programPrize.getProgram();
+
+                    if(programName.equals(userProgramName)) {
                         LocalDate date = program.getDate();
 
                         CountConditionModel condition = program.getCondition();
@@ -98,7 +102,7 @@ public class ProfileController {
                             }
                         }
 
-                        int points = 0;
+                        int userPoints = 0;
                         try {
                             Map<String, String> map = dataExtractor.scanProfileLink(profile, date);
 
@@ -106,19 +110,19 @@ public class ProfileController {
                                 if (!countingList.isEmpty()) {
                                     for(String elem : countingList) {
                                         if(elem.equals(entry.getKey())) {
-                                            points++;
+                                            userPoints++;
                                         }
                                     }
                                 } else if(!ignoreList.isEmpty()) {
                                     for(String elem : ignoreList) {
                                         if(!elem.equals(entry.getKey())) {
-                                            points++;
+                                            userPoints++;
                                         }
                                     }
                                 }
                             }
                         } catch (ProfilePageStructureChangedException ex) {
-                            Notification.showErrorMessage("Error", "Page structure has changed.");
+                            Notification.showErrorMessage("Error", "Page structure has changed or empty.");
                         }
 
                         List<PrizeInfo> prizeInfos = programPrize.getPrizeInfoList();
@@ -126,19 +130,36 @@ public class ProfileController {
                             prizeInfos = new ArrayList<>();
                             prizeInfos.add(new PrizeInfo());
                         }
-                        prizeInfos.get(0).setEarnedPoints(points);
+
+                        prizeInfos.get(0).setEarnedPoints(userPoints);
+
+                        if(!allPrizes.isEmpty()) {
+                            String userPrizeName = getUserPrizeName(allPrizes, userProgramName, userPoints);
+                            prizeInfos.get(0).setPrize(userPrizeName);
+                        }
+
                         programPrize.setPrizeInfoList(prizeInfos);
-
-                        // TODO: calculate prizes
-
-                        // TODO: set prizes to profile
-
                     }
                 }
             }
         }
 
         updateProfile(profile);
+    }
+
+    private static String getUserPrizeName(List<Prize> allPrizes, String userProgramName, int userPoints) {
+        String userPrizeName = "-";
+        for (Prize prize : allPrizes) {
+            if(prize.getProgram().equals(userProgramName)) {
+                String prizeName = prize.getName();
+                int prizePoints = prize.getPoints();
+
+                if(userPoints >= prizePoints) {
+                    userPrizeName = prizeName;
+                }
+            }
+        }
+        return userPrizeName;
     }
 
     private void updateProfile(Profile profile) {
