@@ -61,80 +61,76 @@ public class ProfileController {
         return profileModel.loadProfilesFromFile(FileName.PROFILES_FILE);
     }
 
-    public void scanAndUpdateProfile(Profile profile) {
-        List<String> profilePrograms = new ArrayList<>();
-        List<ProgramPrize> programPrizeList = profile.getProgramPrizes();
-        for (ProgramPrize programPrize : programPrizeList) {
-            profilePrograms.add(programPrize.getProgram());
-        }
+    public boolean scanAndUpdateProfile(Profile profile) {
+        List<ProgramPrize> userProgramPrizeList = profile.getProgramPrizes();
 
         List<Program> allPrograms = loadProgramsFromFile();
         List<Prize> allPrizes = prizeController.loadPrizesFromFile();
 
-        if(!allPrograms.isEmpty()) {
-            for (Program program : allPrograms) {
-                for (ProgramPrize programPrize : programPrizeList) {
+        if(!allPrograms.isEmpty() && !userProgramPrizeList.isEmpty()) {
+                for (Program program : allPrograms) {
+                    for (ProgramPrize programPrize : userProgramPrizeList) {
 
-                    String programName = program.getName();
-                    String userProgramName = programPrize.getProgram();
+                        String programName = program.getName();
+                        String userProgramName = programPrize.getProgram();
 
-                    if(programName.equals(userProgramName)) {
-                        LocalDate date = program.getDate();
-
-                        CountConditionModel condition = program.getCondition();
-                        List<String> countingList = new ArrayList<>();
-                        List<String> ignoreList = new ArrayList<>();
-                        if (condition != null) {
-                            if (condition.getType().equals("What to count")) {
-                                countingList = condition.getValues();
-                            } else if (condition.getType().equals("What not to count")) {
-                                ignoreList = condition.getValues();
+                        if(programName.equals(userProgramName)) {
+                            CountConditionModel condition = program.getCondition();
+                            List<String> countingList = new ArrayList<>();
+                            List<String> ignoreList = new ArrayList<>();
+                            if (condition != null) {
+                                if (condition.getType().equals("What to count")) {
+                                    countingList = condition.getValues();
+                                } else if (condition.getType().equals("What not to count")) {
+                                    ignoreList = condition.getValues();
+                                }
                             }
-                        }
 
-                        int userPoints = 0;
-                        try {
-                            Map<String, String> map = dataExtractor.scanProfileLink(profile, date);
+                            int userPoints = 0;
+                            try {
+                                LocalDate date = program.getDate();
+                                Map<String, String> map = dataExtractor.scanProfileLink(profile, date);
 
-                            for (Map.Entry<String, String> entry : map.entrySet()) {
-                                if (!countingList.isEmpty()) {
-                                    for(String elem : countingList) {
-                                        if(elem.equals(entry.getKey())) {
-                                            userPoints++;
+                                System.out.println("3");
+                                for (Map.Entry<String, String> entry : map.entrySet()) {
+                                    if (!countingList.isEmpty()) {
+                                        for(String elem : countingList) {
+                                            if(elem.equals(entry.getKey())) {
+                                                userPoints++;
+                                            }
                                         }
-                                    }
-                                } else if(!ignoreList.isEmpty()) {
-                                    for(String elem : ignoreList) {
-                                        if(!elem.equals(entry.getKey())) {
-                                            userPoints++;
+                                    } else if(!ignoreList.isEmpty()) {
+                                        for(String elem : ignoreList) {
+                                            if(!elem.equals(entry.getKey())) {
+                                                userPoints++;
+                                            }
                                         }
                                     }
                                 }
+                            } catch (ProfilePageStructureChangedException ex) {
+                                Notification.showErrorMessage("Error", "Page structure has changed or empty.");
+                                return false;
                             }
-                        } catch (ProfilePageStructureChangedException ex) {
-                            Notification.showErrorMessage("Error", "Page structure has changed or empty.");
+
+                            List<PrizeInfo> prizeInfos = programPrize.getPrizeInfoList();
+                            if (prizeInfos == null || prizeInfos.isEmpty()) {
+                                prizeInfos = new ArrayList<>();
+                                prizeInfos.add(new PrizeInfo());
+                            }
+                            prizeInfos.get(0).setEarnedPoints(userPoints);
+
+                            if(!allPrizes.isEmpty()) {
+                                String userPrizeName = getUserPrizeName(allPrizes, userProgramName, userPoints);
+                                prizeInfos.get(0).setPrize(userPrizeName);
+                            }
+                            programPrize.setPrizeInfoList(prizeInfos);
                         }
-
-                        List<PrizeInfo> prizeInfos = programPrize.getPrizeInfoList();
-                        if (prizeInfos == null || prizeInfos.isEmpty()) {
-                            prizeInfos = new ArrayList<>();
-                            prizeInfos.add(new PrizeInfo());
-                        }
-
-                        prizeInfos.get(0).setEarnedPoints(userPoints);
-
-                        if(!allPrizes.isEmpty()) {
-                            String userPrizeName = getUserPrizeName(allPrizes, userProgramName, userPoints);
-                            prizeInfos.get(0).setPrize(userPrizeName);
-                        }
-
-                        programPrize.setPrizeInfoList(prizeInfos);
                     }
                 }
-            }
         }
 
         updateProfile(profile);
+        return true;
     }
 
     private static String getUserPrizeName(List<Prize> allPrizes, String userProgramName, int userPoints) {

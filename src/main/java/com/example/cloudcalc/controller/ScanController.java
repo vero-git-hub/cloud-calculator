@@ -22,8 +22,11 @@ public class ScanController {
     }
 
     public void showScreen(Stage stage, Profile profile) {
-        serviceFacade.getProfileController().scanAndUpdateProfile(profile);
-        scanView.showScreen(stage, profile);
+        boolean isScanSuccess = serviceFacade.getProfileController().scanAndUpdateProfile(profile);
+
+        if(isScanSuccess) {
+            scanView.showScreen(stage, profile);
+        }
     }
 
     public void showStatsScreen(Stage stage) {
