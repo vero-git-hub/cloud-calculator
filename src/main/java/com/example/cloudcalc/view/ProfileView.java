@@ -9,20 +9,12 @@ import com.example.cloudcalc.entity.ProgramPrize;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
-import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -36,10 +28,6 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
     TextField nameField;
     TextField dateField;
     TextField linkField;
-    private String titlePreText = "DETAILS for";
-    private String startDateText = "Start Date: ";
-    private Label linksTitle = new Label("PDF Links:");
-    private Button uploadPdfButton = new Button("html");
     private Label programsLabel;
 
     public ProfileView(ProfileController profileController) {
@@ -57,38 +45,6 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
 
     public Label getTitleLabel() {
         return titleLabel;
-    }
-
-    public void showProfileScreen(Stage stage, Profile profile) {
-        VBox layout = new VBox(10);
-
-        Button backButton = ButtonFactory.createBackButton(e -> profileController.getMainController().showMainScreen(stage));
-
-        Text preTextLabel = new Text(titlePreText);
-        Hyperlink nameLink = new Hyperlink(profile.getName());
-        nameLink.setOnAction(e -> {
-            try {
-                Desktop.getDesktop().browse(new URI(profile.getLink()));
-            } catch (IOException | URISyntaxException ex) {
-                ex.printStackTrace();
-            }
-        });
-
-        TextFlow textFlow = new TextFlow(preTextLabel, nameLink);
-        HBox topLayout = profileController.createTopLayoutWithBackAndText(backButton, textFlow);
-
-        layout.getChildren().addAll(
-                topLayout,
-                profileController.createProfileInfoForProfile(profile, startDateText),
-                profileController.createPdfLinksSectionForProfile(profile, linksTitle)
-        );
-
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
-        scrollPane.setContent(layout);
-
-        profileController.createScene(stage, scrollPane);
     }
 
     public void showCreateProfileScreen(Stage primaryStage) {
@@ -250,18 +206,11 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
     @Override
     public void updateLocalization(ResourceBundle bundle) {
         titleLabel.setText(bundle.getString("createProfileTitle"));
-        titlePreText = bundle.getString("detailsTitle");
-        startDateText = bundle.getString("detailsStartDateText");
-        linksTitle.setText(bundle.getString("detailsLinksTitle"));
         programsLabel.setText(bundle.getString("programsLabelSelect"));
 
         updateNameFieldPlaceholder(bundle.getString("createProfileNameField"));
         updateDateFieldPlaceholder(bundle.getString("createProfileDateField"));
         updateLinkFieldPlaceholder(bundle.getString("createProfileLinkField"));
-
-        if (uploadPdfButton != null) {
-            uploadPdfButton.setText(bundle.getString("uploadPdfButtonText"));
-        }
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.example.cloudcalc.builder;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.IScreenController;
 import com.example.cloudcalc.controller.MainController;
-import com.example.cloudcalc.entity.Profile;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -11,23 +10,12 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import java.util.List;
 
 public class ElementsBuilder {
-
-    public TextFlow createTextFlow(String boldText, String normalText) {
-        Text bold = new Text(boldText);
-        bold.setStyle("-fx-font-weight: bold;");
-
-        Text normal = new Text(normalText);
-
-        return new TextFlow(bold, normal);
-    }
 
     public HBox createTopLayoutWithBackAndText(Button backButton, TextFlow textFlow) {
         HBox topLayout = new HBox(10);
@@ -99,20 +87,6 @@ public class ElementsBuilder {
 
         return createTopLayout(backButton, titleLabel, addButton);
     }
-
-    public VBox createProfileInfoForProfile(Profile profile, String startDateText) {
-        VBox profileInfoBox = new VBox(10);
-
-//        TextFlow startDateFlow = createTextFlow(startDateText, profile.getStartDate());
-//        profileInfoBox.getChildren().addAll(startDateFlow);
-
-        return profileInfoBox;
-    }
-
-//    public HBox createTopLayoutForStats(Stage primaryStage, Label titleLabel, MainController mainController) {
-//        Button backButton = ButtonFactory.createBackButton(e -> mainController.showMainScreen(primaryStage));
-//        return uiCallbacks.createTopLayout(backButton, titleLabel);
-//    }
 
     public Label createSubtitleLabel(Label subtitleLabel) {
         subtitleLabel.setStyle("-fx-font-style: italic;");

@@ -4,7 +4,7 @@ import com.example.cloudcalc.builder.fields.prize.PrizeFieldManager;
 import com.example.cloudcalc.builder.fields.prize.PrizeFieldUpdatable;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.PrizeController;
-import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.entity.prize.Prize;
 import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;

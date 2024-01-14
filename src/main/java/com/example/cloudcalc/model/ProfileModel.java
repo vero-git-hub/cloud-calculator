@@ -3,11 +3,9 @@ package com.example.cloudcalc.model;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.MainController;
 import com.example.cloudcalc.controller.ProfileController;
-import com.example.cloudcalc.entity.PrizeInfo;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.entity.ProgramPrize;
-import com.example.cloudcalc.exception.PDFIsEmpty;
-import com.example.cloudcalc.exception.PageStructureFromPDFChangedException;
+import com.example.cloudcalc.entity.prize.PrizeInfo;
 import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -189,24 +187,6 @@ public class ProfileModel {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public void updateProfile(Profile profileToUpdate) {
         JSONArray profilesArray = new JSONArray(loadProfilesFromFile(FileName.PROFILES_FILE));
         updateProfileFile(profileToUpdate, profilesArray);
@@ -238,26 +218,5 @@ public class ProfileModel {
     public void handleProfileSave(Stage primaryStage, Profile profile) {
         saveProfileToFile(profile, FileName.PROFILES_FILE);
         profileController.showMainScreen(primaryStage);
-    }
-
-    private void saveFromPdfFile (Profile profile) throws PageStructureFromPDFChangedException, PDFIsEmpty {
-//        if(profile.getPdfFilePath() != null) {
-//
-//            List<String> extractedLinks = profileController.extractHiddenLinksFromPdf(profile.getPdfFilePath());
-//            if(!extractedLinks.isEmpty()) {
-//                List<String> h1Contents = profileController.extractH1FromLinks(extractedLinks);
-//
-//                if(!h1Contents.isEmpty()) {
-//                    profile.setPdfLinks(h1Contents);
-//                } else {
-//                    throw new PageStructureFromPDFChangedException();
-//                }
-//            } else {
-//                throw new PageStructureFromPDFChangedException();
-//            }
-//
-//        } else {
-//            throw new PDFIsEmpty();
-//        }
     }
 }

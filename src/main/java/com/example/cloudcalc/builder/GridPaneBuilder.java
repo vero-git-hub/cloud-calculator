@@ -22,22 +22,6 @@ public class GridPaneBuilder {
         return gridPane;
     }
 
-    public Label getProgramNameLabel() {
-        return programNameLabel;
-    }
-
-    public void setProgramNameLabel(Label programNameLabel) {
-        this.programNameLabel = programNameLabel;
-    }
-
-    public Label getLabelDate() {
-        return labelDate;
-    }
-
-    public void setLabelDate(Label labelDate) {
-        this.labelDate = labelDate;
-    }
-
     public void setGridPaneSizes() {
         gridPane.setHgap(10);
         gridPane.setVgap(10);

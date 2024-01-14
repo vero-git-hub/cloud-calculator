@@ -1,12 +1,7 @@
 package com.example.cloudcalc.view.program;
 
 import com.example.cloudcalc.button.ButtonFactory;
-import com.example.cloudcalc.controller.MainController;
-import com.example.cloudcalc.controller.PrizeController;
-import com.example.cloudcalc.controller.ProfileController;
 import com.example.cloudcalc.controller.ProgramController;
-import com.example.cloudcalc.entity.Prize;
-import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
@@ -124,13 +119,10 @@ public class ProgramView implements Localizable {
                 String.join(", ", cellData.getValue().getValues())
         ));
 
-
-
         subTableView.getColumns().addAll(subIndexColumn, typeColumn, valueColumn);
 
         return subTableView;
     }
-
 
     private void configureTableColumnsWidth(TableView<Program> table) {
         double numberColumnPercentage = 0.05;

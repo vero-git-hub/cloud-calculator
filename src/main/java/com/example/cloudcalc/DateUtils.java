@@ -8,11 +8,6 @@ import java.util.regex.Pattern;
 
 public class DateUtils {
 
-    public LocalDate convertProfileOrTypeBadgeStartDate(String startDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        return LocalDate.parse(startDate, formatter);
-    }
-
     public LocalDate extractDateFromValue(String value) {
         Pattern pattern = Pattern.compile("(\\w+\\s\\d+,\\s\\d+)");
         Matcher matcher = pattern.matcher(value);
@@ -29,5 +24,4 @@ public class DateUtils {
         LocalDate localDate = LocalDate.now();
         return dtf.format(localDate);
     }
-
 }

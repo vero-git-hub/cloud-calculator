@@ -4,7 +4,6 @@ import com.example.cloudcalc.builder.fields.badge.BadgeFieldManager;
 import com.example.cloudcalc.builder.fields.prize.PrizeFieldManager;
 import com.example.cloudcalc.builder.fields.profile.ProfileFieldManager;
 import com.example.cloudcalc.builder.fields.program.ProgramFieldManager;
-import com.example.cloudcalc.builder.fields.type.TypeBadgeFieldManager;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.MainController;
 import com.example.cloudcalc.language.LanguageManager;
@@ -44,9 +43,6 @@ public class Main extends Application {
         PrizeFieldManager prizeTextFieldManager = new PrizeFieldManager(bundle);
         LanguageManager.setTextFieldPrizeManager(prizeTextFieldManager);
 
-        TypeBadgeFieldManager typeBadgeFieldManager = new TypeBadgeFieldManager(bundle);
-        LanguageManager.setTypeBadgeTextFieldsManager(typeBadgeFieldManager);
-
         ProfileFieldManager profileFieldManager = new ProfileFieldManager(bundle);
         LanguageManager.setProfileFieldManager(profileFieldManager);
 
@@ -57,5 +53,4 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
 }

@@ -28,18 +28,12 @@ import java.util.ResourceBundle;
 public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     private final ProgramController programController;
     private VBox layout;
-    TextField countField = new TextField();
-    TextField ignoreField = new TextField();
-    String countTooltip;
-    String ignoreTooltip;
     GridPane gridPane;
     Label labelName = new Label();
     TextField programNameField = new TextField();
     Label labelDate = new Label();
     DatePicker startDatePicker = new DatePicker();
-    Label labelCheckBox = new Label();
     Label titleAddScreenLabel = new Label();
-    Label labelAddCondition = new Label();
     Button saveButton = new Button();
     Button cancelButton = new Button();
     private TableView<CountConditionModel> conditionsTable;
@@ -349,34 +343,22 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
 
         labelName.setText(bundle.getString("programNameLabel"));
         labelDate.setText(bundle.getString("labelDate"));
-        labelCheckBox.setText(bundle.getString("labelCheckBox"));
-
-        labelAddCondition.setText(bundle.getString("addConditionButton"));
-
-        countTooltip = bundle.getString("countTooltip");
-        ignoreTooltip = bundle.getString("ignoreTooltip");
 
         saveButton.setText(bundle.getString("saveButton"));
         cancelButton.setText(bundle.getString("cancelButton"));
 
-        updateCountFieldPlaceholder(bundle.getString("countField"));
-        updateIgnoreFieldPlaceholder(bundle.getString("ignoreField"));
         updateProgramNameFieldPlaceholder(bundle.getString("programNameField"));
         updateDateFieldPlaceholder(bundle.getString("startDatePicker"));
     }
 
     @Override
     public void updateCountFieldPlaceholder(String placeholder) {
-        if(countField != null) {
-            countField.setPromptText(placeholder);
-        }
+
     }
 
     @Override
     public void updateIgnoreFieldPlaceholder(String placeholder) {
-        if (ignoreField != null) {
-            ignoreField.setPromptText(placeholder);
-        }
+
     }
 
     @Override

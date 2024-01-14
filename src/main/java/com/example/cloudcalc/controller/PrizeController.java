@@ -2,14 +2,13 @@ package com.example.cloudcalc.controller;
 
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.builder.TableBuilder;
-import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.entity.prize.Prize;
 import com.example.cloudcalc.entity.Program;
-import com.example.cloudcalc.entity.badge.TypeBadge;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.model.PrizeModel;
 import com.example.cloudcalc.util.Notification;
-import com.example.cloudcalc.view.prize.SavePrizeView;
 import com.example.cloudcalc.view.prize.PrizeView;
+import com.example.cloudcalc.view.prize.SavePrizeView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
@@ -17,11 +16,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class PrizeController extends BaseController {
     private PrizeView prizeView = new PrizeView(this);
@@ -30,7 +26,6 @@ public class PrizeController extends BaseController {
     private SavePrizeView savePrizeView;
 
     public static ResourceBundle bundle;
-    private final Map<String, Prize> receivedPrizes = new HashMap<>();
     String alertTitleDeletePrize = "Confirmation Dialog";
     String alertHeaderDeletePrize = "Delete Prize";
     String alertContentDeletePrize = "Are you sure you want to delete this prize?";
@@ -48,10 +43,6 @@ public class PrizeController extends BaseController {
 
     public static ResourceBundle getBundle() {
         return bundle;
-    }
-
-    public Map<String, Prize> getReceivedPrizes() {
-        return receivedPrizes;
     }
 
     public ScanController getScanController() {
@@ -106,51 +97,6 @@ public class PrizeController extends BaseController {
 
     public void showMainScreen(Stage stage) {
         mainController.showMainScreen(stage);
-    }
-
-    public List<TypeBadge> loadTypesBadgeFromFile() {
-        return serviceFacade.getTypeBadgeController().getTypeBadgeModel().loadTypesBadgeFromFile();
-    }
-
-    public void showAddTypeBadgeScreen(Stage stage) {
-        serviceFacade.showTypeBadgeScreen(stage);
-    }
-
-    public List<String> determinePrizesForBadgeCount(int prizePDF, int prizeSkill, int prizeActivity, int prizeTypeBadge) {
-        List<Prize> prizes = loadPrizesFromFile();
-
-        receivedPrizes.clear();
-
-//        prizes.stream()
-//                .filter(prize -> "pdf".equals(prize.getType()))
-//                .filter(prize -> prizePDF >= prize.getCount())
-//                .findFirst()
-//                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.PDF_FOR_PRIZE, prize));
-//
-//        prizes.stream()
-//                .filter(prize -> "skill".equals(prize.getType()))
-//                .sorted(Comparator.comparing(Prize::getCount).reversed())
-//                .filter(prize -> prizeSkill >= prize.getCount())
-//                .findFirst()
-//                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_PRIZE, prize));
-//
-//        if (prizeActivity >= 30) {
-//            prizes.stream()
-//                    .filter(prize -> "activity".equals(prize.getType()))
-//                    .sorted(Comparator.comparing(Prize::getCount).reversed())
-//                    .filter(prize -> prizeActivity >= prize.getCount())
-//                    .findFirst()
-//                    .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_ACTIVITY, prize));
-//        }
-//
-//        prizes.stream()
-//                .filter(prize -> "pl-02.10.2023".equals(prize.getType()))
-//                .sorted(Comparator.comparing(Prize::getCount).reversed())
-//                .filter(prize ->  prizeTypeBadge >= prize.getCount())
-//                .findFirst()
-//                .ifPresent(prize -> receivedPrizes.put(IBadgeCategory.SKILL_FOR_PL, prize));
-
-        return receivedPrizes.values().stream().map(Prize::getName).collect(Collectors.toList());
     }
 
     public List<Program> loadProgramsFromFile() {

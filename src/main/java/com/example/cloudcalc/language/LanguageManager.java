@@ -5,7 +5,6 @@ import com.example.cloudcalc.builder.fields.badge.BadgeFieldManager;
 import com.example.cloudcalc.builder.fields.prize.PrizeFieldManager;
 import com.example.cloudcalc.builder.fields.profile.ProfileFieldManager;
 import com.example.cloudcalc.builder.fields.program.ProgramFieldManager;
-import com.example.cloudcalc.builder.fields.type.TypeBadgeFieldManager;
 import com.example.cloudcalc.constant.FileName;
 import javafx.scene.control.ComboBox;
 import org.json.JSONObject;
@@ -21,7 +20,6 @@ public class LanguageManager {
     private static List<Localizable> localizables = new ArrayList<>();
     private static BadgeFieldManager textFieldManager;
     private static PrizeFieldManager prizeTextFieldManager;
-    private static TypeBadgeFieldManager typeBadgeFieldManager;
     private static ProfileFieldManager profileFieldManager;
     private static ProgramFieldManager programFieldManager;
     private static ResourceBundle bundle;
@@ -50,24 +48,12 @@ public class LanguageManager {
         LanguageManager.bundle = bundle;
     }
 
-    public static TypeBadgeFieldManager getTypeBadgeTextFieldsManager() {
-        return typeBadgeFieldManager;
-    }
-
-    public static void setTypeBadgeTextFieldsManager(TypeBadgeFieldManager typeBadgeFieldManager) {
-        LanguageManager.typeBadgeFieldManager = typeBadgeFieldManager;
-    }
-
     public static ProfileFieldManager getProfileFieldManager() {
         return profileFieldManager;
     }
 
     public static void setProfileFieldManager(ProfileFieldManager profileFieldManager) {
         LanguageManager.profileFieldManager = profileFieldManager;
-    }
-
-    public static ProgramFieldManager getProgramFieldManager() {
-        return programFieldManager;
     }
 
     public static void setProgramFieldManager(ProgramFieldManager programFieldManager) {

@@ -26,12 +26,8 @@ module com.example.cloudcalc {
     opens com.example.cloudcalc.model to javafx.fxml;
     exports com.example.cloudcalc.entity;
     opens com.example.cloudcalc.entity to javafx.fxml;
-    exports com.example.cloudcalc.view.arcade;
-    opens com.example.cloudcalc.view.arcade to javafx.fxml;
     exports com.example.cloudcalc.view.prize;
     opens com.example.cloudcalc.view.prize to javafx.fxml;
-    opens com.example.cloudcalc.entity.badge to javafx.fxml;
-    exports com.example.cloudcalc.entity.badge;
     exports com.example.cloudcalc.builder.fields.badge;
     opens com.example.cloudcalc.builder.fields.badge to javafx.fxml;
     exports com.example.cloudcalc.builder.fields.prize;
@@ -39,4 +35,6 @@ module com.example.cloudcalc {
 
     exports com.example.cloudcalc.view.program;
     opens com.example.cloudcalc.view.program to javafx.fxml;
+    exports com.example.cloudcalc.entity.prize;
+    opens com.example.cloudcalc.entity.prize to javafx.fxml;
 }

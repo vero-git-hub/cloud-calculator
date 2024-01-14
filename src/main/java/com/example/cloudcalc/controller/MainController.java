@@ -51,9 +51,7 @@ public class MainController {
 
     public HBox initializeButtons(Stage primaryStage) {
         Button statsButton = ButtonFactory.createStatsButton(e -> serviceFacade.showStatsScreen(primaryStage));
-        Button ignoreButton = ButtonFactory.createIgnoreButton(e -> serviceFacade.showIgnoreScreen(primaryStage));
         Button prizeButton = ButtonFactory.createPrizeButton(e -> serviceFacade.showPrizesScreen(primaryStage));
-        Button arcadeButton = ButtonFactory.createArcadeButton(e -> serviceFacade.showArcadeScreen(primaryStage));
         Button programButton = ButtonFactory.createProgramButton(e -> serviceFacade.showProgramScreen(primaryStage));
 
         return elementsBuilder.createExtendedTopLayout(
@@ -67,5 +65,4 @@ public class MainController {
     public void getCreateProfileScreen(Stage primaryStage){
         serviceFacade.showCreateProfileScreen(primaryStage);
     }
-
 }

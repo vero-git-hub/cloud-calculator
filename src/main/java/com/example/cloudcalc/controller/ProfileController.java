@@ -5,21 +5,20 @@ import com.example.cloudcalc.DateUtils;
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.builder.ElementsBuilder;
 import com.example.cloudcalc.builder.SceneBuilder;
-import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.entity.*;
+import com.example.cloudcalc.entity.prize.Prize;
+import com.example.cloudcalc.entity.prize.PrizeInfo;
 import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
 import com.example.cloudcalc.model.CountConditionModel;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.util.Notification;
 import com.example.cloudcalc.view.ProfileView;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
@@ -37,7 +36,6 @@ public class ProfileController {
     private final PrizeController prizeController;
     private final ElementsBuilder elementsBuilder;
     private final SceneBuilder sceneBuilder;
-    private final TableBuilder tableBuilder = new TableBuilder();
 
     public ProfileController(ServiceFacade serviceFacade) {
         this.serviceFacade = serviceFacade;
@@ -49,14 +47,6 @@ public class ProfileController {
         this.sceneBuilder = new SceneBuilder();
         this.programController = serviceFacade.getProgramController();
         this.prizeController = serviceFacade.getPrizeController();
-    }
-
-    public MainController getMainController() {
-        return mainController;
-    }
-
-    public ProfileModel getProfileModel() {
-        return profileModel;
     }
 
     public void showCreateProfileScreen(Stage primaryStage) {
@@ -165,22 +155,6 @@ public class ProfileController {
     private void updateProfile(Profile profile) {
         profile.setLastScannedDate(DateUtils.getCurrentDate());
         profileModel.updateProfile(profile);
-    }
-
-    public void showProfileDetailsScreen(Stage stage, Profile profile) {
-        profileView.showProfileScreen(stage, profile);
-    }
-
-    public VBox createProfileInfoForProfile(Profile profile, String startDateText) {
-        return elementsBuilder.createProfileInfoForProfile(profile, startDateText);
-    }
-
-    public VBox createPdfLinksSectionForProfile(Profile profile, Label linksTitle) {
-        return tableBuilder.createPdfLinksSectionForProfile(profile, linksTitle);
-    }
-
-    public HBox createTopLayoutWithBackAndText(Button backButton, TextFlow textFlow) {
-        return elementsBuilder.createTopLayoutWithBackAndText(backButton, textFlow);
     }
 
     public HBox createTopLayout(Stage primaryStage){

@@ -1,5 +1,7 @@
 package com.example.cloudcalc.entity;
 
+import com.example.cloudcalc.entity.prize.PrizeInfo;
+
 import java.util.List;
 
 public class ProgramPrize {

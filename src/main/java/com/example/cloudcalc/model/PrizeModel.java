@@ -3,7 +3,7 @@ package com.example.cloudcalc.model;
 import com.example.cloudcalc.FileManager;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.PrizeController;
-import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.entity.prize.Prize;
 import com.example.cloudcalc.util.FunctionUtils;
 import javafx.stage.Stage;
 import org.json.JSONArray;

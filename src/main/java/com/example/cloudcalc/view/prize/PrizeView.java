@@ -2,7 +2,7 @@ package com.example.cloudcalc.view.prize;
 
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.PrizeController;
-import com.example.cloudcalc.entity.Prize;
+import com.example.cloudcalc.entity.prize.Prize;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
 import javafx.scene.control.Button;
