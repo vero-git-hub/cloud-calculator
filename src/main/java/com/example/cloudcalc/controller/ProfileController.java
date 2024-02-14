@@ -91,7 +91,6 @@ public class ProfileController {
                                 LocalDate date = program.getDate();
                                 Map<String, String> map = dataExtractor.scanProfileLink(profile, date);
 
-                                System.out.println("3");
                                 for (Map.Entry<String, String> entry : map.entrySet()) {
                                     if (!countingList.isEmpty()) {
                                         for(String elem : countingList) {
@@ -99,11 +98,16 @@ public class ProfileController {
                                                 userPoints++;
                                             }
                                         }
-                                    } else if(!ignoreList.isEmpty()) {
-                                        for(String elem : ignoreList) {
-                                            if(!elem.equals(entry.getKey())) {
-                                                userPoints++;
+                                    } else if (!ignoreList.isEmpty()) {
+                                        boolean shouldCount = true;
+                                        for (String elem : ignoreList) {
+                                            if (elem.equals(entry.getKey())) {
+                                                shouldCount = false;
+                                                break;
                                             }
+                                        }
+                                        if (shouldCount) {
+                                            userPoints++;
                                         }
                                     }
                                 }

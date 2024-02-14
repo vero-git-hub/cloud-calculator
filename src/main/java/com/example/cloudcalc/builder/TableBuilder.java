@@ -116,17 +116,13 @@ public class TableBuilder {
         double numberColumnPercentage = 0.05;
         double nameColumnPercentage = 0.1;
         double linkColumnPercentage = 0.2;
+        double scanColumnPercentage = 0.1;
         double editColumnPercentage = 0.1;
         double deleteColumnPercentage = 0.1;
 
-        double programsColumnPercentage = 1.0 - (numberColumnPercentage + nameColumnPercentage + linkColumnPercentage + editColumnPercentage + deleteColumnPercentage);
+        double programsColumnPercentage = 1.0 - (numberColumnPercentage + nameColumnPercentage + linkColumnPercentage + scanColumnPercentage + editColumnPercentage + deleteColumnPercentage);
 
-        mainTable.getColumns().get(0).prefWidthProperty().bind(mainTable.widthProperty().multiply(numberColumnPercentage));
-        mainTable.getColumns().get(1).prefWidthProperty().bind(mainTable.widthProperty().multiply(nameColumnPercentage));
-        mainTable.getColumns().get(2).prefWidthProperty().bind(mainTable.widthProperty().multiply(linkColumnPercentage));
-        mainTable.getColumns().get(3).prefWidthProperty().bind(mainTable.widthProperty().multiply(programsColumnPercentage));
-        mainTable.getColumns().get(4).prefWidthProperty().bind(mainTable.widthProperty().multiply(editColumnPercentage));
-        mainTable.getColumns().get(5).prefWidthProperty().bind(mainTable.widthProperty().multiply(deleteColumnPercentage));
+        setColumnWidths(mainTable, numberColumnPercentage, nameColumnPercentage, linkColumnPercentage, programsColumnPercentage, scanColumnPercentage, editColumnPercentage, deleteColumnPercentage);
     }
 
     public void setColumnWidthForStats(TableView<Profile> table) {
@@ -174,7 +170,6 @@ public class TableBuilder {
         if(AlertGuardian.alertContentDeleteBadge != null) {
             AlertGuardian.alertContentDeleteBadge = newAlertContentDeleteBadge;
         }
-
     }
 
     public TableView<Profile> createTableForMain(Stage primaryStage, ProfileController profileController, MainController mainController, ScanController scanController) {
