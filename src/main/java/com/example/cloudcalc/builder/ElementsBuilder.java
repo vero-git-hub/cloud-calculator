@@ -3,9 +3,11 @@ package com.example.cloudcalc.builder;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.IScreenController;
 import com.example.cloudcalc.controller.MainController;
+import com.example.cloudcalc.entity.Profile;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -13,6 +15,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class ElementsBuilder {
@@ -91,5 +97,17 @@ public class ElementsBuilder {
     public Label createSubtitleLabel(Label subtitleLabel) {
         subtitleLabel.setStyle("-fx-font-style: italic;");
         return subtitleLabel;
+    }
+
+    public Hyperlink createProfileLink(Profile profile) {
+        Hyperlink nameLink = new Hyperlink(profile.getName());
+        nameLink.setOnAction(e -> {
+            try {
+                Desktop.getDesktop().browse(new URI(profile.getLink()));
+            } catch (IOException | URISyntaxException ex) {
+                ex.printStackTrace();
+            }
+        });
+        return nameLink;
     }
 }

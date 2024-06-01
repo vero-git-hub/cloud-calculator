@@ -185,7 +185,7 @@ public class TableBuilder {
         TableColumn<Profile, Profile> editColumn = createEditColumnForProfile(primaryStage, profileController, mainController);
         TableColumn<Profile, Profile> actionColumn = createActionColumnForProfile(primaryStage, profileController, mainController);
 
-        mainTable.getColumns().addAll(numberColumn, nameColumn, linkColumn, programsColumn, scanColumn, editColumn, actionColumn);
+        mainTable.getColumns().addAll(numberColumn, nameColumn, linkColumn, programsColumn, editColumn, scanColumn, actionColumn);
 
         List<Profile> profiles = profileController.getProfilesFromFile();
         mainTable.getItems().addAll(profiles);
@@ -409,7 +409,7 @@ public class TableBuilder {
     }
 
     public TableColumn<Profile, Profile> createEditColumnForProfile(Stage primaryStage, ProfileController profileController, MainController mainController) {
-        TableColumn<Profile, Profile> column = new TableColumn<>("Edit");
+        TableColumn<Profile, Profile> column = new TableColumn<>("Toggle programs");
         column.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
         column.setCellFactory(param -> new TableCell<Profile, Profile>() {
             @Override
@@ -421,7 +421,9 @@ public class TableBuilder {
                 }
 
                 EventHandler<ActionEvent> action = e -> {
-                    profileController.showEditProfileScreen(primaryStage, profile);
+                    //TODO: move to new page Profiles
+                    //profileController.showEditProfileScreen(primaryStage, profile);
+                    profileController.toggleUserPrograms(primaryStage, profile);
                 };
 
                 Button button = ButtonFactory.createEditButton(action);

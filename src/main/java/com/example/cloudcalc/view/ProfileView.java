@@ -8,11 +8,10 @@ import com.example.cloudcalc.entity.Program;
 import com.example.cloudcalc.entity.ProgramPrize;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -29,6 +28,7 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
     TextField dateField;
     TextField linkField;
     private Label programsLabel;
+    private String TOGGLE_PROGRAMS_TITLE = "TOGGLE PROGRAMS FOR";
 
     public ProfileView(ProfileController profileController) {
         this.profileController = profileController;
@@ -131,6 +131,31 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
                 profileController.createTopLayoutEditProfileScreen(primaryStage),
                 nameField,
                 linkField,
+                programsLabel
+        );
+
+        List<Program> programs = profileController.loadProgramsFromFile();
+        List<CheckBox> checkBoxes = createCheckBoxes(layout, programs, profile);
+
+        Button saveButton = createSaveButton(checkBoxes, profile, primaryStage);
+        layout.getChildren().add(saveButton);
+
+        profileController.createScene(primaryStage, layout);
+    }
+
+    /**
+     * Enable and disable user programs
+     */
+    public void toggleUserPrograms(Stage primaryStage, Profile profile) {
+        VBox layout = createLayout();
+        setupNameAndLinkFields(profile);
+
+        Hyperlink link = profileController.createLink(profile);
+        Text preTextLabel = new Text(TOGGLE_PROGRAMS_TITLE);
+        TextFlow textFlow = new TextFlow(preTextLabel, link);
+
+        layout.getChildren().addAll(
+                profileController.createTopLayoutDouble(primaryStage, textFlow),
                 programsLabel
         );
 

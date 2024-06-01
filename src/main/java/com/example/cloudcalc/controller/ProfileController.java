@@ -16,9 +16,12 @@ import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.util.Notification;
 import com.example.cloudcalc.view.ProfileView;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
@@ -189,5 +192,18 @@ public class ProfileController {
 
     public List<Program> loadProgramsFromFile() {
         return programController.loadProgramsFromFile();
+    }
+
+    public void toggleUserPrograms(Stage primaryStage, Profile profile) {
+        profileView.toggleUserPrograms(primaryStage, profile);
+    }
+
+    public HBox createTopLayoutDouble(Stage primaryStage, TextFlow textFlow){
+        Button backButton = ButtonFactory.createBackButton(e -> mainController.showMainScreen(primaryStage));
+        return elementsBuilder.createTopLayoutWithBackAndText(backButton, textFlow);
+    }
+
+    public Hyperlink createLink(Profile profile) {
+        return elementsBuilder.createProfileLink(profile);
     }
 }
