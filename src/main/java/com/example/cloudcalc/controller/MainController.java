@@ -65,4 +65,8 @@ public class MainController {
     public void getCreateProfileScreen(Stage primaryStage){
         serviceFacade.showCreateProfileScreen(primaryStage);
     }
+
+    public void getProfilesScreen(Stage primaryStage){
+        serviceFacade.showProfilesScreen(primaryStage);
+    }
 }

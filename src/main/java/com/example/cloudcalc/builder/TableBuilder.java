@@ -283,6 +283,27 @@ public class TableBuilder {
         return table;
     }
 
+    public TableView<Profile> createTableForProfiles(Stage stage, List<Profile> profiles, ProfileController controller) {
+        TableView<Profile> table = new TableView<>();
+
+        TableColumn<Profile, Integer> idxColumn = createNumbering(table);
+        TableColumn<Profile, String> nameColumn = createColumnForProfile("Name");
+        TableColumn<Profile, String> programColumn = createLinkColumn("Link");
+
+        TableColumn<Profile, Profile> editColumn = createEditColumn(stage, controller);
+        TableColumn<Profile, Void> deleteColumn = createColumnDeleteProfile(stage, controller);
+
+        table.getColumns().addAll(idxColumn, nameColumn, programColumn
+                , editColumn
+                 , deleteColumn
+        );
+        table.getItems().addAll(profiles);
+
+        configureTableColumnsWidthForProfiles(table);
+
+        return table;
+    }
+
     private TableColumn<Prize, Prize> createEditColumn(Stage stage, PrizeController prizeController) {
         TableColumn<Prize, Prize> column = new TableColumn<>("Edit");
         column.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
@@ -306,9 +327,38 @@ public class TableBuilder {
         return column;
     }
 
+    private TableColumn<Profile, Profile> createEditColumn(Stage stage, ProfileController controller) {
+        TableColumn<Profile, Profile> column = new TableColumn<>("Edit");
+        column.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue()));
+        column.setCellFactory(param -> new TableCell<Profile, Profile>() {
+            @Override
+            protected void updateItem(Profile profile, boolean empty) {
+                super.updateItem(profile, empty);
+                if (profile == null || empty) {
+                    setGraphic(null);
+                    return;
+                }
+
+                EventHandler<ActionEvent> action = e -> {
+                    controller.showEditProfile(stage, profile);
+                };
+
+                Button button = ButtonFactory.createEditButton(action);
+                setGraphic(button);
+            }
+        });
+        return column;
+    }
+
     public TableColumn<Prize, Integer> createNumberColumnForPrize(TableView<Prize> mainTable) {
         TableColumn<Prize, Integer> numberColumn = new TableColumn<>("№");
         numberColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(mainTable.getItems().indexOf(cellData.getValue()) + 1));
+        return numberColumn;
+    }
+
+    public TableColumn<Profile, Integer> createNumbering(TableView<Profile> table) {
+        TableColumn<Profile, Integer> numberColumn = new TableColumn<>("№");
+        numberColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(table.getItems().indexOf(cellData.getValue()) + 1));
         return numberColumn;
     }
 
@@ -344,6 +394,39 @@ public class TableBuilder {
         return deleteColumn;
     }
 
+    private TableColumn<Profile, Void> createColumnDeleteProfile(Stage stage, ProfileController controller) {
+        TableColumn<Profile, Void> deleteColumn = new TableColumn<>("Delete");
+
+        Callback<TableColumn<Profile, Void>, TableCell<Profile, Void>> cellFactory = new Callback<>() {
+            @Override
+            public TableCell<Profile, Void> call(final TableColumn<Profile, Void> param) {
+                return new TableCell<>() {
+                    final EventHandler<ActionEvent> deleteAction = (ActionEvent event) -> {
+                        Profile profile = getTableView().getItems().get(getIndex());
+                        controller.deleteProfile(stage, profile);
+                    };
+
+                    final Button deleteButton = ButtonFactory.createDeleteButton(deleteAction);
+
+                    @Override
+                    public void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            setGraphic(deleteButton);
+                        }
+                    }
+                };
+            }
+        };
+
+        deleteColumn.setCellFactory(cellFactory);
+
+        return deleteColumn;
+    }
+
+
     public void configureTableColumnsWidthForPrize(TableView<Prize> table) {
         TableColumn<Prize, ?> numberColumn = table.getColumns().get(0);
         TableColumn<Prize, ?> nameColumn = table.getColumns().get(1);
@@ -370,6 +453,28 @@ public class TableBuilder {
         deleteColumn.prefWidthProperty().bind(table.widthProperty().multiply(deleteColumnPercentage));
     }
 
+    public void configureTableColumnsWidthForProfiles(TableView<Profile> table) {
+        TableColumn<Profile, ?> number = table.getColumns().get(0);
+        TableColumn<Profile, ?> name = table.getColumns().get(1);
+        TableColumn<Profile, ?> link = table.getColumns().get(2);
+        TableColumn<Profile, ?> edit = table.getColumns().get(3);
+        TableColumn<Profile, ?> delete = table.getColumns().get(4);
+
+        double numberColumnPercentage = 0.05;
+        double editColumnPercentage = 0.1;
+        double deleteColumnPercentage = 0.1;
+
+        double remained = 1.0 - (numberColumnPercentage + editColumnPercentage + deleteColumnPercentage);
+        double nameColumnPercentage = remained * 0.2;
+        double linkColumnPercentage = remained * 0.8;
+
+        number.prefWidthProperty().bind(table.widthProperty().multiply(numberColumnPercentage));
+        name.prefWidthProperty().bind(table.widthProperty().multiply(nameColumnPercentage));
+        link.prefWidthProperty().bind(table.widthProperty().multiply(linkColumnPercentage));
+        edit.prefWidthProperty().bind(table.widthProperty().multiply(editColumnPercentage));
+        delete.prefWidthProperty().bind(table.widthProperty().multiply(deleteColumnPercentage));
+    }
+
     public TableColumn<Prize, Integer> createCountColumnForPrize() {
         TableColumn<Prize, Integer> countColumn = new TableColumn<>("Points");
         countColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
@@ -378,6 +483,12 @@ public class TableBuilder {
 
     public TableColumn<Prize, String> createColumnForPrize(String value) {
         TableColumn<Prize, String> column = new TableColumn<>(value);
+        column.setCellValueFactory(new PropertyValueFactory<>(value.toLowerCase()));
+        return column;
+    }
+
+    public TableColumn<Profile, String> createColumnForProfile(String value) {
+        TableColumn<Profile, String> column = new TableColumn<>(value);
         column.setCellValueFactory(new PropertyValueFactory<>(value.toLowerCase()));
         return column;
     }
@@ -421,8 +532,6 @@ public class TableBuilder {
                 }
 
                 EventHandler<ActionEvent> action = e -> {
-                    //TODO: move to new page Profiles
-                    //profileController.showEditProfileScreen(primaryStage, profile);
                     profileController.toggleUserPrograms(primaryStage, profile);
                 };
 

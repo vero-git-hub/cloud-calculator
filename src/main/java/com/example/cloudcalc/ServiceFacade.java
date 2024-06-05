@@ -86,4 +86,8 @@ public class ServiceFacade {
     public void showProgramScreen(Stage stage) {
         programController.showScreen(stage);
     }
+
+    public void showProfilesScreen(Stage stage){
+        profileController.showScreen(stage);
+    }
 }

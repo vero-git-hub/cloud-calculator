@@ -32,6 +32,18 @@ public class ProfileModel {
         mainController.showMainScreen(primaryStage);
     }
 
+    public void handleDeleteAction(Stage primaryStage, Profile profile) {
+        boolean isConfirmationAlert = profileController.showConfirmationAlert();
+
+        if (isConfirmationAlert) {
+            List<Profile> profiles = loadProfilesFromFile(FileName.PROFILES_FILE);
+            profiles.remove(profile);
+            saveProfilesToFile(profiles, FileName.PROFILES_FILE);
+
+            profileController.showScreen(primaryStage);
+        }
+    }
+
     public void saveProfileToFile(Profile profile, String fileName) {
         JSONArray profilesArray = new JSONArray();
         File file = new File(fileName);

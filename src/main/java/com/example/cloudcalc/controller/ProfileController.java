@@ -5,20 +5,19 @@ import com.example.cloudcalc.DateUtils;
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.builder.ElementsBuilder;
 import com.example.cloudcalc.builder.SceneBuilder;
+import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.entity.*;
 import com.example.cloudcalc.entity.prize.Prize;
 import com.example.cloudcalc.entity.prize.PrizeInfo;
 import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
+import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.model.CountConditionModel;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.util.Notification;
 import com.example.cloudcalc.view.ProfileView;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextFlow;
@@ -28,9 +27,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
-public class ProfileController {
-    private ServiceFacade serviceFacade;
+public class ProfileController extends BaseController {
     private final ProfileView profileView;
     private final ProfileModel profileModel;
     private final DataExtractor dataExtractor;
@@ -39,9 +38,16 @@ public class ProfileController {
     private final PrizeController prizeController;
     private final ElementsBuilder elementsBuilder;
     private final SceneBuilder sceneBuilder;
+    public static ResourceBundle bundle;
+    private TableBuilder tableBuilder = new TableBuilder();
+    String alertTitleDeleteProfile = "Confirmation Dialog";
+    String alertHeaderDeleteProfile = "Delete Profile";
+    String alertContentDeleteProfile = "Are you sure you want to delete this profile?";
 
-    public ProfileController(ServiceFacade serviceFacade) {
-        this.serviceFacade = serviceFacade;
+    public ProfileController(ServiceFacade serviceFacade){
+        super(serviceFacade);
+        bundle = LanguageManager.getBundle();
+
         this.profileView = new ProfileView(this);
         this.profileModel = new ProfileModel(this);
         this.dataExtractor = serviceFacade.getDataExtractor();
@@ -198,12 +204,45 @@ public class ProfileController {
         profileView.toggleUserPrograms(primaryStage, profile);
     }
 
-    public HBox createTopLayoutDouble(Stage primaryStage, TextFlow textFlow){
+    public HBox createTopLayoutDouble(Stage primaryStage, TextFlow textFlow) {
         Button backButton = ButtonFactory.createBackButton(e -> mainController.showMainScreen(primaryStage));
         return elementsBuilder.createTopLayoutWithBackAndText(backButton, textFlow);
     }
 
     public Hyperlink createLink(Profile profile) {
         return elementsBuilder.createProfileLink(profile);
+    }
+
+    @Override
+    public void showScreen(Stage stage) {
+        profileView.showScreen(stage);
+    }
+
+    @Override
+    public void showAddScreen(Stage stage) {
+        //TODO: show profile adding screen
+    }
+
+    @Override
+    public void createScene(VBox layout, Stage stage) {
+        sceneBuilder.createScene(layout, stage);
+    }
+
+    public TableView<Profile> createTable(Stage stage, List<Profile> profiles) {
+        return tableBuilder.createTableForProfiles(stage, profiles, this);
+    }
+
+    public void showEditProfile(Stage stage, Profile profile) {
+        profileView.showEditProfileScreen(stage, profile);
+    }
+
+    public void deleteProfile(Stage stage, Profile profile) {
+        profileModel.handleDeleteAction(stage, profile);
+    }
+
+    public boolean showConfirmationAlert() {
+        return Notification.showConfirmationAlert(
+                alertTitleDeleteProfile, alertHeaderDeleteProfile, alertContentDeleteProfile
+        );
     }
 }

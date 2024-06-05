@@ -2,25 +2,30 @@ package com.example.cloudcalc.view;
 
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.MainController;
+import com.example.cloudcalc.entity.ProgramPrize;
 import com.example.cloudcalc.language.Language;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
 import com.example.cloudcalc.entity.Profile;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class MainView implements Localizable {
 
     private final MainController controller;
     private Label titleLabel;
     Label profilesLabel = new Label("PROFILES");
+    String PROFILES_TITLE = "PROFILES";
 
     public MainView(MainController controller) {
         this.controller = controller;
@@ -62,14 +67,16 @@ public class MainView implements Localizable {
         HBox labelAndButton = new HBox(5);
         labelAndButton.setAlignment(Pos.CENTER_LEFT);
 
-        Button addButton = ButtonFactory.createAddButton(e -> controller.getCreateProfileScreen(primaryStage));
+        //TODO: move to profile page
+        //Button addButton = ButtonFactory.createAddButton(e -> controller.getCreateProfileScreen(primaryStage));
+        Button profilesButton = ButtonFactory.createProfilesButton(e -> controller.getProfilesScreen(primaryStage));
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         ComboBox<Language> languageComboBox = createLanguageComboBox();
 
-        labelAndButton.getChildren().addAll(profilesLabel, addButton, spacer, languageComboBox);
+        labelAndButton.getChildren().addAll(profilesButton, spacer, languageComboBox);
         return labelAndButton;
     }
 

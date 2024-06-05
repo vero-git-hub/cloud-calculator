@@ -9,6 +9,7 @@ import com.example.cloudcalc.entity.ProgramPrize;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -29,6 +30,7 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
     TextField linkField;
     private Label programsLabel;
     private String TOGGLE_PROGRAMS_TITLE = "TOGGLE PROGRAMS FOR";
+    private String title = "PROFILES";
 
     public ProfileView(ProfileController profileController) {
         this.profileController = profileController;
@@ -226,6 +228,27 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
             }
         }
         return newProgramPrizes;
+    }
+
+    public void showScreen(Stage stage) {
+        VBox layout = new VBox(10);
+
+        List<Profile> profiles = profileController.getProfilesFromFile();
+
+        TableView<Profile> table = profileController.createTable(stage, profiles);
+
+        Button backButton = ButtonFactory.createBackButton(e -> profileController.showMainScreen(stage));
+
+        Button createButton = ButtonFactory.createAddButton(e -> profileController.showAddScreen(stage));
+
+        HBox topLayout = profileController.createTopLayout(backButton, new Label(title), createButton);
+
+        layout.getChildren().addAll(
+                topLayout,
+                table
+        );
+
+        profileController.createScene(layout, stage);
     }
 
     @Override
