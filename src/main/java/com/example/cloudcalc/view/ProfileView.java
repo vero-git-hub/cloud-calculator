@@ -57,7 +57,7 @@ public class ProfileView implements Localizable, ProfileFieldUpdatable {
         Profile profile = createEmptyProfile();
 
         layout.getChildren().addAll(
-                profileController.createTopLayout(primaryStage),
+                profileController.createTopLayoutForAddScreen(primaryStage),
                 nameField,
                 linkField,
                 programsLabel

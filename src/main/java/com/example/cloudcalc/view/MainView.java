@@ -67,8 +67,6 @@ public class MainView implements Localizable {
         HBox labelAndButton = new HBox(5);
         labelAndButton.setAlignment(Pos.CENTER_LEFT);
 
-        //TODO: move to profile page
-        //Button addButton = ButtonFactory.createAddButton(e -> controller.getCreateProfileScreen(primaryStage));
         Button profilesButton = ButtonFactory.createProfilesButton(e -> controller.getProfilesScreen(primaryStage));
 
         Region spacer = new Region();

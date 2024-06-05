@@ -71,10 +71,6 @@ public class ServiceFacade {
         return programController;
     }
 
-    public void showCreateProfileScreen(Stage primaryStage) {
-        profileController.showCreateProfileScreen(primaryStage);
-    }
-
     public void showStatsScreen(Stage primaryStage) {
         statsController.showStatsScreen(primaryStage);
     }

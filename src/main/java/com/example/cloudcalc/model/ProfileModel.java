@@ -229,6 +229,6 @@ public class ProfileModel {
 
     public void handleProfileSave(Stage primaryStage, Profile profile) {
         saveProfileToFile(profile, FileName.PROFILES_FILE);
-        profileController.showMainScreen(primaryStage);
+        profileController.showScreen(primaryStage);
     }
 }

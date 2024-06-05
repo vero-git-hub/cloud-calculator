@@ -58,14 +58,6 @@ public class ProfileController extends BaseController {
         this.prizeController = serviceFacade.getPrizeController();
     }
 
-    public void showCreateProfileScreen(Stage primaryStage) {
-        profileView.showCreateProfileScreen(primaryStage);
-    }
-
-    public void showEditProfileScreen(Stage primaryStage, Profile profile) {
-        profileView.showEditProfileScreen(primaryStage, profile);
-    }
-
     public List<Profile> getProfilesFromFile() {
         return profileModel.loadProfilesFromFile(FileName.PROFILES_FILE);
     }
@@ -171,6 +163,11 @@ public class ProfileController extends BaseController {
         return elementsBuilder.createTopLayout(backButton, profileView.getTitleLabel());
     }
 
+    public HBox createTopLayoutForAddScreen(Stage primaryStage){
+        Button backButton = ButtonFactory.createBackButton(e -> showScreen(primaryStage));
+        return elementsBuilder.createTopLayout(backButton, profileView.getTitleLabel());
+    }
+
     public HBox createTopLayoutEditProfileScreen(Stage primaryStage){
         Button backButton = ButtonFactory.createBackButton(e -> mainController.showMainScreen(primaryStage));
         return elementsBuilder.createTopLayout(backButton, profileView.getTitleLabelEditProfileScreen());
@@ -220,7 +217,7 @@ public class ProfileController extends BaseController {
 
     @Override
     public void showAddScreen(Stage stage) {
-        //TODO: show profile adding screen
+        profileView.showCreateProfileScreen(stage);
     }
 
     @Override
