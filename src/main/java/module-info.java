@@ -37,6 +37,6 @@ module com.example.cloudcalc {
     opens com.example.cloudcalc.view.program to javafx.fxml;
     exports com.example.cloudcalc.entity.prize;
     opens com.example.cloudcalc.entity.prize to javafx.fxml;
-    exports com.example.cloudcalc.view.profile;
-    opens com.example.cloudcalc.view.profile to javafx.fxml;
+    exports com.example.cloudcalc.entity.program;
+    opens com.example.cloudcalc.entity.program to javafx.fxml;
 }

@@ -2,7 +2,7 @@ package com.example.cloudcalc.controller;
 
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.entity.Profile;
-import com.example.cloudcalc.entity.Program;
+import com.example.cloudcalc.entity.program.Program;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.model.ProgramModel;
 import com.example.cloudcalc.util.Notification;
@@ -84,7 +84,7 @@ public class ProgramController extends BaseController {
         saveProgramView.showEditProgramScreen(primaryStage, program);
     }
 
-    public Label createSubtitleLabel() {
-        return elementsBuilder.createSubtitleLabel(saveProgramView.getSubtitleLabel());
-    }
+//    public Label createSubtitleLabel() {
+//        return elementsBuilder.createSubtitleLabel(saveProgramView.getSubtitleLabel());
+//    }
 }

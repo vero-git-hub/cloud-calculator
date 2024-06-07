@@ -11,9 +11,10 @@ import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.entity.*;
 import com.example.cloudcalc.entity.prize.Prize;
 import com.example.cloudcalc.entity.prize.PrizeInfo;
+import com.example.cloudcalc.entity.program.Program;
 import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
 import com.example.cloudcalc.language.LanguageManager;
-import com.example.cloudcalc.model.CountConditionModel;
+import com.example.cloudcalc.entity.program.CountCondition;
 import com.example.cloudcalc.model.ProfileModel;
 import com.example.cloudcalc.util.Notification;
 import com.example.cloudcalc.view.ProfileView;
@@ -76,14 +77,17 @@ public class ProfileController extends BaseController {
                         String userProgramName = programPrize.getProgram();
 
                         if(programName.equals(userProgramName)) {
-                            CountConditionModel condition = program.getCondition();
-                            List<String> countingList = new ArrayList<>();
-                            List<String> ignoreList = new ArrayList<>();
-                            if (condition != null) {
-                                if (condition.getType().equals("What to count")) {
-                                    countingList = condition.getValues();
-                                } else if (condition.getType().equals("What not to count")) {
-                                    ignoreList = condition.getValues();
+                            List<CountCondition> conditions = program.getConditions();
+                            List<CountCondition.ValueWithPoints> countingList = new ArrayList<>();
+                            List<CountCondition.ValueWithPoints> ignoreList = new ArrayList<>();
+
+                            if (conditions != null) {
+                                for (CountCondition condition : conditions) {
+                                    if (condition.getType().equals("What to count")) {
+                                        countingList.addAll(condition.getValues());
+                                    } else if (condition.getType().equals("What not to count")) {
+                                        ignoreList.addAll(condition.getValues());
+                                    }
                                 }
                             }
 
@@ -93,23 +97,30 @@ public class ProfileController extends BaseController {
                                 Map<String, String> map = dataExtractor.scanProfileLink(profile, date);
 
                                 for (Map.Entry<String, String> entry : map.entrySet()) {
+                                    String entryKey = entry.getKey();
+                                    boolean isCounted = false;
+
                                     if (!countingList.isEmpty()) {
-                                        for(String elem : countingList) {
-                                            if(elem.equals(entry.getKey())) {
-                                                userPoints++;
-                                            }
-                                        }
-                                    } else if (!ignoreList.isEmpty()) {
-                                        boolean shouldCount = true;
-                                        for (String elem : ignoreList) {
-                                            if (elem.equals(entry.getKey())) {
-                                                shouldCount = false;
+                                        for (CountCondition.ValueWithPoints valueWithPoints : countingList) {
+                                            if (valueWithPoints.getTitle().equals(entryKey)) {
+                                                userPoints += valueWithPoints.getPoints();
+                                                isCounted = true;
                                                 break;
                                             }
                                         }
-                                        if (shouldCount) {
+                                    } else if (!ignoreList.isEmpty()) {
+                                        isCounted = true;
+                                        for (CountCondition.ValueWithPoints valueWithPoints : ignoreList) {
+                                            if (valueWithPoints.getTitle().equals(entryKey)) {
+                                                isCounted = false;
+                                                break;
+                                            }
+                                        }
+                                        if (isCounted) {
                                             userPoints++;
                                         }
+                                    } else {
+                                        userPoints++;
                                     }
                                 }
                             } catch (ProfilePageStructureChangedException ex) {

@@ -2,10 +2,10 @@ package com.example.cloudcalc.view.program;
 
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.ProgramController;
-import com.example.cloudcalc.entity.Program;
+import com.example.cloudcalc.entity.program.Program;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import com.example.cloudcalc.model.CountConditionModel;
+import com.example.cloudcalc.entity.program.CountCondition;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -21,6 +21,7 @@ import javafx.util.Callback;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class ProgramView implements Localizable {
     private final ProgramController programController;
@@ -58,71 +59,84 @@ public class ProgramView implements Localizable {
         TableColumn<Program, LocalDate> dateColumn = new TableColumn<>("Date");
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
 
+        TableColumn<Program, String> conditionsColumn = new TableColumn<>("Conditions");
+        conditionsColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(
+                cellData.getValue().getConditions().stream()
+                        .map(condition -> condition.getType() + ": " +
+                                condition.getValues().stream()
+                                        .map(vp -> vp.getTitle() + " (" + vp.getPoints() + ")")
+                                        .collect(Collectors.joining(", ")))
+                        .collect(Collectors.joining("; "))
+        ));
+
+
         TableColumn<Program, Void> deleteColumn = createDeleteColumn(stage);
         TableColumn<Program, Program> editColumn = createEditColumn(stage, programController);
 
-        tableView.getColumns().addAll(indexColumn, nameColumn, dateColumn, editColumn, deleteColumn);
+        tableView.getColumns().addAll(indexColumn, nameColumn, dateColumn, conditionsColumn, editColumn, deleteColumn);
 
-        TableView<CountConditionModel> subTableView = createSubTableView();
-
-        tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                CountConditionModel condition = newSelection.getCondition();
-                if (condition != null) {
-                    subTableView.setItems(FXCollections.observableArrayList(condition));
-                } else {
-                    subTableView.setItems(FXCollections.observableArrayList());
-                }
-            } else {
-                subTableView.setItems(FXCollections.observableArrayList());
-            }
-        });
+//        TableView<CountCondition> subTableView = createSubTableView();
+//
+//        tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+//            if (newSelection != null) {
+//                CountCondition condition = newSelection.getCondition();
+//                if (condition != null) {
+//                    subTableView.setItems(FXCollections.observableArrayList(condition));
+//                } else {
+//                    subTableView.setItems(FXCollections.observableArrayList());
+//                }
+//            } else {
+//                subTableView.setItems(FXCollections.observableArrayList());
+//            }
+//        });
 
         VBox layout = new VBox(10);
         Button backButton = ButtonFactory.createBackButton(e -> programController.showMainScreen(stage));
         Button createButton = ButtonFactory.createAddButton(e -> programController.showAddScreen(stage));
         HBox topLayout = programController.createTopLayout(backButton, new Label(title), createButton);
 
-        layout.getChildren().addAll(topLayout, tableView, subTableView);
+        layout.getChildren().addAll(topLayout, tableView
+                //, subTableView
+        );
 
         configureTableColumnsWidth(tableView);
         programController.createScene(layout, stage);
     }
 
-    private TableView<CountConditionModel> createSubTableView() {
-        TableView<CountConditionModel> subTableView = new TableView<>();
-
-        TableColumn<CountConditionModel, Number> subIndexColumn = new TableColumn<>("№");
-        subIndexColumn.setMinWidth(30);
-        subIndexColumn.setMaxWidth(50);
-        subIndexColumn.setSortable(false);
-        subIndexColumn.setCellValueFactory(column -> new ReadOnlyObjectWrapper<>(subTableView.getItems().indexOf(column.getValue()) + 1));
-        subIndexColumn.setCellFactory(column -> new TableCell<CountConditionModel, Number>() {
-            @Override
-            protected void updateItem(Number item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(item.toString());
-                }
-            }
-        });
-
-        TableColumn<CountConditionModel, String> typeColumn = new TableColumn<>("Condition Type");
-        typeColumn.setPrefWidth(150);
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
-
-        TableColumn<CountConditionModel, String> valueColumn = new TableColumn<>("Condition Values");
-        valueColumn.setPrefWidth(600);
-        valueColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(
-                String.join(", ", cellData.getValue().getValues())
-        ));
-
-        subTableView.getColumns().addAll(subIndexColumn, typeColumn, valueColumn);
-
-        return subTableView;
-    }
+//    private TableView<CountCondition> createSubTableView() {
+//        TableView<CountCondition> subTableView = new TableView<>();
+//
+//        TableColumn<CountCondition, Number> subIndexColumn = new TableColumn<>("№");
+//        subIndexColumn.setMinWidth(30);
+//        subIndexColumn.setMaxWidth(50);
+//        subIndexColumn.setSortable(false);
+//        subIndexColumn.setCellValueFactory(column -> new ReadOnlyObjectWrapper<>(subTableView.getItems().indexOf(column.getValue()) + 1));
+//        subIndexColumn.setCellFactory(column -> new TableCell<CountCondition, Number>() {
+//            @Override
+//            protected void updateItem(Number item, boolean empty) {
+//                super.updateItem(item, empty);
+//                if (empty || item == null) {
+//                    setText(null);
+//                } else {
+//                    setText(item.toString());
+//                }
+//            }
+//        });
+//
+//        TableColumn<CountCondition, String> typeColumn = new TableColumn<>("Condition Type");
+//        typeColumn.setPrefWidth(150);
+//        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+//
+//        TableColumn<CountCondition, String> valueColumn = new TableColumn<>("Condition Values");
+//        valueColumn.setPrefWidth(600);
+//        valueColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(
+//                String.join(", ", cellData.getValue().getValues())
+//        ));
+//
+//        subTableView.getColumns().addAll(subIndexColumn, typeColumn, valueColumn);
+//
+//        return subTableView;
+//    }
 
     private void configureTableColumnsWidth(TableView<Program> table) {
         double numberColumnPercentage = 0.05;

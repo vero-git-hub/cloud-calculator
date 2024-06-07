@@ -5,7 +5,8 @@ import com.example.cloudcalc.constant.FileName;
 import com.example.cloudcalc.controller.ProgramController;
 
 import com.example.cloudcalc.entity.Profile;
-import com.example.cloudcalc.entity.Program;
+import com.example.cloudcalc.entity.program.CountCondition;
+import com.example.cloudcalc.entity.program.Program;
 import com.example.cloudcalc.util.FunctionUtils;
 import com.example.cloudcalc.util.Notification;
 import javafx.stage.Stage;
@@ -36,7 +37,7 @@ public class ProgramModel {
                 program.setId(programObject.getInt("id"));
             }
 
-            if (programObject.has("name") && programObject.has("date") && programObject.has("condition")) {
+            if (programObject.has("name") && programObject.has("date") && programObject.has("conditions")) {
                 program.setName(programObject.getString("name"));
 
                 String dateString = programObject.getString("date");
@@ -48,21 +49,33 @@ public class ProgramModel {
                     Notification.showErrorMessage("Date error", "Check that the date is correct.");
                 }
 
-                JSONObject conditionObject = programObject.getJSONObject("condition");
-                CountConditionModel condition = new CountConditionModel();
+                JSONArray conditionsArray = programObject.getJSONArray("conditions");
+                List<CountCondition> conditions = new ArrayList<>();
 
-                condition.setType(conditionObject.getString("type"));
+                for (int j = 0; j < conditionsArray.length(); j++) {
+                    JSONObject conditionObject = conditionsArray.getJSONObject(j);
+                    CountCondition condition = new CountCondition();
+                    condition.setType(conditionObject.getString("type"));
 
-                if (conditionObject.has("values")) {
-                    JSONArray valuesArray = conditionObject.getJSONArray("values");
-                    List<String> values = new ArrayList<>();
-                    for (int k = 0; k < valuesArray.length(); k++) {
-                        values.add(valuesArray.getString(k));
+                    if (conditionObject.has("values")) {
+                        JSONArray valuesArray = conditionObject.getJSONArray("values");
+                        List<CountCondition.ValueWithPoints> values = new ArrayList<>();
+
+                        for (int k = 0; k < valuesArray.length(); k++) {
+                            JSONObject valueObject = valuesArray.getJSONObject(k);
+                            String title = valueObject.getString("title");
+                            int points = valueObject.getInt("points");
+                            CountCondition.ValueWithPoints valueWithPoints = new CountCondition.ValueWithPoints(title, points);
+                            values.add(valueWithPoints);
+                        }
+
+                        condition.setValues(values);
                     }
-                    condition.setValues(values);
+
+                    conditions.add(condition);
                 }
 
-                program.setCondition(condition);
+                program.setConditions(conditions);
 
                 programs.add(program);
             } else {
@@ -100,21 +113,22 @@ public class ProgramModel {
             jsonObject.put("name", program.getName());
             jsonObject.put("date", program.getDate().toString());
 
-            CountConditionModel condition = program.getCondition();
-            if (condition != null) {
+            JSONArray conditionsArray = new JSONArray();
+            for (CountCondition condition : program.getConditions()) {
                 JSONObject conditionObject = new JSONObject();
                 conditionObject.put("type", condition.getType());
 
                 JSONArray valuesArray = new JSONArray();
-                if (condition.getValues() != null) {
-                    for (String value : condition.getValues()) {
-                        valuesArray.put(value);
-                    }
+                for (CountCondition.ValueWithPoints value : condition.getValues()) {
+                    JSONObject valueObject = new JSONObject();
+                    valueObject.put("title", value.getTitle());
+                    valueObject.put("points", value.getPoints());
+                    valuesArray.put(valueObject);
                 }
                 conditionObject.put("values", valuesArray);
-
-                jsonObject.put("condition", conditionObject);
+                conditionsArray.put(conditionObject);
             }
+            jsonObject.put("conditions", conditionsArray);
 
             jsonArray.put(jsonObject);
         }

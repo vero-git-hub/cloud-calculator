@@ -3,7 +3,7 @@ package com.example.cloudcalc.controller;
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.builder.TableBuilder;
 import com.example.cloudcalc.entity.prize.Prize;
-import com.example.cloudcalc.entity.Program;
+import com.example.cloudcalc.entity.program.Program;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.model.PrizeModel;
 import com.example.cloudcalc.util.Notification;

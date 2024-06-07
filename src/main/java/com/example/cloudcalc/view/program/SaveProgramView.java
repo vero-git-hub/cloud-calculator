@@ -4,10 +4,10 @@ import com.example.cloudcalc.builder.GridPaneBuilder;
 import com.example.cloudcalc.builder.fields.program.ProgramFieldUpdatable;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.ProgramController;
-import com.example.cloudcalc.entity.Program;
+import com.example.cloudcalc.entity.program.Program;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import com.example.cloudcalc.model.CountConditionModel;
+import com.example.cloudcalc.entity.program.CountCondition;
 import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     private final ProgramController programController;
@@ -36,13 +37,14 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     Label titleAddScreenLabel = new Label();
     Button saveButton = new Button();
     Button cancelButton = new Button();
-    private TableView<CountConditionModel> conditionsTable;
-    private Label subtitleLabel = new Label("If you can get more than 1 prize, create another program. Does not apply to Arcade.");
+    private TableView<CountCondition> conditionsTable;
+    //private Label subtitleLabel = new Label("Doesn't count copies.");
     private ComboBox<String> conditionTypeComboBox;
     private TextField badgeNameField;
+    private TextField badgePointsField;
     private Button addBadgeButton;
-    private final String typeTitle = "Type:";
-    private final String badgeTitle = "Badge:";
+    //private final String typeTitle = "Type:";
+    //private final String badgeTitle = "Badge:";
 
     public SaveProgramView(ProgramController programController) {
         this.programController = programController;
@@ -56,19 +58,54 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     private void addBadgeToList() {
         String badgeName = badgeNameField.getText();
         String conditionType = conditionTypeComboBox.getValue();
+        String pointsString = badgePointsField.getText();
+
+        int points;
+        try {
+            points = Integer.parseInt(pointsString);
+        } catch (NumberFormatException e) {
+            showError("Invalid points value. Please enter a valid number.");
+            return;
+        }
 
         if (!badgeName.isEmpty() && conditionType != null) {
-            CountConditionModel condition = new CountConditionModel(conditionType, Arrays.asList(badgeName));
+            // Create an instance of ValueWithPoints
+            CountCondition.ValueWithPoints valueWithPoints = new CountCondition.ValueWithPoints(badgeName, points);
+
+            // Create a CountConditionModel instance with a type and a list of values with points
+            CountCondition condition = new CountCondition(
+                    conditionType,
+                    List.of(valueWithPoints)
+            );
+
+            // Add to table
             conditionsTable.getItems().add(condition);
+
+            // Clear the input field
             badgeNameField.clear();
+            badgePointsField.clear();
+        } else {
+            showError("Please fill in all fields.");
         }
     }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 
     private void initializeBadgeEntryFields() {
         badgeNameField = new TextField();
         badgeNameField.setPromptText("Enter Badge Name");
         addBadgeButton = new Button("Add Badge");
         addBadgeButton.setOnAction(e -> addBadgeToList());
+
+        badgePointsField = new TextField();
+        badgePointsField.setPromptText("Enter Points");
     }
 
     private void initializeConditionTypeComboBox() {
@@ -112,9 +149,9 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         badgeNameField.setDisable(true);
     }
 
-    public Label getSubtitleLabel() {
-        return subtitleLabel;
-    }
+//    public Label getSubtitleLabel() {
+//        return subtitleLabel;
+//    }
 
     public void showScreen(Stage stage) {
         resetConditionTypeComboBox();
@@ -123,14 +160,17 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
 
         HBox badgeEntryLayout = new HBox(10);
         badgeEntryLayout.getChildren().addAll(
-                new Label(typeTitle), conditionTypeComboBox,
-                new Label(badgeTitle), badgeNameField,
+                //new Label(typeTitle),
+                conditionTypeComboBox,
+                //new Label(badgeTitle),
+                badgeNameField,
+                badgePointsField,
                 addBadgeButton
         );
 
         layout.getChildren().addAll(
                 createTopLayout(stage),
-                programController.createSubtitleLabel(),
+                //programController.createSubtitleLabel(),
                 createFormLayout(),
                 badgeEntryLayout,
                 conditionsTable,
@@ -179,20 +219,32 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
                 program.setName(programName);
                 program.setDate(selectedDate);
 
-                List<String> badges = new ArrayList<>();
-                for (CountConditionModel conditionModel : conditionsTable.getItems()) {
-                    badges.addAll(conditionModel.getValues());
+                List<CountCondition> countConditions = new ArrayList<>();
+
+                for (CountCondition conditionModel : conditionsTable.getItems()) {
+                    List<CountCondition.ValueWithPoints> valuesWithPoints = conditionModel.getValues().stream()
+                            .map(vp -> new CountCondition.ValueWithPoints(vp.getTitle(), vp.getPoints()))
+                            .collect(Collectors.toList());
+
+                    CountCondition condition = new CountCondition();
+                    condition.setType(conditionModel.getType());
+                    condition.setValues(valuesWithPoints);
+                    countConditions.add(condition);
                 }
 
-                CountConditionModel condition = new CountConditionModel();
-                condition.setType(conditionTypeComboBox.getValue());
-                condition.setValues(badges);
-                program.setCondition(condition);
+//                CountCondition condition = new CountCondition();
+//                condition.setType(conditionTypeComboBox.getValue());
+//                condition.setValues(badges);
+                program.setConditions(countConditions);
 
                 saveProgram(stage, program);
             }
         });
         return new HBox(10, saveButton, cancelButton);
+    }
+
+    private void prepareToSaveProgram() {
+
     }
 
     private boolean isConditionsTableEmpty() {
@@ -203,14 +255,17 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         programController.saveProgram(stage, program);
     }
 
+    /**
+     * Display in table on the Add Program screen
+     */
     private void initializeConditionsTable() {
         conditionsTable = new TableView<>();
 
-        TableColumn<CountConditionModel, Number> indexColumn = new TableColumn<>("№");
+        TableColumn<CountCondition, Number> indexColumn = new TableColumn<>("№");
         indexColumn.setSortable(false);
         indexColumn.setMinWidth(30);
         indexColumn.setCellValueFactory(column -> new ReadOnlyObjectWrapper<>(conditionsTable.getItems().indexOf(column.getValue()) + 1));
-        indexColumn.setCellFactory(column -> new TableCell<CountConditionModel, Number>() {
+        indexColumn.setCellFactory(column -> new TableCell<CountCondition, Number>() {
             @Override
             protected void updateItem(Number item, boolean empty) {
                 super.updateItem(item, empty);
@@ -222,26 +277,37 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
             }
         });
 
-        TableColumn<CountConditionModel, String> typeColumn = new TableColumn<>("Condition type");
+        TableColumn<CountCondition, String> typeColumn = new TableColumn<>("Condition type");
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
 
-        TableColumn<CountConditionModel, String> valueColumn = new TableColumn<>("Values");
+        TableColumn<CountCondition, String> valueColumn = new TableColumn<>("Values");
         valueColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(
-                String.join(", ", cellData.getValue().getValues())
+                cellData.getValue().getValues().stream()
+                        .map(CountCondition.ValueWithPoints::getTitle)
+                        .collect(Collectors.joining(", "))
         ));
 
-        TableColumn<CountConditionModel, Void> deleteColumn = new TableColumn<>("Delete");
+        TableColumn<CountCondition, Integer> pointsColumn = new TableColumn<>("Points");
+        pointsColumn.setCellValueFactory(cellData -> {
+            int totalPoints = cellData.getValue().getValues().stream()
+                    .mapToInt(CountCondition.ValueWithPoints::getPoints)
+                    .sum();
+            return new ReadOnlyObjectWrapper<>(totalPoints);
+        });
+
+
+        TableColumn<CountCondition, Void> deleteColumn = new TableColumn<>("Delete");
         deleteColumn.setMinWidth(40);
 
-        Callback<TableColumn<CountConditionModel, Void>, TableCell<CountConditionModel, Void>> cellFactory = new Callback<>() {
+        Callback<TableColumn<CountCondition, Void>, TableCell<CountCondition, Void>> cellFactory = new Callback<>() {
             @Override
-            public TableCell<CountConditionModel, Void> call(final TableColumn<CountConditionModel, Void> param) {
-                final TableCell<CountConditionModel, Void> cell = new TableCell<>() {
+            public TableCell<CountCondition, Void> call(final TableColumn<CountCondition, Void> param) {
+                final TableCell<CountCondition, Void> cell = new TableCell<>() {
                     private final Button btn = new Button("X");
 
                     {
                         btn.setOnAction(event -> {
-                            CountConditionModel data = getTableView().getItems().get(getIndex());
+                            CountCondition data = getTableView().getItems().get(getIndex());
                             conditionsTable.getItems().remove(data);
                         });
                     }
@@ -260,7 +326,7 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
             }
         };
         deleteColumn.setCellFactory(cellFactory);
-        conditionsTable.getColumns().addAll(indexColumn, typeColumn, valueColumn, deleteColumn);
+        conditionsTable.getColumns().addAll(indexColumn, typeColumn, valueColumn, pointsColumn, deleteColumn);
     }
 
     public void showEditProgramScreen(Stage stage, Program program) {
@@ -270,19 +336,34 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         programNameField.setText(program.getName());
         startDatePicker.setValue(program.getDate());
 
-        conditionTypeComboBox.setValue(program.getCondition().getType());
-        conditionTypeComboBox.setDisable(true);
-
-        List<CountConditionModel> conditionModels = new ArrayList<>();
-        for (String badge : program.getCondition().getValues()) {
-            conditionModels.add(new CountConditionModel(program.getCondition().getType(), Arrays.asList(badge)));
+        // Processing conditions and filling the table
+        List<CountCondition> conditionModels = new ArrayList<>();
+        for (CountCondition condition : program.getConditions()) {
+            for (CountCondition.ValueWithPoints valueWithPoints : condition.getValues()) {
+                CountCondition conditionModel = new CountCondition(
+                        condition.getType(),
+                        List.of(new CountCondition.ValueWithPoints(
+                                valueWithPoints.getTitle(),
+                                valueWithPoints.getPoints()
+                        ))
+                );
+                conditionModels.add(conditionModel);
+            }
         }
         conditionsTable.setItems(FXCollections.observableArrayList(conditionModels));
 
+        // Setting ComboBox and input field values
+        conditionTypeComboBox.setValue(program.getConditions().isEmpty() ? null : program.getConditions().get(0).getType());
+        conditionTypeComboBox.setDisable(true);
+
+        // Layout for adding icons
         HBox badgeEntryLayout = new HBox(10);
         badgeEntryLayout.getChildren().addAll(
-                new Label(typeTitle), conditionTypeComboBox,
-                new Label(badgeTitle), badgeNameField,
+                //new Label(typeTitle),
+                conditionTypeComboBox,
+                //new Label(badgeTitle),
+                badgeNameField,
+                badgePointsField,
                 addBadgeButton
         );
 
@@ -294,6 +375,7 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
                 createButtonsSection(stage)
         );
 
+        // Action for the save button
         saveButton.setOnAction(event -> {
             String programName = programNameField.getText();
             LocalDate selectedDate = startDatePicker.getValue();
@@ -310,15 +392,19 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         program.setName(programName);
         program.setDate(selectedDate);
 
-        List<String> badges = new ArrayList<>();
-        for (CountConditionModel conditionModel : conditionsTable.getItems()) {
-            badges.addAll(conditionModel.getValues());
+        List<CountCondition> updatedConditions = new ArrayList<>();
+        for (CountCondition conditionModel : conditionsTable.getItems()) {
+            List<CountCondition.ValueWithPoints> valuesWithPoints = conditionModel.getValues().stream()
+                    .map(vp -> new CountCondition.ValueWithPoints(vp.getTitle(), vp.getPoints()))
+                    .collect(Collectors.toList());
+
+            CountCondition condition = new CountCondition();
+            condition.setType(conditionModel.getType());
+            condition.setValues(valuesWithPoints);
+            updatedConditions.add(condition);
         }
 
-        CountConditionModel updatedCondition = new CountConditionModel();
-        updatedCondition.setType(conditionTypeComboBox.getValue());
-        updatedCondition.setValues(badges);
-        program.setCondition(updatedCondition);
+        program.setConditions(updatedConditions);
 
         programController.saveProgram(stage, program);
     }

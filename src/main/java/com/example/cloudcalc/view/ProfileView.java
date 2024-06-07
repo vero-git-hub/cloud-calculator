@@ -4,7 +4,7 @@ import com.example.cloudcalc.builder.fields.profile.ProfileFieldUpdatable;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.ProfileController;
 import com.example.cloudcalc.entity.Profile;
-import com.example.cloudcalc.entity.Program;
+import com.example.cloudcalc.entity.program.Program;
 import com.example.cloudcalc.entity.ProgramPrize;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
