@@ -70,12 +70,12 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
 
         if (!badgeName.isEmpty() && conditionType != null) {
             // Create an instance of ValueWithPoints
-            CountCondition.ValueWithPoints valueWithPoints = new CountCondition.ValueWithPoints(badgeName, points);
+            CountCondition.Badges badges = new CountCondition.Badges(badgeName, points);
 
             // Create a CountConditionModel instance with a type and a list of values with points
             CountCondition condition = new CountCondition(
                     conditionType,
-                    List.of(valueWithPoints)
+                    List.of(badges)
             );
 
             // Add to table
@@ -222,8 +222,8 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
                 List<CountCondition> countConditions = new ArrayList<>();
 
                 for (CountCondition conditionModel : conditionsTable.getItems()) {
-                    List<CountCondition.ValueWithPoints> valuesWithPoints = conditionModel.getValues().stream()
-                            .map(vp -> new CountCondition.ValueWithPoints(vp.getTitle(), vp.getPoints()))
+                    List<CountCondition.Badges> valuesWithPoints = conditionModel.getValues().stream()
+                            .map(vp -> new CountCondition.Badges(vp.getTitle(), vp.getPoints()))
                             .collect(Collectors.toList());
 
                     CountCondition condition = new CountCondition();
@@ -232,19 +232,12 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
                     countConditions.add(condition);
                 }
 
-//                CountCondition condition = new CountCondition();
-//                condition.setType(conditionTypeComboBox.getValue());
-//                condition.setValues(badges);
                 program.setConditions(countConditions);
 
                 saveProgram(stage, program);
             }
         });
         return new HBox(10, saveButton, cancelButton);
-    }
-
-    private void prepareToSaveProgram() {
-
     }
 
     private boolean isConditionsTableEmpty() {
@@ -283,14 +276,14 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         TableColumn<CountCondition, String> valueColumn = new TableColumn<>("Values");
         valueColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(
                 cellData.getValue().getValues().stream()
-                        .map(CountCondition.ValueWithPoints::getTitle)
+                        .map(CountCondition.Badges::getTitle)
                         .collect(Collectors.joining(", "))
         ));
 
         TableColumn<CountCondition, Integer> pointsColumn = new TableColumn<>("Points");
         pointsColumn.setCellValueFactory(cellData -> {
             int totalPoints = cellData.getValue().getValues().stream()
-                    .mapToInt(CountCondition.ValueWithPoints::getPoints)
+                    .mapToInt(CountCondition.Badges::getPoints)
                     .sum();
             return new ReadOnlyObjectWrapper<>(totalPoints);
         });
@@ -339,12 +332,12 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         // Processing conditions and filling the table
         List<CountCondition> conditionModels = new ArrayList<>();
         for (CountCondition condition : program.getConditions()) {
-            for (CountCondition.ValueWithPoints valueWithPoints : condition.getValues()) {
+            for (CountCondition.Badges badges : condition.getValues()) {
                 CountCondition conditionModel = new CountCondition(
                         condition.getType(),
-                        List.of(new CountCondition.ValueWithPoints(
-                                valueWithPoints.getTitle(),
-                                valueWithPoints.getPoints()
+                        List.of(new CountCondition.Badges(
+                                badges.getTitle(),
+                                badges.getPoints()
                         ))
                 );
                 conditionModels.add(conditionModel);
@@ -394,8 +387,8 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
 
         List<CountCondition> updatedConditions = new ArrayList<>();
         for (CountCondition conditionModel : conditionsTable.getItems()) {
-            List<CountCondition.ValueWithPoints> valuesWithPoints = conditionModel.getValues().stream()
-                    .map(vp -> new CountCondition.ValueWithPoints(vp.getTitle(), vp.getPoints()))
+            List<CountCondition.Badges> valuesWithPoints = conditionModel.getValues().stream()
+                    .map(vp -> new CountCondition.Badges(vp.getTitle(), vp.getPoints()))
                     .collect(Collectors.toList());
 
             CountCondition condition = new CountCondition();

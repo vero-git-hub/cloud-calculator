@@ -4,6 +4,7 @@ import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
+import com.example.cloudcalc.util.Notification;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -48,9 +49,8 @@ public class DataExtractor implements Localizable {
                     resultMap.put(key, valueStr);
                 }
             }
-
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ProfilePageStructureChangedException("Error scanning profile.");
         }
 
         return resultMap;

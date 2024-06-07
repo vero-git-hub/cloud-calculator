@@ -64,22 +64,32 @@ public class ProfileController extends BaseController {
     }
 
     public boolean scanAndUpdateProfile(Profile profile) {
+        // Read user programs (name, points, prizes)- profiles.json
         List<ProgramPrize> userProgramPrizeList = profile.getProgramPrizes();
 
+        // Read programs - programs.json
         List<Program> allPrograms = loadProgramsFromFile();
+        // Read prizes - prizes.json
         List<Prize> allPrizes = prizeController.loadPrizesFromFile();
 
+        // if programs and user programs exist
         if(!allPrograms.isEmpty() && !userProgramPrizeList.isEmpty()) {
+                // Iterate every program (programs from programs.json)
                 for (Program program : allPrograms) {
-                    for (ProgramPrize programPrize : userProgramPrizeList) {
+                    String programName = program.getName();
 
-                        String programName = program.getName();
+                    // Iterate user programs
+                    for (ProgramPrize programPrize : userProgramPrizeList) {
                         String userProgramName = programPrize.getProgram();
 
+                        // If program matches with user program
                         if(programName.equals(userProgramName)) {
+                            // Define program conditions
                             List<CountCondition> conditions = program.getConditions();
-                            List<CountCondition.ValueWithPoints> countingList = new ArrayList<>();
-                            List<CountCondition.ValueWithPoints> ignoreList = new ArrayList<>();
+
+                            // Separate conditions on the "What to count" and "What not to count" lists
+                            List<CountCondition.Badges> countingList = new ArrayList<>();
+                            List<CountCondition.Badges> ignoreList = new ArrayList<>();
 
                             if (conditions != null) {
                                 for (CountCondition condition : conditions) {
@@ -93,41 +103,57 @@ public class ProfileController extends BaseController {
 
                             int userPoints = 0;
                             try {
+                                // Start date to count
                                 LocalDate date = program.getDate();
+                                // Profile scanning starting from this date (above)
                                 Map<String, String> map = dataExtractor.scanProfileLink(profile, date);
 
-                                for (Map.Entry<String, String> entry : map.entrySet()) {
-                                    String entryKey = entry.getKey();
+                                // Iterate over each map element: Loop through all entries in the profile data map
+                                for (Map.Entry<String, String> profileBadge : map.entrySet()) {
+                                    // Extract the key (badge name) from the current entry
+                                    String badgeTitleProfile = profileBadge.getKey();
                                     boolean isCounted = false;
 
+                                    // Check the list of "What to count"
                                     if (!countingList.isEmpty()) {
-                                        for (CountCondition.ValueWithPoints valueWithPoints : countingList) {
-                                            if (valueWithPoints.getTitle().equals(entryKey)) {
-                                                userPoints += valueWithPoints.getPoints();
+                                        // Iterate badge in conditions
+                                        for (CountCondition.Badges badge: countingList) {
+                                            String badgeTitle = badge.getTitle();
+                                            if (badgeTitle.equals(badgeTitleProfile)) {
+                                                // When calculating, add the number of points indicated for this badge
+                                                int badgePoints = badge.getPoints();
+                                                userPoints += badgePoints;
                                                 isCounted = true;
+                                                //System.out.println("count -> " + badgeTitle);
                                                 break;
                                             }
                                         }
+                                    // Check the list of "What not to count"
                                     } else if (!ignoreList.isEmpty()) {
+                                        // If countingList is empty
                                         isCounted = true;
-                                        for (CountCondition.ValueWithPoints valueWithPoints : ignoreList) {
-                                            if (valueWithPoints.getTitle().equals(entryKey)) {
+                                        for (CountCondition.Badges badge : ignoreList) {
+                                            String badgeTitle = badge.getTitle();
+                                            if (badgeTitle.equals(badgeTitleProfile)) {
                                                 isCounted = false;
+                                                //System.out.println("ignore -> " + badgeTitle);
                                                 break;
                                             }
                                         }
+                                        // Add [one] point if the badge counted, and it is not on the ignore list.
+                                        // i.e. not count "ignore", and count all the rest
                                         if (isCounted) {
                                             userPoints++;
+                                            //System.out.println("everything don't ignore");
                                         }
-                                    } else {
-                                        userPoints++;
                                     }
                                 }
                             } catch (ProfilePageStructureChangedException ex) {
-                                Notification.showErrorMessage("Error", "Page structure has changed or empty.");
+                                Notification.showErrorMessage("Error scanning profile", "Reason: The profile link is invalid or the page structure has changed.");
                                 return false;
                             }
 
+                            // Add prize in profile
                             List<PrizeInfo> prizeInfos = programPrize.getPrizeInfoList();
                             if (prizeInfos == null || prizeInfos.isEmpty()) {
                                 prizeInfos = new ArrayList<>();
@@ -145,6 +171,7 @@ public class ProfileController extends BaseController {
                 }
         }
 
+        // update last scanning date
         updateProfile(profile);
         return true;
     }

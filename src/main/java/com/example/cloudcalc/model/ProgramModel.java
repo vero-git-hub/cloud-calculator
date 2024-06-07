@@ -57,16 +57,16 @@ public class ProgramModel {
                     CountCondition condition = new CountCondition();
                     condition.setType(conditionObject.getString("type"));
 
-                    if (conditionObject.has("values")) {
-                        JSONArray valuesArray = conditionObject.getJSONArray("values");
-                        List<CountCondition.ValueWithPoints> values = new ArrayList<>();
+                    if (conditionObject.has("badges")) {
+                        JSONArray valuesArray = conditionObject.getJSONArray("badges");
+                        List<CountCondition.Badges> values = new ArrayList<>();
 
                         for (int k = 0; k < valuesArray.length(); k++) {
                             JSONObject valueObject = valuesArray.getJSONObject(k);
                             String title = valueObject.getString("title");
                             int points = valueObject.getInt("points");
-                            CountCondition.ValueWithPoints valueWithPoints = new CountCondition.ValueWithPoints(title, points);
-                            values.add(valueWithPoints);
+                            CountCondition.Badges badges = new CountCondition.Badges(title, points);
+                            values.add(badges);
                         }
 
                         condition.setValues(values);
@@ -119,13 +119,13 @@ public class ProgramModel {
                 conditionObject.put("type", condition.getType());
 
                 JSONArray valuesArray = new JSONArray();
-                for (CountCondition.ValueWithPoints value : condition.getValues()) {
+                for (CountCondition.Badges value : condition.getValues()) {
                     JSONObject valueObject = new JSONObject();
                     valueObject.put("title", value.getTitle());
                     valueObject.put("points", value.getPoints());
                     valuesArray.put(valueObject);
                 }
-                conditionObject.put("values", valuesArray);
+                conditionObject.put("badges", valuesArray);
                 conditionsArray.put(conditionObject);
             }
             jsonObject.put("conditions", conditionsArray);

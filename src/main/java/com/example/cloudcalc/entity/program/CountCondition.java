@@ -12,14 +12,14 @@ import java.util.Objects;
 
 public class CountCondition {
     private final StringProperty type;
-    private final ObservableList<ValueWithPoints> values;
+    private final ObservableList<Badges> values;
 
     public CountCondition() {
         this.type = new SimpleStringProperty();
         this.values = FXCollections.observableArrayList();
     }
 
-    public CountCondition(String type, List<ValueWithPoints> values) {
+    public CountCondition(String type, List<Badges> values) {
         this.type = new SimpleStringProperty(type);
         this.values = FXCollections.observableArrayList(values);
     }
@@ -28,7 +28,7 @@ public class CountCondition {
         return type.get();
     }
 
-    public ObservableList<ValueWithPoints> getValues() {
+    public ObservableList<Badges> getValues() {
         return values;
     }
 
@@ -40,7 +40,7 @@ public class CountCondition {
         this.type.set(type);
     }
 
-    public void setValues(List<ValueWithPoints> values) {
+    public void setValues(List<Badges> values) {
         this.values.setAll(values);
     }
 
@@ -52,11 +52,11 @@ public class CountCondition {
                 '}';
     }
 
-    public static class ValueWithPoints {
+    public static class Badges {
         private final StringProperty title;
         private final IntegerProperty points;
 
-        public ValueWithPoints(String title, int points) {
+        public Badges(String title, int points) {
             this.title = new SimpleStringProperty(title);
             this.points = new SimpleIntegerProperty(points);
         }
@@ -87,7 +87,7 @@ public class CountCondition {
 
         @Override
         public String toString() {
-            return "ValueWithPoints{" +
+            return "Badges{" +
                     "title='" + getTitle() + '\'' +
                     ", points=" + getPoints() +
                     '}';
@@ -97,7 +97,7 @@ public class CountCondition {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            ValueWithPoints that = (ValueWithPoints) o;
+            Badges that = (Badges) o;
             return getPoints() == that.getPoints() && Objects.equals(getTitle(), that.getTitle());
         }
 
