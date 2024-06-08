@@ -7,6 +7,7 @@ import com.example.cloudcalc.controller.ProgramController;
 import com.example.cloudcalc.entity.Profile;
 import com.example.cloudcalc.entity.program.CountCondition;
 import com.example.cloudcalc.entity.program.Program;
+import com.example.cloudcalc.entity.program.SpecialConditions;
 import com.example.cloudcalc.util.FunctionUtils;
 import com.example.cloudcalc.util.Notification;
 import javafx.stage.Stage;
@@ -77,6 +78,30 @@ public class ProgramModel {
 
                 program.setConditions(conditions);
 
+                if (programObject.has("specialConditions")) {
+                    JSONObject specialConditionsObject = programObject.getJSONObject("specialConditions");
+                    SpecialConditions specialConditions = new SpecialConditions();
+
+                    if (specialConditionsObject.has("badgesToIgnore")) {
+                        JSONArray badgesToIgnoreArray = specialConditionsObject.getJSONArray("badgesToIgnore");
+                        List<String> badgesToIgnore = new ArrayList<>();
+                        for (int k = 0; k < badgesToIgnoreArray.length(); k++) {
+                            badgesToIgnore.add(badgesToIgnoreArray.getString(k));
+                        }
+                        specialConditions.setBadgesToIgnore(badgesToIgnore);
+                    }
+
+                    if (specialConditionsObject.has("badgesPerPoint")) {
+                        specialConditions.setBadgesPerPoint(specialConditionsObject.getInt("badgesPerPoint"));
+                    }
+
+                    if (specialConditionsObject.has("pointsPerBadge")) {
+                        specialConditions.setPointsPerBadge(specialConditionsObject.getInt("pointsPerBadge"));
+                    }
+
+                    program.setSpecialConditions(specialConditions);
+                }
+
                 programs.add(program);
             } else {
                 Notification.showErrorMessage("Error keys", "Wrong keys has detected while loading programs.");
@@ -130,6 +155,19 @@ public class ProgramModel {
             }
             jsonObject.put("conditions", conditionsArray);
 
+            SpecialConditions specialConditions = program.getSpecialConditions();
+            JSONObject specialConditionsObject = new JSONObject();
+            if (specialConditions != null) {
+                specialConditionsObject.put("badgesToIgnore", new JSONArray(specialConditions.getBadgesToIgnore()));
+                specialConditionsObject.put("badgesPerPoint", specialConditions.getBadgesPerPoint());
+                specialConditionsObject.put("pointsPerBadge", specialConditions.getPointsPerBadge());
+            } else {
+                specialConditionsObject.put("badgesToIgnore", new JSONArray());
+                specialConditionsObject.put("badgesPerPoint", 0);
+                specialConditionsObject.put("pointsPerBadge", 0);
+            }
+            jsonObject.put("specialConditions", specialConditionsObject);
+
             jsonArray.put(jsonObject);
         }
         return jsonArray;
@@ -160,5 +198,25 @@ public class ProgramModel {
     private void saveProgramsToFile(List<Program> programs) {
         JSONArray jsonArray = convertProgramsToJSONArray(programs);
         FileManager.writeJsonToFile(jsonArray, FileName.PROGRAMS_FILE);
+    }
+
+    public void addSpecialConditions(String programName, List<String> badgesToIgnore, int badgesPerPoint, int pointsPerBadge) {
+        List<Program> programs = loadProgramsFromFile();
+
+        for (Program program : programs) {
+            if (program.getName().equals(programName)) {
+                SpecialConditions specialConditions = program.getSpecialConditions();
+                if (specialConditions == null) {
+                    specialConditions = new SpecialConditions();
+                }
+                specialConditions.setBadgesToIgnore(badgesToIgnore);
+                specialConditions.setBadgesPerPoint(badgesPerPoint);
+                specialConditions.setPointsPerBadge(pointsPerBadge);
+                program.setSpecialConditions(specialConditions);
+                break;
+            }
+        }
+
+        saveProgramsToFile(programs);
     }
 }

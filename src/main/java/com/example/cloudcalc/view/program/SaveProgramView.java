@@ -4,21 +4,29 @@ import com.example.cloudcalc.builder.GridPaneBuilder;
 import com.example.cloudcalc.builder.fields.program.ProgramFieldUpdatable;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.ProgramController;
+import com.example.cloudcalc.entity.program.CountCondition;
 import com.example.cloudcalc.entity.program.Program;
+import com.example.cloudcalc.entity.program.SpecialConditions;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.language.Localizable;
-import com.example.cloudcalc.entity.program.CountCondition;
 import com.example.cloudcalc.util.Notification;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +51,8 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
     private TextField badgeNameField;
     private TextField badgePointsField;
     private Button addBadgeButton;
+    private Button specialConditionButton;
+    private Program currentProgram;
     //private final String typeTitle = "Type:";
     //private final String badgeTitle = "Badge:";
 
@@ -55,6 +65,97 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         initializeConditionsTable();
     }
 
+    private void initializeBadgeEntryFields() {
+        badgeNameField = new TextField();
+        badgeNameField.setPromptText("Enter Badge Name");
+        addBadgeButton = new Button("Add Badge");
+        addBadgeButton.setOnAction(e -> addBadgeToList());
+
+        badgePointsField = new TextField();
+        badgePointsField.setPromptText("Enter Points");
+
+        specialConditionButton = new Button("*");
+        specialConditionButton.setOnAction(e -> openSpecialConditions());
+    }
+
+    /**
+     * Show Configure Special Conditions screen
+     */
+    private void openSpecialConditions() {
+        Stage specialConditionsStage = new Stage();
+        specialConditionsStage.setTitle("Special Conditions Configuration");
+
+        // Create an interface for the window
+        VBox layout = new VBox();
+        layout.setPadding(new Insets(10));
+        layout.setSpacing(8);
+
+        Label instructions = new Label("Configure your special badge counting conditions here:");
+        // Adding interface elements for configuring conditions
+
+        // Fields for entering values
+        Label nLabel = new Label("Each [n] badges:");
+        TextField nField = new TextField();
+        nField.setPromptText("Enter the number of badges");
+
+        Label xLabel = new Label("Equals [x] points:");
+        TextField xField = new TextField();
+        xField.setPromptText("Enter the number of points");
+
+        // Field for loading a file of icons that do not need to be taken into account
+        Label ignoreBadgesLabel = new Label("Upload badges to ignore (txt file):");
+        Button uploadButton = new Button("Upload File");
+        Label fileLabel = new Label();
+
+        List<String> badgesToIgnore = new ArrayList<>();
+
+        uploadButton.setOnAction(event -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+            File file = fileChooser.showOpenDialog(specialConditionsStage);
+            if (file != null) {
+                fileLabel.setText("File selected: " + file.getName());
+                badgesToIgnore.clear();
+                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        badgesToIgnore.add(line.trim());
+                    }
+                } catch (IOException e) {
+                    Notification.showErrorMessage("File Error", "Error reading file. Please try again.");
+                }
+            }
+        });
+
+        Button saveButton = new Button("Save");
+        saveButton.setOnAction(event -> {
+            try {
+                int n = Integer.parseInt(nField.getText());
+                int x = Integer.parseInt(xField.getText());
+
+                // Saving special conditions to a Program object
+                SpecialConditions specialConditions = new SpecialConditions();
+                specialConditions.setBadgesToIgnore(badgesToIgnore);
+                specialConditions.setBadgesPerPoint(n);
+                specialConditions.setPointsPerBadge(x);
+                currentProgram.setSpecialConditions(specialConditions);
+
+                specialConditionsStage.close();
+            } catch (NumberFormatException e) {
+                Notification.showErrorMessage("Invalid input", "Please enter valid numbers for badges and points.");
+            }
+        });
+
+        layout.getChildren().addAll(instructions, nLabel, nField, xLabel, xField, ignoreBadgesLabel, uploadButton, fileLabel, saveButton);
+
+        Scene scene = new Scene(layout, 400, 300);
+        specialConditionsStage.setScene(scene);
+        specialConditionsStage.show();
+    }
+
+    /**
+     * Add badge&points in table on the Add Program screen
+     */
     private void addBadgeToList() {
         String badgeName = badgeNameField.getText();
         String conditionType = conditionTypeComboBox.getValue();
@@ -95,17 +196,6 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-
-    private void initializeBadgeEntryFields() {
-        badgeNameField = new TextField();
-        badgeNameField.setPromptText("Enter Badge Name");
-        addBadgeButton = new Button("Add Badge");
-        addBadgeButton.setOnAction(e -> addBadgeToList());
-
-        badgePointsField = new TextField();
-        badgePointsField.setPromptText("Enter Points");
     }
 
     private void initializeConditionTypeComboBox() {
@@ -157,6 +247,7 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
         resetConditionTypeComboBox();
         resetForm();
         layout = new VBox(10);
+        currentProgram = new Program();
 
         HBox badgeEntryLayout = new HBox(10);
         badgeEntryLayout.getChildren().addAll(
@@ -165,7 +256,8 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
                 //new Label(badgeTitle),
                 badgeNameField,
                 badgePointsField,
-                addBadgeButton
+                addBadgeButton,
+                specialConditionButton
         );
 
         layout.getChildren().addAll(
@@ -215,9 +307,8 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
                 Notification.showAlert("Empty table", "No conditions.", "Please add a condition.");
             }
             else {
-                Program program = new Program();
-                program.setName(programName);
-                program.setDate(selectedDate);
+                currentProgram.setName(programName);
+                currentProgram.setDate(selectedDate);
 
                 List<CountCondition> countConditions = new ArrayList<>();
 
@@ -232,9 +323,9 @@ public class SaveProgramView implements Localizable, ProgramFieldUpdatable {
                     countConditions.add(condition);
                 }
 
-                program.setConditions(countConditions);
+                currentProgram.setConditions(countConditions);
 
-                saveProgram(stage, program);
+                saveProgram(stage, currentProgram);
             }
         });
         return new HBox(10, saveButton, cancelButton);

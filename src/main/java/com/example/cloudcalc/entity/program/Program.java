@@ -9,6 +9,7 @@ public class Program {
     private String name;
     private LocalDate date;
     private List<CountCondition> conditions;
+    private SpecialConditions specialConditions;
 
     public int getId() {
         return id;
@@ -42,6 +43,14 @@ public class Program {
         this.conditions = conditions;
     }
 
+    public SpecialConditions getSpecialConditions() {
+        return specialConditions;
+    }
+
+    public void setSpecialConditions(SpecialConditions specialConditions) {
+        this.specialConditions = specialConditions;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -49,12 +58,14 @@ public class Program {
         Program program = (Program) obj;
         return id == program.id &&
                 Objects.equals(name, program.name) &&
-                Objects.equals(date, program.date);
+                Objects.equals(date, program.date) &&
+                Objects.equals(conditions, program.conditions) &&
+                Objects.equals(specialConditions, program.specialConditions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, date, conditions);
+        return Objects.hash(id, name, date, conditions, specialConditions);
     }
 
     @Override
@@ -64,6 +75,7 @@ public class Program {
                 ", name='" + name + '\'' +
                 ", date=" + date +
                 ", conditions=" + conditions +
+                ", specialConditions=" + specialConditions +
                 '}';
     }
 }
