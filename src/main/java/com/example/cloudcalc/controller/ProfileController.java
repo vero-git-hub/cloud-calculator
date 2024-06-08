@@ -12,6 +12,7 @@ import com.example.cloudcalc.entity.*;
 import com.example.cloudcalc.entity.prize.Prize;
 import com.example.cloudcalc.entity.prize.PrizeInfo;
 import com.example.cloudcalc.entity.program.Program;
+import com.example.cloudcalc.entity.program.SpecialConditions;
 import com.example.cloudcalc.exception.ProfilePageStructureChangedException;
 import com.example.cloudcalc.language.LanguageManager;
 import com.example.cloudcalc.entity.program.CountCondition;
@@ -78,6 +79,12 @@ public class ProfileController extends BaseController {
                 for (Program program : allPrograms) {
                     String programName = program.getName();
 
+                    // Get special conditions for the program
+                    SpecialConditions specialConditions = program.getSpecialConditions();
+                    List<String> badgesToIgnore = specialConditions != null ? specialConditions.getBadgesToIgnore() : new ArrayList<>();
+                    int countMergeBadges = specialConditions != null ? specialConditions.getBadgesPerPoint() : 0;
+                    int pointsPerBadge = specialConditions != null ? specialConditions.getPointsPerBadge() : 0;
+
                     // Iterate user programs
                     for (ProgramPrize programPrize : userProgramPrizeList) {
                         String userProgramName = programPrize.getProgram();
@@ -102,6 +109,7 @@ public class ProfileController extends BaseController {
                             }
 
                             int userPoints = 0;
+                            int countSkillBadges = 0;
                             try {
                                 // Start date to count
                                 LocalDate date = program.getDate();
@@ -129,7 +137,8 @@ public class ProfileController extends BaseController {
                                             }
                                         }
                                     // Check the list of "What not to count"
-                                    } else if (!ignoreList.isEmpty()) {
+                                    }
+                                    else if (!ignoreList.isEmpty()) {
                                         // If countingList is empty
                                         isCounted = true;
                                         for (CountCondition.Badges badge : ignoreList) {
@@ -144,10 +153,26 @@ public class ProfileController extends BaseController {
                                         // i.e. not count "ignore", and count all the rest
                                         if (isCounted) {
                                             userPoints++;
-                                            //System.out.println("everything don't ignore");
+                                        }
+                                    }
+
+                                    // Handle special conditions if the list is not empty
+                                    if(!badgesToIgnore.isEmpty() && countMergeBadges > 0) {
+                                        boolean isBadgeIgnored = badgesToIgnore.contains(badgeTitleProfile);
+
+                                        if (!isBadgeIgnored) {
+                                            // Increment the count of skill badges if the badge is not in the ignore list
+                                            countSkillBadges++;
                                         }
                                     }
                                 }
+
+                                // Apply special conditions after all other calculations
+                                if (countMergeBadges > 0) {
+                                    int additionalPoints = (countSkillBadges / countMergeBadges) * pointsPerBadge;
+                                    userPoints += additionalPoints;
+                                }
+
                             } catch (ProfilePageStructureChangedException ex) {
                                 Notification.showErrorMessage("Error scanning profile", "Reason: The profile link is invalid or the page structure has changed.");
                                 return false;
