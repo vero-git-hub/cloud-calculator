@@ -21,6 +21,7 @@ public class ButtonFactory {
     private static final String BOOK_ICON = "/images/main/book-48.png";
     private static final String EDIT_ICON = "/images/crud/edit-48.png";
     private static final String PROFILE_ICON = "/images/main/test-account-60.png";
+    private static final String DAILY_STAT_ICON = "/images/main/calendar-64.png";
 
     public static Button createSaveButton(EventHandler<ActionEvent> action) {
         Image image = new Image(ButtonFactory.class.getResourceAsStream(SAVE_ICON));
@@ -64,6 +65,11 @@ public class ButtonFactory {
 
     public static Button createProgramButton(EventHandler<ActionEvent> action) {
         Image image = new Image(ButtonFactory.class.getResourceAsStream(BOOK_ICON));
+        return createButton("", action, image, "");
+    } 
+    
+    public static Button createDailyStatButton(EventHandler<ActionEvent> action) {
+        Image image = new Image(ButtonFactory.class.getResourceAsStream(DAILY_STAT_ICON));
         return createButton("", action, image, "");
     }
 

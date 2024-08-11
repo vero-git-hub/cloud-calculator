@@ -53,9 +53,10 @@ public class MainController {
         Button statsButton = ButtonFactory.createStatsButton(e -> serviceFacade.showStatsScreen(primaryStage));
         Button prizeButton = ButtonFactory.createPrizeButton(e -> serviceFacade.showPrizesScreen(primaryStage));
         Button programButton = ButtonFactory.createProgramButton(e -> serviceFacade.showProgramScreen(primaryStage));
+        Button dailyStatButton = ButtonFactory.createDailyStatButton(e -> serviceFacade.showDailyStatScreen(primaryStage));
 
         return elementsBuilder.createExtendedTopLayout(
-                Arrays.asList(statsButton),
+                Arrays.asList(statsButton, dailyStatButton),
                 mainView.getTitleLabel(),
                 programButton,
                 prizeButton

@@ -18,6 +18,7 @@ public class ServiceFacade {
     private MainController mainController = new MainController(this);
     private ScanController scanController = new ScanController(this);
     private ProgramController programController = new ProgramController(this);
+    private DailyStatController dailyStatController = new DailyStatController(this);
 
     private ServiceFacade() {
         dataExtractor = new DataExtractor();
@@ -85,5 +86,9 @@ public class ServiceFacade {
 
     public void showProfilesScreen(Stage stage){
         profileController.showScreen(stage);
+    }
+
+    public void showDailyStatScreen(Stage primaryStage) {
+        dailyStatController.showScreen(primaryStage);
     }
 }
