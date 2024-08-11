@@ -7,26 +7,30 @@ import com.example.cloudcalc.model.ProfileModel;
 import javafx.stage.Stage;
 
 public class ServiceFacade {
-
+    private final ProfileModel profileModel;
+    private final DataExtractor dataExtractor;
+    private final PrizeController prizeController;
+    private final ProfileController profileController;
+    private final StatsController statsController;
+    private final MainController mainController;
+    private final ScanController scanController;
+    private final ProgramController programController;
+    private final DailyStatController dailyStatController;
     private static ServiceFacade instance;
-    private ProfileModel profileModel;
-    private DataExtractor dataExtractor;
-    private PrizeController prizeController;
     private FileOperationManager fileOperationManager;
-    private ProfileController profileController;
-    private StatsController statsController;
-    private MainController mainController = new MainController(this);
-    private ScanController scanController = new ScanController(this);
-    private ProgramController programController = new ProgramController(this);
-    private DailyStatController dailyStatController = new DailyStatController(this);
 
     private ServiceFacade() {
-        dataExtractor = new DataExtractor();
-        prizeController = new PrizeController(this);
-        fileOperationManager = new FileOperationManager();
-        profileController = createProfileController();
+        this.dataExtractor = new DataExtractor();
+        this.prizeController = new PrizeController(this);
+        this.fileOperationManager = new FileOperationManager();
+        this.profileController = new ProfileController(this);
         this.profileModel = new ProfileModel(profileController);
-        statsController = new StatsController(this);
+        this.statsController = new StatsController(this);
+
+        this.mainController = new MainController(this);
+        this.scanController = new ScanController(this);
+        this.programController = new ProgramController(this);
+        this.dailyStatController = new DailyStatController(this);
     }
 
     public static synchronized ServiceFacade getInstance() {
@@ -34,10 +38,6 @@ public class ServiceFacade {
             instance = new ServiceFacade();
         }
         return instance;
-    }
-
-    private ProfileController createProfileController() {
-        return new ProfileController(this);
     }
 
     public ProfileModel getProfileDataManager() {
