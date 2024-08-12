@@ -3,6 +3,7 @@ package com.example.cloudcalc.view;
 import com.example.cloudcalc.button.ButtonFactory;
 import com.example.cloudcalc.controller.DailyStatController;
 import com.example.cloudcalc.entity.Profile;
+import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -11,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import javafx.event.EventHandler;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,13 +68,12 @@ public class DailyStatView {
     }
 
     private Button createCopyButton(TextArea textArea) {
-        // TODO: add icon to button
-        Button copyButton = new Button("Copy text");
-        copyButton.setOnAction(e -> {
+        EventHandler<ActionEvent> copyAction = e -> {
             String text = textArea.getText();
             copyToClipboard(text);
-        });
-        return copyButton;
+        };
+
+        return ButtonFactory.createCopyButton(copyAction);
     }
 
     private void copyToClipboard(String text) {
