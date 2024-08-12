@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import javafx.event.EventHandler;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author v_code
@@ -45,7 +46,7 @@ public class DailyStatView {
 
         List<CheckBox> checkBoxes = createCheckBoxes(profiles, layout);
 
-        Button saveButton = createSaveButton();
+        Button saveButton = createSaveButton(stage, checkBoxes);
         Button scanButton = createScanButton();
         HBox hBox = new HBox(10);
         hBox.getChildren().addAll(saveButton, scanButton);
@@ -88,9 +89,15 @@ public class DailyStatView {
         return new Button();
     }
 
-    private Button createSaveButton() {
-        // TODO: save checkBoxes (for next time)
-        return new Button();
+    private Button createSaveButton(Stage stage, List<CheckBox> checkBoxes) {
+        EventHandler<ActionEvent> action = e -> {
+            List<String> selectedProfiles = checkBoxes.stream()
+                    .filter(CheckBox::isSelected)
+                    .map(CheckBox::getText)
+                    .collect(Collectors.toList());
+            dailyStatController.saveSelectedProfiles(stage, selectedProfiles);
+        };
+        return ButtonFactory.createSaveButton(action);
     }
 
     private List<CheckBox> createCheckBoxes(List<Profile> profiles, VBox layout) {
