@@ -29,17 +29,28 @@ public class DailyStatController extends BaseController {
         return profileController.getProfilesFromFile();
     }
 
-    public void saveSelectedProfiles(Stage stage, List<String> selectedProfiles) {
+    public void saveSelectedProfiles(List<String> selectedProfiles) {
         if (selectedProfiles == null || selectedProfiles.isEmpty()) {
             Notification.showAlert("Saving...", "Please select at least one profile before saving.", "");
             return;
         }
+        dailyStatModel.saveSelectedProfiles(selectedProfiles);
+    }
 
-        dailyStatModel.saveSelectedProfiles(stage, selectedProfiles);
+    public void saveTemplate(String text) {
+        if(text == null || text.isEmpty()) {
+            Notification.showAlert("Saving...", "Please select at least one template.", "");
+            return;
+        }
+        dailyStatModel.saveTemplate(text);
     }
 
     public List<String> loadSelectedProfiles() {
         return dailyStatModel.loadSelectedProfiles();
+    }
+
+    public String loadTemplate() {
+        return dailyStatModel.loadTemplate();
     }
 
     @Override

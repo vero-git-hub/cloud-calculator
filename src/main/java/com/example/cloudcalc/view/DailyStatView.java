@@ -26,6 +26,7 @@ public class DailyStatView {
     private static final String DAILY_STAT_TITLE = "DAILY STAT";
     private static final String DAILY_STAT_TITLE_CHECKBOX = "Choose the profiles";
     private static final String DAILY_STAT_TITLE_TEMPLATE = "Result template for copy";
+    private String textAreaPromptText = "Enter text here...";
 
     public DailyStatView(DailyStatController dailyStatController) {
         this.dailyStatController = dailyStatController;
@@ -53,15 +54,23 @@ public class DailyStatView {
         hBox.getChildren().addAll(saveButton, scanButton);
 
         TextArea textArea = new TextArea();
-        textArea.setPromptText("Enter text here...");
+        setTemplate(textArea);
+        textArea.setPromptText(textAreaPromptText);
 
-        Button saveTemplateButton = createSaveTemplateButton();
+        Button saveTemplateButton = createSaveTemplateButton(textArea);
         Button copyButton = createCopyButton(textArea);
         HBox hBoxTemplate = new HBox(10);
         hBoxTemplate.getChildren().addAll(saveTemplateButton, copyButton);
 
         layout.getChildren().addAll(hBox, labelTemplate, textArea, hBoxTemplate);
         dailyStatController.createScene(layout, stage);
+    }
+
+    private void setTemplate(TextArea textArea) {
+        String template = dailyStatController.loadTemplate();
+        if (template != null) {
+            textArea.setText(template);
+        }
     }
 
     private void setSelectedProfiles(List<CheckBox> checkBoxes) {
@@ -74,9 +83,12 @@ public class DailyStatView {
         }
     }
 
-    private Button createSaveTemplateButton() {
-        // TODO: save template (from textArea)
-        return new Button();
+    private Button createSaveTemplateButton(TextArea textArea) {
+        EventHandler<ActionEvent> action = e -> {
+            String text = textArea.getText();
+            dailyStatController.saveTemplate(text);
+        };
+        return ButtonFactory.createSaveButton(action);
     }
 
     private Button createCopyButton(TextArea textArea) {
@@ -106,7 +118,7 @@ public class DailyStatView {
                     .filter(CheckBox::isSelected)
                     .map(CheckBox::getText)
                     .collect(Collectors.toList());
-            dailyStatController.saveSelectedProfiles(stage, selectedProfiles);
+            dailyStatController.saveSelectedProfiles(selectedProfiles);
         };
         return ButtonFactory.createSaveButton(action);
     }

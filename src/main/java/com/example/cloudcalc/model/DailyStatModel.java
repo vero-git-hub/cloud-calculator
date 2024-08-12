@@ -14,9 +14,7 @@ import java.util.List;
  **/
 public class DailyStatModel {
 
-    public void saveSelectedProfiles(Stage stage, List<String> selectedProfiles) {
-        JSONObject settings = FileManager.readJsonObjectFromFile(FileName.SETTINGS_FILE);
-
+    private JSONObject getOrCreateDailyStat(JSONObject settings) {
         JSONObject dailyStat;
         if (settings.has("dailyStat")) {
             dailyStat = settings.getJSONObject("dailyStat");
@@ -24,10 +22,26 @@ public class DailyStatModel {
             dailyStat = new JSONObject();
             settings.put("dailyStat", dailyStat);
         }
+        return dailyStat;
+    }
+
+    public void saveSelectedProfiles(List<String> selectedProfiles) {
+        JSONObject settings = FileManager.readJsonObjectFromFile(FileName.SETTINGS_FILE);
+
+        JSONObject dailyStat = getOrCreateDailyStat(settings);
 
         JSONArray profilesArray = new JSONArray(selectedProfiles);
         dailyStat.put("selectedProfiles", profilesArray);
 
+        FileManager.writeJsonToFile(settings, FileName.SETTINGS_FILE);
+    }
+
+    public void saveTemplate(String text) {
+        JSONObject settings = FileManager.readJsonObjectFromFile(FileName.SETTINGS_FILE);
+
+        JSONObject dailyStat = getOrCreateDailyStat(settings);
+
+        dailyStat.put("templateText", text);
         FileManager.writeJsonToFile(settings, FileName.SETTINGS_FILE);
     }
 
@@ -46,5 +60,17 @@ public class DailyStatModel {
         }
 
         return selectedProfiles;
+    }
+
+    public String loadTemplate() {
+        JSONObject settings = FileManager.readJsonObjectFromFile(FileName.SETTINGS_FILE);
+
+        if (settings.has("dailyStat")) {
+            JSONObject dailyStat = settings.getJSONObject("dailyStat");
+            if (dailyStat.has("templateText")) {
+                return dailyStat.getString("templateText");
+            }
+        }
+        return "";
     }
 }
