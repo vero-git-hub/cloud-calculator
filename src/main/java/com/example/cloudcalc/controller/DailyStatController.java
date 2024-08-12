@@ -38,6 +38,10 @@ public class DailyStatController extends BaseController {
         dailyStatModel.saveSelectedProfiles(stage, selectedProfiles);
     }
 
+    public List<String> loadSelectedProfiles() {
+        return dailyStatModel.loadSelectedProfiles();
+    }
+
     @Override
     public void showScreen(Stage stage) {
         dailyStatView.showScreen(stage);
@@ -52,4 +56,5 @@ public class DailyStatController extends BaseController {
     public void createScene(VBox layout, Stage stage) {
         sceneBuilder.createScene(layout, stage);
     }
+
 }

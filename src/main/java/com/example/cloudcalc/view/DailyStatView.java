@@ -45,6 +45,7 @@ public class DailyStatView {
         );
 
         List<CheckBox> checkBoxes = createCheckBoxes(profiles, layout);
+        setSelectedProfiles(checkBoxes);
 
         Button saveButton = createSaveButton(stage, checkBoxes);
         Button scanButton = createScanButton();
@@ -61,6 +62,16 @@ public class DailyStatView {
 
         layout.getChildren().addAll(hBox, labelTemplate, textArea, hBoxTemplate);
         dailyStatController.createScene(layout, stage);
+    }
+
+    private void setSelectedProfiles(List<CheckBox> checkBoxes) {
+        List<String> savedProfiles = dailyStatController.loadSelectedProfiles();
+
+        for (CheckBox checkBox : checkBoxes) {
+            if (savedProfiles.contains(checkBox.getText())) {
+                checkBox.setSelected(true);
+            }
+        }
     }
 
     private Button createSaveTemplateButton() {
