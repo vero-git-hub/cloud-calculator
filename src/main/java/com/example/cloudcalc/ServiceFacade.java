@@ -23,13 +23,15 @@ public class ServiceFacade {
         this.dataExtractor = new DataExtractor();
         this.prizeController = new PrizeController(this);
         this.fileOperationManager = new FileOperationManager();
+
+        this.mainController = new MainController(this);
+        this.programController = new ProgramController(this);
         this.profileController = new ProfileController(this);
         this.profileModel = new ProfileModel(profileController);
         this.statsController = new StatsController(this);
 
-        this.mainController = new MainController(this);
+
         this.scanController = new ScanController(this);
-        this.programController = new ProgramController(this);
         this.dailyStatController = new DailyStatController(this);
     }
 

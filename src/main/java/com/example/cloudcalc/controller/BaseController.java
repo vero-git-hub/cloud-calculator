@@ -28,6 +28,10 @@ public abstract class BaseController {
         return elementsBuilder.createTopLayout(backButton, titleLabel, createButton);
     }
 
+    public HBox createTopLayout(Button backButton, Label titleLabel) {
+        return elementsBuilder.createTopLayout(backButton, titleLabel);
+    }
+
     public abstract void showScreen(Stage stage);
     public abstract void showAddScreen(Stage stage);
     public abstract void createScene(VBox layout, Stage stage);

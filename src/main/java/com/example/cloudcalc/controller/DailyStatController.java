@@ -37,6 +37,6 @@ public class DailyStatController extends BaseController {
 
     @Override
     public void createScene(VBox layout, Stage stage) {
-
+        sceneBuilder.createScene(layout, stage);
     }
 }
