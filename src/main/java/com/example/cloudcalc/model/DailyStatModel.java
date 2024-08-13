@@ -2,7 +2,6 @@ package com.example.cloudcalc.model;
 
 import com.example.cloudcalc.FileManager;
 import com.example.cloudcalc.constant.FileName;
-import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -32,6 +31,17 @@ public class DailyStatModel {
 
         JSONArray profilesArray = new JSONArray(selectedProfiles);
         dailyStat.put("selectedProfiles", profilesArray);
+
+        FileManager.writeJsonToFile(settings, FileName.SETTINGS_FILE);
+    }
+
+    public void saveSelectedPrograms(List<String> selectedPrograms) {
+        JSONObject settings = FileManager.readJsonObjectFromFile(FileName.SETTINGS_FILE);
+
+        JSONObject dailyStat = getOrCreateDailyStat(settings);
+
+        JSONArray programsArray = new JSONArray(selectedPrograms);
+        dailyStat.put("selectedPrograms", programsArray);
 
         FileManager.writeJsonToFile(settings, FileName.SETTINGS_FILE);
     }
