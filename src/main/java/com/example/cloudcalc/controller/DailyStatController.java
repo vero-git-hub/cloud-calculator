@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,18 +68,20 @@ public class DailyStatController extends BaseController {
     }
 
     public Map<String, Map<String, Integer>> scanProfiles(List<String> selectedProfiles, List<String> selectedPrograms) {
-        Map<String, Map<String, Integer>> results = new HashMap<>();
+        Map<String, Map<String, Integer>> results = new LinkedHashMap<>();
         List<Profile> profiles = profileController.findProfilesByName(selectedProfiles);
 
         if(profiles != null && !profiles.isEmpty()) {
             for (Profile profile : profiles) {
-                for (String selectedProfile : selectedProfiles) {
-                    if (profile.getName().equals(selectedProfile)) {
-                        profileController.scanAndUpdateProfile(profile);
-                    }
+                profileController.scanAndUpdateProfile(profile);
+            }
+            Map<String, Map<String, Integer>> scanResults = dailyStatModel.getScanResults(profiles, selectedPrograms);
+            for (String profileName : selectedProfiles) {
+                if (scanResults.containsKey(profileName)) {
+                    results.put(profileName, scanResults.get(profileName));
                 }
             }
-            results = dailyStatModel.getScanResults(profiles, selectedPrograms);
+
         }
         return results;
     }
