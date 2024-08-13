@@ -11,9 +11,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import javafx.event.EventHandler;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -70,7 +69,7 @@ public class DailyStatView {
         textArea.setPromptText(textAreaPromptText);
 
         Button saveButton = createSaveButton(profileCheckBoxes, programsCheckBoxes);
-        Button scanButton = createScanButton(profileCheckBoxes, programsCheckBoxes);
+        Button scanButton = createScanButton(profileCheckBoxes, programsCheckBoxes, textArea);
         HBox buttonsBox = new HBox(10, saveButton, scanButton);
 
         Button saveTemplateButton = createSaveTemplateButton(textArea);
@@ -124,15 +123,50 @@ public class DailyStatView {
         clipboard.setContent(content);
     }
 
-    private Button createScanButton(List<CheckBox> checkBoxes, List<CheckBox> programsCheckBoxes) {
+    private Button createScanButton(List<CheckBox> checkBoxes, List<CheckBox> programsCheckBoxes, TextArea textArea) {
         EventHandler<ActionEvent> action = e -> {
             List<String> selectedProfiles = getSelectedProfiles(checkBoxes);
             List<String> selectedPrograms = getSelectedPrograms(programsCheckBoxes);
             Map<String, Map<String, Integer>> results = dailyStatController.scanProfiles(selectedProfiles, selectedPrograms);
-            //TODO: results to template
-            System.out.println(results);
+
+            String template = textArea.getText();
+            String resultText = processTemplate(template, results);
+            textArea.setText(resultText);
         };
         return ButtonFactory.createScanButton(action);
+    }
+
+    private String processTemplate(String template, Map<String, Map<String, Integer>> results) {
+        if (!results.isEmpty()) {
+            Set<String> programNames = results.values().iterator().next().keySet();
+            String programsHeader = String.join("  |  ", programNames);
+            template = template.replaceFirst("\\[program_name\\]  \\|  \\[program_name\\]", programsHeader);
+        }
+
+        for (Map.Entry<String, Map<String, Integer>> entry : results.entrySet()) {
+            String profileName = entry.getKey();
+            Map<String, Integer> programPoints = entry.getValue();
+
+            String regex = "\\[profile_name\\](\\s+\\[points\\]/\\d+)+";
+            String templateLine = findTemplateLine(template, regex);
+
+            if (templateLine != null) {
+                StringBuilder replacement = new StringBuilder(profileName);
+
+                for (Map.Entry<String, Integer> programEntry : programPoints.entrySet()) {
+                    int points = programEntry.getValue();
+                    templateLine = templateLine.replaceFirst("\\[points\\]", String.valueOf(points));
+                }
+
+                template = template.replaceFirst(regex, replacement.toString() + templateLine.replaceFirst("\\[profile_name\\]", ""));
+            }
+        }
+
+        return template;
+    }
+
+    private String findTemplateLine(String template, String regex) {
+        return template.lines().filter(line -> line.matches(regex)).findFirst().orElse(null);
     }
 
     private List<String> getSelectedPrograms(List<CheckBox> checkBoxes) {
