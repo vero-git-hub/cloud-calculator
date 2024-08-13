@@ -105,9 +105,8 @@ public class DailyStatModel {
         return "";
     }
 
-    public  Map<String, Map<String, Integer>> scanProfiles(List<Profile> profiles, List<String> selectedPrograms) {
+    public  Map<String, Map<String, Integer>> getScanResults(List<Profile> profiles, List<String> selectedPrograms) {
         ScanResult scanResult = new ScanResult();
-
         for (Profile profile : profiles) {
             for (String selectedProgram : selectedPrograms) {
                 List<ProgramPrize> profilePrograms = profile.getProgramPrizes();
@@ -123,9 +122,6 @@ public class DailyStatModel {
                 }
             }
         }
-
-        Map<String, Map<String, Integer>> allResults = scanResult.getAllResults();
-        return allResults;
-
+        return scanResult.getAllResults();
     }
 }

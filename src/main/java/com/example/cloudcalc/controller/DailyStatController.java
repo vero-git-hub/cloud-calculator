@@ -2,8 +2,6 @@ package com.example.cloudcalc.controller;
 
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.entity.Profile;
-import com.example.cloudcalc.entity.ProgramPrize;
-import com.example.cloudcalc.entity.prize.PrizeInfo;
 import com.example.cloudcalc.entity.program.Program;
 import com.example.cloudcalc.model.DailyStatModel;
 import com.example.cloudcalc.util.Notification;
@@ -11,7 +9,7 @@ import com.example.cloudcalc.view.DailyStatView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -69,8 +67,20 @@ public class DailyStatController extends BaseController {
     }
 
     public Map<String, Map<String, Integer>> scanProfiles(List<String> selectedProfiles, List<String> selectedPrograms) {
+        Map<String, Map<String, Integer>> results = new HashMap<>();
         List<Profile> profiles = profileController.findProfilesByName(selectedProfiles);
-        return dailyStatModel.scanProfiles(profiles, selectedPrograms);
+
+        if(profiles != null && !profiles.isEmpty()) {
+            for (Profile profile : profiles) {
+                for (String selectedProfile : selectedProfiles) {
+                    if (profile.getName().equals(selectedProfile)) {
+                        profileController.scanAndUpdateProfile(profile);
+                    }
+                }
+            }
+            results = dailyStatModel.getScanResults(profiles, selectedPrograms);
+        }
+        return results;
     }
 
     public void saveSelectedPrograms(List<String> selectedPrograms) {
