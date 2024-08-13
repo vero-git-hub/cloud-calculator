@@ -72,6 +72,22 @@ public class DailyStatModel {
         return selectedProfiles;
     }
 
+    public List<String> loadSelectedPrograms() {
+        JSONObject settings = FileManager.readJsonObjectFromFile(FileName.SETTINGS_FILE);
+        List<String> selectedPrograms = new ArrayList<>();
+
+        if (settings.has("dailyStat")) {
+            JSONObject dailyStat = settings.getJSONObject("dailyStat");
+            if (dailyStat.has("selectedPrograms")) {
+                JSONArray programsArray = dailyStat.getJSONArray("selectedPrograms");
+                for (int i = 0; i < programsArray.length(); i++) {
+                    selectedPrograms.add(programsArray.getString(i));
+                }
+            }
+        }
+        return selectedPrograms;
+    }
+
     public String loadTemplate() {
         JSONObject settings = FileManager.readJsonObjectFromFile(FileName.SETTINGS_FILE);
 

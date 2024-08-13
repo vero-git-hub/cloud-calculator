@@ -47,7 +47,8 @@ public class DailyStatView {
         leftLayout.getChildren().add(profilesLabel);
 
         List<CheckBox> profileCheckBoxes = createCheckBoxes(profiles, leftLayout, Profile::getName);
-        setSelectedProfiles(profileCheckBoxes);
+        List<String> savedProfiles = dailyStatController.loadSelectedProfiles();
+        setSelectedItems(profileCheckBoxes, savedProfiles);
 
         VBox rightLayout = new VBox(10);
         List<Program> programs = dailyStatController.getPrograms();
@@ -55,6 +56,8 @@ public class DailyStatView {
         rightLayout.getChildren().add(programsLabel);
 
         List<CheckBox> programsCheckBoxes = createCheckBoxes(programs, rightLayout, Program::getName);
+        List<String> savedPrograms = dailyStatController.loadSelectedPrograms();
+        setSelectedItems(programsCheckBoxes, savedPrograms);
 
         splitPane.getItems().addAll(leftLayout, rightLayout);
         splitPane.setDividerPositions(0.5);
@@ -88,11 +91,9 @@ public class DailyStatView {
         }
     }
 
-    private void setSelectedProfiles(List<CheckBox> checkBoxes) {
-        List<String> savedProfiles = dailyStatController.loadSelectedProfiles();
-
+    private void setSelectedItems(List<CheckBox> checkBoxes, List<String> savedItems) {
         for (CheckBox checkBox : checkBoxes) {
-            if (savedProfiles.contains(checkBox.getText())) {
+            if (savedItems.contains(checkBox.getText())) {
                 checkBox.setSelected(true);
             }
         }

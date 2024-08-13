@@ -56,6 +56,10 @@ public class DailyStatController extends BaseController {
         return dailyStatModel.loadSelectedProfiles();
     }
 
+    public List<String> loadSelectedPrograms() {
+        return dailyStatModel.loadSelectedPrograms();
+    }
+
     public String loadTemplate() {
         return dailyStatModel.loadTemplate();
     }
