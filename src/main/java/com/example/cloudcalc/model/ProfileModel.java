@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProfileModel {
     private final ProfileController profileController;
@@ -230,5 +231,22 @@ public class ProfileModel {
     public void handleProfileSave(Stage primaryStage, Profile profile) {
         saveProfileToFile(profile, FileName.PROFILES_FILE);
         profileController.showScreen(primaryStage);
+    }
+
+    public List<Profile> findProfilesByName(List<String> names) {
+        List<Profile> profiles = loadProfilesFromFile(FileName.PROFILES_FILE);
+        List<Profile> matchingProfiles = new ArrayList<>();
+
+        List<String> lowerCaseNames = names.stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+
+        for (Profile profile : profiles) {
+            if (lowerCaseNames.contains(profile.getName().toLowerCase())) {
+                matchingProfiles.add(profile);
+            }
+        }
+
+        return matchingProfiles;
     }
 }

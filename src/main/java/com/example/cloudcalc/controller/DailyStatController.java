@@ -2,6 +2,8 @@ package com.example.cloudcalc.controller;
 
 import com.example.cloudcalc.ServiceFacade;
 import com.example.cloudcalc.entity.Profile;
+import com.example.cloudcalc.entity.ProgramPrize;
+import com.example.cloudcalc.entity.prize.PrizeInfo;
 import com.example.cloudcalc.entity.program.Program;
 import com.example.cloudcalc.model.DailyStatModel;
 import com.example.cloudcalc.util.Notification;
@@ -9,7 +11,9 @@ import com.example.cloudcalc.view.DailyStatView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author v_code
@@ -64,18 +68,9 @@ public class DailyStatController extends BaseController {
         return dailyStatModel.loadTemplate();
     }
 
-    public void scanProfiles(List<String> selectedProfiles, List<String> selectedPrograms) {
-        List<Profile> profiles = profileController.getProfilesFromFile();
-        for (Profile profile : profiles) {
-            for (String selectedProfile : selectedProfiles) {
-                if (profile.getName().equals(selectedProfile)) {
-                    profileController.scanAndUpdateProfile(profile);
-                    System.out.println(selectedProfile);
-                }
-            }
-        }
-
-        // TODO: get points for selected programs
+    public Map<String, Map<String, Integer>> scanProfiles(List<String> selectedProfiles, List<String> selectedPrograms) {
+        List<Profile> profiles = profileController.findProfilesByName(selectedProfiles);
+        return dailyStatModel.scanProfiles(profiles, selectedPrograms);
     }
 
     public void saveSelectedPrograms(List<String> selectedPrograms) {

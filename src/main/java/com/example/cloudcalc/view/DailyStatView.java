@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import javafx.event.EventHandler;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -124,11 +125,12 @@ public class DailyStatView {
     }
 
     private Button createScanButton(List<CheckBox> checkBoxes, List<CheckBox> programsCheckBoxes) {
-        // TODO: scan selected profiles (from checkBoxes)
         EventHandler<ActionEvent> action = e -> {
             List<String> selectedProfiles = getSelectedProfiles(checkBoxes);
             List<String> selectedPrograms = getSelectedPrograms(programsCheckBoxes);
-            dailyStatController.scanProfiles(selectedProfiles, selectedPrograms);
+            Map<String, Map<String, Integer>> results = dailyStatController.scanProfiles(selectedProfiles, selectedPrograms);
+            //TODO: results to template
+            System.out.println(results);
         };
         return ButtonFactory.createScanButton(action);
     }

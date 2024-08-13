@@ -2,11 +2,16 @@ package com.example.cloudcalc.model;
 
 import com.example.cloudcalc.FileManager;
 import com.example.cloudcalc.constant.FileName;
+import com.example.cloudcalc.entity.Profile;
+import com.example.cloudcalc.entity.ProgramPrize;
+import com.example.cloudcalc.entity.dailystat.ScanResult;
+import com.example.cloudcalc.entity.prize.PrizeInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author v_code
@@ -98,5 +103,29 @@ public class DailyStatModel {
             }
         }
         return "";
+    }
+
+    public  Map<String, Map<String, Integer>> scanProfiles(List<Profile> profiles, List<String> selectedPrograms) {
+        ScanResult scanResult = new ScanResult();
+
+        for (Profile profile : profiles) {
+            for (String selectedProgram : selectedPrograms) {
+                List<ProgramPrize> profilePrograms = profile.getProgramPrizes();
+                for (ProgramPrize programPrize : profilePrograms) {
+                    String programName = programPrize.getProgram();
+
+                    if (programName.equals(selectedProgram)) {
+                        List<PrizeInfo> prizeInfoList = programPrize.getPrizeInfoList();
+                        int points = prizeInfoList.get(0).getEarnedPoints();
+                        String profileName = profile.getName();
+                        scanResult.addScanResult(profileName, programName, points);
+                    }
+                }
+            }
+        }
+
+        Map<String, Map<String, Integer>> allResults = scanResult.getAllResults();
+        return allResults;
+
     }
 }

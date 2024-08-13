@@ -305,4 +305,8 @@ public class ProfileController extends BaseController {
                 alertTitleDeleteProfile, alertHeaderDeleteProfile, alertContentDeleteProfile
         );
     }
+
+    public List<Profile> findProfilesByName(List<String> names) {
+        return profileModel.findProfilesByName(names);
+    }
 }
